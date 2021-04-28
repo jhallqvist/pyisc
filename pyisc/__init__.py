@@ -43,7 +43,7 @@ def print_tree(tree, level=0):
 with open('tests/dhcpd1.conf', 'r') as infile:
     conf = infile.read()
 
-import parse_isc, json
-mongo = parse_isc.loads(conf)
+import pyisc, json
+mongo = pyisc.loads(conf)
 json.dumps(mongo, default=lambda x: x.__dict__)
 '''
