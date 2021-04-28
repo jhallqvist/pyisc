@@ -1,6 +1,7 @@
 # PyISC
 
 A python library with the purpose of parsing ISC configuration files. Currently only focused on the dhcpd.conf file but might be expanded in the future.
+This module draws inspiration from the reconfigure library found [here](https://github.com/Eugeny/reconfigure).
 
 ## Installation
 
