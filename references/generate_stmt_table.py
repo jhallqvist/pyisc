@@ -1,6 +1,7 @@
+# output_file = 'dhcpd-reference.md'
 output_file = 'test.md'
 
-files = ['dhcpd-parameters.conf']
+files = ['dhcpd-parameters.conf', 'dhcpd-declarations.conf']
 
 concatenated_string = None
 
@@ -21,15 +22,30 @@ reference_head = '''# DHCPd statements
 def generate_table(input_list: list) -> str:
     return_string = ''
     for line in input_list:
-        line = line.replace('|', '\\|').replace(' ;', ';')
-        if line.startswith('server-duid'):
-            key, value, optional = line.split(None, 2)
-        elif 'authoritative' in line:
-            key, value, optional = [line] + [None, None]
-        elif any(['hardware' in line, 'host-identifier' in line]):
-            key, value, optional = line.rsplit(None, 1) + [None]
+        if line.endswith(';'):
+            line = line.replace('|', '\\|').replace(' ;', ';')
+            if line.startswith('server-duid'):
+                key, value, optional = line.split(None, 2)
+            elif 'authoritative' in line:
+                key, value, optional = [line] + [None, None]
+            elif line.startswith('range6') and 'temporary' in line:
+                key, value, optional = line.split()
+            elif any(['hardware' in line, 'host-identifier' in line]):
+                key, value, optional = line.rsplit(None, 1) + [None]
+            else:
+                key, value, optional = line.split(None, 1) + [None]
+        elif line.endswith('{'):
+            modded_line = line.replace(' {', '')
+            if modded_line.startswith('subnet '):
+                key, value, optional = modded_line.split(None, 2)
+                # optional = ' '.join(optional)
+            elif any(['group' in line, 'pool' in modded_line]):
+                key, value, optional = [modded_line] + [None, None]
+            else:
+                key, value, optional = modded_line.split(None, 1) + [None]
         else:
-            key, value, optional = line.split(None, 1) + [None]
+            # print(f'{line}: NOT PROCESSED')
+            continue
         return_string += f'|{line}|{key}|{value}|{optional}|\n'
     return return_string
 

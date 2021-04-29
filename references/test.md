@@ -84,3 +84,15 @@
 |use-host-decl-names flag;|use-host-decl-names|flag;|None|
 |use-lease-addr-for-default-route flag;|use-lease-addr-for-default-route|flag;|None|
 |vendor-option-space string;|vendor-option-space|string;|None|
+|include "filename";|include|"filename";|None|
+|shared-network name {|shared-network|name|None|
+|subnet subnet-number netmask netmask-dotted {|subnet|subnet-number|netmask netmask-dotted|
+|subnet6 subnet6-number {|subnet6|subnet6-number|None|
+|range [ dynamic-bootp ] low-address [ high-address];|range|[ dynamic-bootp ] low-address [ high-address];|None|
+|range6 low-address high-address;|range6|low-address high-address;|None|
+|range6 subnet6-number;|range6|subnet6-number;|None|
+|range6 subnet6-number temporary;|range6|subnet6-number|temporary;|
+|range6 address temporary;|range6|address|temporary;|
+|prefix6 low-address high-address / bits;|prefix6|low-address high-address / bits;|None|
+|host hostname {|host|hostname|None|
+|group {|group|None|None|
