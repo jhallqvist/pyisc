@@ -110,7 +110,7 @@
 |max-response-delay 60;|max-response-delay|60|None|
 |max-unacked-updates 10;|max-unacked-updates|10|None|
 |mclt 3600;|mclt|3600|None|
-|hba ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00;|hba|ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:ff:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00|None|
+|hba ff:ff:ff:ff:ff:ff:ff:ff:00:00:00:00:00:00:00;|hba|ff:ff:ff:ff:ff:ff:ff:ff:00:00:00:00:00:00:00|None|
 |load balance max 5;|load balance max|5|None|
 |auto-partner-down 5;|auto-partner-down|5|None|
 |failover peer 'name' state {|failover peer|'name'|state|

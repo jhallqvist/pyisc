@@ -1,9 +1,10 @@
+"""TEMP."""
+from pyisc import utils
+
 import os, sys
 currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
-
-from pyisc import utils
 
 output_file = 'dhcpd-reference.md'
 
@@ -37,7 +38,8 @@ def generate_table(input_list: list) -> str:
     bool_keys = ('authoritative', 'not authoritative', 'primary', 'secondary',
                 'group', 'pool')  # Primary currently not working for DNS Conf
     optional_last_parameter = ('failover')
-    split_on_first = ('allow', 'deny', 'ignore', 'match', 'spawn', 'range', 'db-time-format', 'fixed-address', 'fixed-prefix6')
+    split_on_first = ('allow', 'deny', 'ignore', 'match', 'spawn', 'range',
+                     'db-time-format', 'fixed-address', 'fixed-prefix6')
     split_on_last = ('hardware', 'host-identifier', 'load', 'lease', 'peer',
                     'my state', 'peer state')
     split_on_second = ('option')
