@@ -1,52 +1,82 @@
-# output_file = 'dhcpd-reference.md'
-output_file = 'test.md'
+import os, sys
+currentdir = os.path.dirname(os.path.realpath(__file__))
+parentdir = os.path.dirname(currentdir)
+sys.path.append(parentdir)
 
-files = ['dhcpd-parameters.conf', 'dhcpd-declarations.conf']
+from pyisc import utils
+
+output_file = 'dhcpd-reference.md'
+
+files = [
+    'dhcpd-allow_deny.conf',
+    'dhcpd-classes.conf',
+    'dhcpd-declarations.conf',
+    'dhcpd-dns.conf',
+    'dhcpd-failover.conf',
+    'dhcpd-parameters.conf']
 
 concatenated_string = None
 
 for file in files:
     with open(file, 'r') as input_file:
         isc_conf = input_file.read()
-    concatenated_string = '\n'.join(filter(None, (concatenated_string, isc_conf)))
+    concatenated_string = '\n'.join(
+        filter(None, (concatenated_string, isc_conf)))
 
 isc_list = concatenated_string.splitlines()
 
 reference_head = '''# DHCPd statements
 
-| Original statement | Key | Value | Optional parameter |
+| Original statement | Key | Value | Optional/Parameter |
 | :----------------- | :-- | :---- | :----------------- |
 '''
 
 
 def generate_table(input_list: list) -> str:
     return_string = ''
+    bool_keys = ('authoritative', 'not authoritative', 'primary', 'secondary',
+                'group', 'pool')  # Primary currently not working for DNS Conf
+    optional_last_parameter = ('failover')
+    split_on_first = ('allow', 'deny', 'ignore', 'match', 'spawn', 'range', 'db-time-format', 'fixed-address', 'fixed-prefix6')
+    split_on_last = ('hardware', 'host-identifier', 'load', 'lease', 'peer',
+                    'my state', 'peer state')
+    split_on_second = ('option')
+    split_two_first = ('server-duid', 'subnet ')
     for line in input_list:
+        original_line = line
         if line.endswith(';'):
-            line = line.replace('|', '\\|').replace(' ;', ';')
-            if line.startswith('server-duid'):
-                key, value, optional = line.split(None, 2)
-            elif 'authoritative' in line:
-                key, value, optional = [line] + [None, None]
-            elif line.startswith('range6') and 'temporary' in line:
-                key, value, optional = line.split()
-            elif any(['hardware' in line, 'host-identifier' in line]):
-                key, value, optional = line.rsplit(None, 1) + [None]
+            line = line.replace('|', '\\|').replace(';', '').strip()
+            if line.startswith(split_two_first):
+                line_split = line.split(None, 2)
+            elif line.startswith(bool_keys):
+                line_split = [line]
+            elif line.startswith(split_on_second):
+                line_split = utils.nth_split(line, ' ', 2)
+            elif line.startswith(split_on_first):
+                line_split = line.split(None, 1)
+            elif line.startswith(optional_last_parameter):
+                line_split = utils.split_from(line, ' ', 2)
+            elif line.startswith(split_on_last):
+                line_split = line.rsplit(None, 1)
             else:
-                key, value, optional = line.split(None, 1) + [None]
+                line_split = line.split()
         elif line.endswith('{'):
-            modded_line = line.replace(' {', '')
-            if modded_line.startswith('subnet '):
-                key, value, optional = modded_line.split(None, 2)
-                # optional = ' '.join(optional)
-            elif any(['group' in line, 'pool' in modded_line]):
-                key, value, optional = [modded_line] + [None, None]
+            line = line.replace(' {', '').strip()
+            if line.startswith(split_two_first):
+                line_split = line.split(None, 2)
+            elif line.startswith(optional_last_parameter):
+                line_split = utils.split_from(line, ' ', 2)
+            elif line.startswith(bool_keys):
+                line_split = [line]
             else:
-                key, value, optional = modded_line.split(None, 1) + [None]
+                line_split = line.split()
         else:
             # print(f'{line}: NOT PROCESSED')
             continue
-        return_string += f'|{line}|{key}|{value}|{optional}|\n'
+        while 4 > len(line_split):
+            line_split.append(None)
+        key, value, optional, *_ = line_split
+        return_string += f'|{original_line.strip()}|{key}|{value}|{optional}|\n'
     return return_string
 
 
