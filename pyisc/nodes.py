@@ -55,10 +55,11 @@ class Node:
 class PropertyNode:
     """TEMP."""
 
-    def __init__(self, name, value):
+    def __init__(self, name=None, value=None, parameters=None):
         """TEMP."""
         self.name = name
         self.value = value
+        self.parameters = parameters
 
     def __eq__(self, other):
         """TEMP."""
@@ -66,17 +67,18 @@ class PropertyNode:
             return False
         return (
             self.name == other.name and
-            self.value == other.value
+            self.value == other.value and 
+            self.parameters == other.parameters
         )
 
     def __str__(self):
         """TEMP."""
-        return f'{" ".join(filter(None, (self.name, self.value)))}'
+        return f'{" ".join(filter(None, (self.name, self.value, self.parameters)))}'
         # return f'{self.name} {self.value}'
 
     def __repr__(self):
         """TEMP."""
-        return f'PropertyNode({self.name}, {self.value})'
+        return f'PropertyNode({self.name}, {self.value}, {self.parameters})'
         # return repr(self.__dict__)
 
 

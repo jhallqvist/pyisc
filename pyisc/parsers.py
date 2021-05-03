@@ -2,24 +2,57 @@
 
 import re
 from .nodes import Token, Node, PropertyNode, RootNode
-from .utils import nth_split
+from .utils import TokenSplitter
 
 
-class IscParser():
+class IscParser:
     """A parser for ISC configs."""
 
+    FAILOVER_START = r"(?:failover\s)[\w]+\s*?[^\n]*?{"
+    BLOCK_START = r"[\w]+\s*?[^\n]*?{"
+    PARAMETER_SINGLE_KEY = r"""(?:(?:allow|deny|ignore|match|spawn|range|
+                            fixed-address|fixed-prefix6)\s)[\w]+\s*?[^\n]*?;"""
+    PARAMETER_MULTI_VALUE = r"(?:server-duid\s)[\w]+\s*?[^\n]*?;"
+    PARAMETER_SINGLE_VALUE = r"""(?:(?:hardware|host-identifier|load|lease|
+                               peer|my state|peer state)\s)[\w]+\s*?[^\n]*?;"""
+    PARAMETER_OPTION = r"(?:option\s)[\w]+\s*?[^\n]*?;"
+    PARAMETER_GENERAL = r"[\w]+\s*?[^\n]*?;"
+    NEWLINE = r"\n"
+    WHITESPACE = r"\s"
+    COMMENT = r"\#.*?\n"
+    SECTION_END = r"\}"
+
+    # tokens = [
+    #     (r"[\w_]+\s*?[^\n]*?{",
+    #         lambda scanner, token: Token(type='section_start', value=token)),
+    #     (r"[\w_]+?(?:[^\"]+?(?:\".*?\")?)+?;",
+    #         lambda scanner, token: Token(type='option', value=token)),
+    #     (r"\n",
+    #         lambda scanner, token: Token(type='newline', value=token)),
+    #     (r"\s",
+    #         lambda scanner, token: Token(type='whitespace', value=token)),
+    #     (r"\#.*?\n",
+    #         lambda scanner, token: Token(type='comment', value=token)),
+    #     (r"\}",
+    #         lambda scanner, token: Token(type='section_end', value=token)),
+    # ]
     tokens = [
-        (r"[\w_]+\s*?[^\n]*?{", lambda scanner, token: Token(type='section_start', value=token)),
-        (r"[\w_]+?(?:[^\"]+?(?:\".*?\")?)+?;", lambda scanner, token: Token(type='option', value=token)),
-        (r"\n", lambda scanner, token: Token(type='newline', value=token)),
-        (r"\s", lambda scanner, token: Token(type='whitespace', value=token)),
-        (r"\#.*?\n", lambda scanner, token: Token(type='comment', value=token)),
-        (r"\}", lambda scanner, token: Token(type='section_end', value=token)),
+        (FAILOVER_START, lambda scanner, token: Token(type='failover_start', value=token)),
+        (BLOCK_START, lambda scanner, token: Token(type='section_start', value=token)),
+        (PARAMETER_SINGLE_KEY, lambda scanner, token: Token(type='parameter_single_key', value=token)),
+        (PARAMETER_MULTI_VALUE, lambda scanner, token: Token(type='parameter_multiple_values', value=token)),
+        (PARAMETER_SINGLE_VALUE, lambda scanner, token: Token(type='parameter_single_value', value=token)),
+        (PARAMETER_OPTION, lambda scanner, token: Token(type='parameter_option', value=token)),
+        (PARAMETER_GENERAL, lambda scanner, token: Token(type='parameter_general', value=token)),
+        (NEWLINE, lambda scanner, token: Token(type='newline', value=token)),
+        (WHITESPACE, lambda scanner, token: Token(type='whitespace', value=token)),
+        (COMMENT, lambda scanner, token: Token(type='comment', value=token)),
+        (SECTION_END, lambda scanner, token: Token(type='section_end', value=token)),
     ]
 
     def tokenize(self, content):
         """TEMP."""
-        scanner = re.Scanner(self.tokens, re.DOTALL)
+        scanner = re.Scanner(self.tokens, flags=re.DOTALL | re.VERBOSE)
         tokens, remainder = scanner.scan(content)
         if remainder:
             raise Exception(f'Invalid tokens: {remainder}, Tokens: {tokens}')
@@ -29,6 +62,7 @@ class IscParser():
         """TEMP."""
         node = RootNode()
         node_stack = []
+        splitter = TokenSplitter()
         next_comment = None
         for token in self.tokenize(content):
             if token.type in ['whitespace', 'newline']:
@@ -37,12 +71,15 @@ class IscParser():
                 node = node_stack.pop()
             if token.type == 'comment':
                 continue
-            if token.type == 'option':
-                if token.value.startswith('option'):
-                    key, value = nth_split(token.value[:-1], ' ', 2)
-                else:
-                    key, value, *_ = token.value[:-1].split(None, 1) + [None]
-                prop = PropertyNode(name=key, value=value)
+            # if token.type == 'option':
+            #     if token.value.startswith('option'):
+            #         key, value = split_at(token.value[:-1], ' ', 2)
+            #     else:
+            #         key, value, *_ = token.value[:-1].split(None, 1) + [None]
+            if token.type.startswith('parameter'):
+                key, value, parameters, *_ = splitter.switch(token)
+                prop = PropertyNode(
+                    name=key, value=value, parameters=parameters)
                 node.children.append(prop)
             if token.type == 'section_start':
                 token, name, parameters, *_ = token.value[:-1].strip().split(None, 2) + [None, None]

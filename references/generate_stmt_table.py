@@ -8,7 +8,6 @@ from pyisc import utils
 
 output_file = 'dhcpd-reference.md'
 
-"""
 files = [
     'dhcpd-allow_deny.conf',
     'dhcpd-classes.conf',
@@ -16,8 +15,8 @@ files = [
     'dhcpd-dns.conf',
     'dhcpd-failover.conf',
     'dhcpd-parameters.conf']
-"""
-files = ['dhcpd-dns.conf']
+
+# files = ['dhcpd-dns.conf']
 
 concatenated_string = None
 
@@ -49,25 +48,23 @@ def generate_table(input_list: list) -> str:
     split_on_second = ('option')
     split_two_first = ('server-duid', 'subnet ')
     for line in input_list:
-        original_line = line
+        original_line = line.replace('|', '\\|')
         if line.endswith(';'):
-            # Bool split and default split can be the same. I.e. remove bool split thinking
             line = line.replace('|', '\\|').replace(';', '').strip()
             if line.startswith(split_two_first):
                 line_split = line.split(None, 2)
-            # elif line.startswith(bool_keys):
-            elif any(x == line for x in bool_keys):
+            elif line.startswith('subclass') or 'temporary' in line:
                 line_split = line.split()
             elif line.startswith(split_on_second):
                 line_split = utils.nth_split(line, ' ', 2)
-            elif line.startswith(split_on_first):
-                line_split = line.split(None, 1)
+            # elif line.startswith(split_on_first):
+            #     line_split = line.split(None, 1)
             elif line.startswith(optional_last_parameter):
                 line_split = utils.split_from(line, ' ', 2)
             elif line.startswith(split_on_last):
                 line_split = line.rsplit(None, 1)
             else:
-                line_split = line.split()
+                line_split = line.split(None, 1)
         elif line.endswith('{'):
             line = line.replace('{', '').strip()
             if line.startswith(split_two_first):

@@ -77,7 +77,7 @@
 |range6 subnet6-number;|range6|subnet6-number|None|
 |range6 subnet6-number temporary;|range6|subnet6-number temporary|None|
 |range6 address temporary;|range6|address temporary|None|
-|prefix6 low-address high-address / bits;|prefix6|low-address high-address / bits|None|
+|prefix6 low-address high-address / bits;|prefix6|low-address|high-address|
 |host hostname {|host|hostname|None|
 |group {|group|None|None|
 |key DHCP_UPDATER {|key|DHCP_UPDATER|None|
@@ -135,7 +135,7 @@
 |not authoritative;|not|authoritative|None|
 |boot-unknown-clients flag;|boot-unknown-clients|flag|None|
 |check-secs-byte-order flag;|check-secs-byte-order|flag|None|
-|db-time-format [ default \| local ];|db-time-format|[ default \| local ]|None|
+|db-time-format [ default | local ];|db-time-format|[ default \| local ]|None|
 |ddns-hostname name;|ddns-hostname|name|None|
 |ddns-domainname name;|ddns-domainname|name|None|
 |ddns-dual-stack-mixed-mode flag;|ddns-dual-stack-mixed-mode|flag|None|
@@ -152,7 +152,7 @@
 |dhcp-cache-threshold percentage;|dhcp-cache-threshold|percentage|None|
 |do-forward-updates flag;|do-forward-updates|flag|None|
 |dont-use-fsync flag;|dont-use-fsync|flag|None|
-|dynamic-bootp-lease-cutoff W YYYY/MM/DD HH:MM:SS;|dynamic-bootp-lease-cutoff|W YYYY/MM/DD HH:MM:SS|None|
+|dynamic-bootp-lease-cutoff W YYYY/MM/DD HH:MM:SS;|dynamic-bootp-lease-cutoff|W|YYYY/MM/DD|
 |dynamic-bootp-lease-length length;|dynamic-bootp-lease-length|length|None|
 |echo-client-id flag;|echo-client-id|flag|None|
 |filename "filename";|filename|"filename"|None|
