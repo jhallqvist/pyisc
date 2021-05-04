@@ -18,10 +18,29 @@ Currently a git clone is necessary. If project goes well a package on PyPi might
 ```python
 import pyisc
 
-with open('dhcpd.conf', 'r') as input_file:
-    isc_conf = input_file.read()
+test = '''shared-network 224-29 {
+    subnet 10.17.224.0 netmask 255.255.255.0 {
+        option routers rtr-224.example.org;
+    }
+    subnet 10.0.29.0 netmask 255.255.255.0 {
+        option routers rtr-29.example.org;
+    }
+    pool {
+        allow members of "foo";
+        range 10.17.224.10 10.17.224.250;
+    }
+    pool {
+        deny members of "foo";
+        range 10.0.29.10 10.0.29.230;
+    }
+}
+'''
 
-pyisc.loads(isc_conf)
+tree = pyisc.loads(test)
+
+print(f'\nDumped string matches original string: {pyisc.dumps(tree) == test}\n')
+
+print(pyisc.dumps(tree))
 ```
 
 ## Withstanding issues

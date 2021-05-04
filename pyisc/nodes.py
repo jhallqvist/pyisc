@@ -4,7 +4,7 @@ from collections import namedtuple
 
 
 class RootNode:
-    """TEMP."""
+    """Represents the root of the tree."""
 
     def __init__(self, name='Root'):
         """TEMP."""
@@ -22,7 +22,7 @@ class RootNode:
 
 
 class Node:
-    """TEMP."""
+    """Represents an entity capable of having properties."""
 
     def __init__(self, type=None, name=None, parameters=None):
         """TEMP."""
@@ -53,7 +53,7 @@ class Node:
 
 
 class PropertyNode:
-    """TEMP."""
+    """Represents a property of a node."""
 
     def __init__(self, name=None, value=None, parameters=None):
         """TEMP."""

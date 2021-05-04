@@ -22,20 +22,6 @@ class IscParser:
     COMMENT = r"\#.*?\n"
     SECTION_END = r"\}"
 
-    # tokens = [
-    #     (r"[\w_]+\s*?[^\n]*?{",
-    #         lambda scanner, token: Token(type='section_start', value=token)),
-    #     (r"[\w_]+?(?:[^\"]+?(?:\".*?\")?)+?;",
-    #         lambda scanner, token: Token(type='option', value=token)),
-    #     (r"\n",
-    #         lambda scanner, token: Token(type='newline', value=token)),
-    #     (r"\s",
-    #         lambda scanner, token: Token(type='whitespace', value=token)),
-    #     (r"\#.*?\n",
-    #         lambda scanner, token: Token(type='comment', value=token)),
-    #     (r"\}",
-    #         lambda scanner, token: Token(type='section_end', value=token)),
-    # ]
     tokens = [
         (FAILOVER_START, lambda scanner, token: Token(type='failover_start', value=token)),
         (BLOCK_START, lambda scanner, token: Token(type='section_start', value=token)),
@@ -51,7 +37,14 @@ class IscParser:
     ]
 
     def tokenize(self, content):
-        """TEMP."""
+        """
+        Return list of token objects.
+
+        :param content: A supplied string.
+        :type token: str
+        :return: Returns a list of Token objects parsed from submitted string.
+        :rtype: list
+        """
         scanner = re.Scanner(self.tokens, flags=re.DOTALL | re.VERBOSE)
         tokens, remainder = scanner.scan(content)
         if remainder:
@@ -59,7 +52,15 @@ class IscParser:
         return tokens
 
     def build_tree(self, content):
-        """TEMP."""
+        """
+        Return a tree like structure of token objects.
+
+        :param content: A supplied string.
+        :type token: str
+        :return: Returns a tree representation of pyisc.RootNode, pyisc.Node
+            and pyisc PropertyNode objects.
+        :rtype: list
+        """
         node = RootNode()
         node_stack = []
         splitter = TokenSplitter()
