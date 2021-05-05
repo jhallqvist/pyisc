@@ -5,7 +5,7 @@ from .nodes import Token, Node, PropertyNode, RootNode
 from .utils import TokenSplitter
 
 
-class IscParser:
+class DhcpParser:
     """A parser for ISC configs."""
 
     FAILOVER_START = r"(?:failover\s)[\w]+\s*?[^\n]*?{"
@@ -72,17 +72,14 @@ class IscParser:
                 node = node_stack.pop()
             if token.type == 'comment':
                 continue
-            # if token.type == 'option':
-            #     if token.value.startswith('option'):
-            #         key, value = split_at(token.value[:-1], ' ', 2)
-            #     else:
-            #         key, value, *_ = token.value[:-1].split(None, 1) + [None]
             if token.type.startswith('parameter'):
                 key, value, parameters, *_ = splitter.switch(token)
                 prop = PropertyNode(
                     name=key, value=value, parameters=parameters)
                 node.children.append(prop)
-            if token.type == 'section_start':
+            if token.type == 'section_start' or token.type == 'failover_start':
+                # Need to break out failover and split in correct way.
+                # Also need to alter TokenSplitter for failover as a parameter.
                 token, name, parameters, *_ = token.value[:-1].strip().split(None, 2) + [None, None]
                 section = Node(type=token, name=name, parameters=parameters)
                 node.children.append(section)
