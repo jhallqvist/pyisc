@@ -16,9 +16,9 @@ Currently a git clone is necessary. If project goes well a package on PyPi might
 ## Usage
 
 ```python
-import pyisc
+>>> from pyisc import dhcpd
 
-test = '''shared-network 224-29 {
+>>> test = '''shared-network 224-29 {
     subnet 10.17.224.0 netmask 255.255.255.0 {
         option routers rtr-224.example.org;
     }
@@ -36,11 +36,35 @@ test = '''shared-network 224-29 {
 }
 '''
 
-tree = pyisc.loads(test)
+>>> tree = dhcpd.loads(test)
 
-print(f'\nDumped string matches original string: {pyisc.dumps(tree) == test}\n')
+>>> print(f'\nDumped string matches original string: {dhcpd.dumps(tree) == test}\n')
 
-print(pyisc.dumps(tree))
+>>> print(dhcpd.dumps(tree))
+
+>>> new_node = dhcpd.Node(type='subnet', name='172.16.0.0', parameters='netmask 255.255.255.0')
+
+>>> tree.children[0].children.append(new_node)
+
+>>> print(dhcpd.dumps(tree))
+shared-network 224-29 {
+    subnet 10.17.224.0 netmask 255.255.255.0 {
+        option routers rtr-224.example.org;
+    }
+    subnet 10.0.29.0 netmask 255.255.255.0 {
+        option routers rtr-29.example.org;
+    }
+    pool {
+        allow members of "foo";
+        range 10.17.224.10 10.17.224.250;
+    }
+    pool {
+        deny members of "foo";
+        range 10.0.29.10 10.0.29.230;
+    }
+    subnet 172.16.0.0 netmask 255.255.255.0 {
+    }
+}
 ```
 
 ## Withstanding issues

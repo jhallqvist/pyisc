@@ -5,8 +5,8 @@ from .nodes import Token, Node, PropertyNode, RootNode
 from .utils import TokenSplitter
 
 
-class DhcpParser:
-    """A parser for ISC configs."""
+class DhcpdParser:
+    """A parser for ISC DHCPD configs."""
 
     FAILOVER_START = r"(?:failover\s)[\w]+\s*?[^\n]*?{"
     BLOCK_START = r"[\w]+\s*?[^\n]*?{"
@@ -23,17 +23,28 @@ class DhcpParser:
     SECTION_END = r"\}"
 
     tokens = [
-        (FAILOVER_START, lambda scanner, token: Token(type='failover_start', value=token)),
-        (BLOCK_START, lambda scanner, token: Token(type='section_start', value=token)),
-        (PARAMETER_SINGLE_KEY, lambda scanner, token: Token(type='parameter_single_key', value=token)),
-        (PARAMETER_MULTI_VALUE, lambda scanner, token: Token(type='parameter_multiple_values', value=token)),
-        (PARAMETER_SINGLE_VALUE, lambda scanner, token: Token(type='parameter_single_value', value=token)),
-        (PARAMETER_OPTION, lambda scanner, token: Token(type='parameter_option', value=token)),
-        (PARAMETER_GENERAL, lambda scanner, token: Token(type='parameter_general', value=token)),
-        (NEWLINE, lambda scanner, token: Token(type='newline', value=token)),
-        (WHITESPACE, lambda scanner, token: Token(type='whitespace', value=token)),
-        (COMMENT, lambda scanner, token: Token(type='comment', value=token)),
-        (SECTION_END, lambda scanner, token: Token(type='section_end', value=token)),
+        (FAILOVER_START, lambda scanner, token: Token(
+            type='failover_start', value=token)),
+        (BLOCK_START, lambda scanner, token: Token(
+            type='section_start', value=token)),
+        (PARAMETER_SINGLE_KEY, lambda scanner, token: Token(
+            type='parameter_single_key', value=token)),
+        (PARAMETER_MULTI_VALUE, lambda scanner, token: Token(
+            type='parameter_multiple_values', value=token)),
+        (PARAMETER_SINGLE_VALUE, lambda scanner, token: Token(
+            type='parameter_single_value', value=token)),
+        (PARAMETER_OPTION, lambda scanner, token: Token(
+            type='parameter_option', value=token)),
+        (PARAMETER_GENERAL, lambda scanner, token: Token(
+            type='parameter_general', value=token)),
+        (NEWLINE, lambda scanner, token: Token(
+            type='newline', value=token)),
+        (WHITESPACE, lambda scanner, token: Token(
+            type='whitespace', value=token)),
+        (COMMENT, lambda scanner, token: Token(
+            type='comment', value=token)),
+        (SECTION_END, lambda scanner, token: Token(
+            type='section_end', value=token)),
     ]
 
     def tokenize(self, content):
@@ -75,13 +86,14 @@ class DhcpParser:
             if token.type.startswith('parameter'):
                 key, value, parameters, *_ = splitter.switch(token)
                 prop = PropertyNode(
-                    name=key, value=value, parameters=parameters)
+                    type=key, value=value, parameters=parameters)
                 node.children.append(prop)
             if token.type == 'section_start' or token.type == 'failover_start':
                 # Need to break out failover and split in correct way.
                 # Also need to alter TokenSplitter for failover as a parameter.
-                token, name, parameters, *_ = token.value[:-1].strip().split(None, 2) + [None, None]
-                section = Node(type=token, name=name, parameters=parameters)
+                token, name, parameters, *_ = token.value[:-1].strip().split(
+                    None, 2) + [None, None]
+                section = Node(type=token, value=name, parameters=parameters)
                 node.children.append(section)
                 node_stack += [node]
                 node = section

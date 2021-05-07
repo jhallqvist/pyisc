@@ -2,7 +2,7 @@
 
 
 class TokenSplitter:
-    """A static class used to provide case / switch functionality."""
+    """A static class used to provide case / switch like functionality."""
 
     def switch(self, token):
         """
@@ -26,7 +26,7 @@ class TokenSplitter:
         return self.token.value[:-1].rsplit(None, 1) + [None, None]
 
     def parameter_multiple_values(self):
-        """Return a list where the value derived from the string contains space."""
+        """Return a list where the expected value of the string contains space."""
         return self.token.value[:-1].split(None, 2) + [None, None]
 
     def parameter_single_key(self):
