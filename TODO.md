@@ -1,9 +1,11 @@
 # ToDos
 
-* Function that sorts the tree. PropertyNodes need to come first and be sorted based on their key. After that comes the Nodes.
+* Function that sorts the tree. PropertyNodes need to come first and be sorted based on their key. After that comes the Nodes. Sorting is implemented but might need modification. Currently it sorts the supplied tree instead of returning a new one. Which method i preferable? Also might be of use to allow user to supply their own sorting algorithm by modifying the sort_tree function.
 * Full dictionary representation with the \__dict__ methods. Might actually skip this.
 * In a api scenario it would be prudent to return the index of any children of an object so that it can be used as an key to identify the object. Practical for alterations, delations, insertions and more.
+* Rewamp init files? I think one at the pyisc top level would suffice and maybe move the funcions in the current dhcpd init to a new py file.
 * ~~Change constructor attributes of Node and ProprteyNode to match in order to make sorting cleaner?~~
+* Inline Documentation....
 
 ```python
 from pyisc import dhcpd

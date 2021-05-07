@@ -1,12 +1,19 @@
-"""TEMP."""
+"""Contains the parser for DHCPd configuration files/strings."""
 
 import re
-from .nodes import Token, Node, PropertyNode, RootNode
-from .utils import TokenSplitter
+from pyisc.dhcpd.nodes import Token, Node, PropertyNode, RootNode
+from pyisc.dhcpd.utils import TokenSplitter
 
 
 class DhcpdParser:
-    """A parser for ISC DHCPD configs."""
+    """A parser for ISC DHCPD configs.
+
+    The constants are the various RegEx patterns that is used in the tokens
+    variable. Token variable is a list of tuples that conains previously
+    mentioned RegEx patterns as well as lambda functions that are meant to be
+    used by the re.Scanner in tokenize function.
+
+    """
 
     FAILOVER_START = r"(?:failover\s)[\w]+\s*?[^\n]*?{"
     BLOCK_START = r"[\w]+\s*?[^\n]*?{"
@@ -51,10 +58,9 @@ class DhcpdParser:
         """
         Return list of token objects.
 
-        :param content: A supplied string.
-        :type token: str
-        :return: Returns a list of Token objects parsed from submitted string.
-        :rtype: list
+        Args:
+            content (str): A supplied string to turn into tokens.
+
         """
         scanner = re.Scanner(self.tokens, flags=re.DOTALL | re.VERBOSE)
         tokens, remainder = scanner.scan(content)
@@ -66,11 +72,9 @@ class DhcpdParser:
         """
         Return a tree like structure of token objects.
 
-        :param content: A supplied string.
-        :type token: str
-        :return: Returns a tree representation of pyisc.RootNode, pyisc.Node
-            and pyisc PropertyNode objects.
-        :rtype: list
+        Args:
+            content (str): A supplied string to supply to the tokenize method.
+
         """
         node = RootNode()
         node_stack = []

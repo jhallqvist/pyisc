@@ -69,7 +69,6 @@ shared-network 224-29 {
 
 ## Withstanding issues
 
-* Subclasses without the {}. Currently parses as an option which does not have a paramater attribute.
 * Rework the generate_stmt.py to better group statements into groups and split on those (bools, split on nth occurence and so on).
 
 ## Contributing

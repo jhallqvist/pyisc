@@ -2,16 +2,23 @@
 
 
 class TokenSplitter:
-    """A static class used to provide case / switch like functionality."""
+    """A static class used to provide case / switch like functionality.
+
+    The switch takes a supplied token and matches the type of that token to a
+    method. If a match is found that method is executed and the result
+    returned.
+    If a match is not found the default lambda expression will be used instead.
+    The entire purpose is to split a value of the supplied token the desired
+    way.
+    """
 
     def switch(self, token):
         """
         Return list of splitted token string.
 
-        :param token: A supplied token instance of the Token named tuple type.
-        :type token: pyisc.Token
-        :return: Returns a list of values from a supplied Token value.
-        :rtype: list
+        Args:
+            token (Token): A supplied token instance.
+
         """
         self.token = token
         default = token.value[:-1].split() + [None, None]
@@ -33,20 +40,17 @@ class TokenSplitter:
         """Return a list where the first word in the string is the key."""
         return self.token.value[:-1].split(None, 1) + [None, None]
 
+
 def split_at(string, sep, pos):
     """
     Return string splitted at the desired separator.
 
-    :param string: The supplied string that will be splitted.
-    :type string: str
-    :param sep: The desired separator to use for the split.
-    :type sep: str
-    :param pos: The desired occurence of the defined separator within the
-        supplied string and hence the point of the split operation.
-    :type pos: int
-    :return: Returns a list of the values derived from the split of supplied
-        string.
-    :rtype: list
+    Args:
+        string (str): The supplied string that will be splitted.
+        sep (str): The desired separator to use for the split.
+        pos (int): The desired occurence of the defined separator within the
+            supplied string and hence the point of the split operation.
+
     """
     string = string.split(sep)
     return [sep.join(string[:pos]), sep.join(string[pos:])]
@@ -56,17 +60,40 @@ def split_from(string, sep, pos):
     """
     Return string splitted from the desired separator.
 
-    :param string: The supplied string that will be splitted.
-    :type string: str
-    :param sep: The desired separator to use for the split.
-    :type sep: str
-    :param pos: The desired first occurence of the defined separator within
-        the supplied string. This will be the position of the first split
-        performed.
-    :type pos: int
-    :return: Returns a list of the values derived from the split of supplied
-        string.
-    :rtype: list
+    Args:
+        string (str): The supplied string that will be splitted.
+        sep (str): The desired separator to use for the split.
+        pos (int): The desired first occurence of the defined separator within
+            the supplied string. This will be the position of the first split
+            performed.
+
     """
     string = string.split(sep)
     return [sep.join(string[:2])] + string[2:]
+
+
+def sort_tree_algorithm(child):
+    """Return tuple of values for sorting.
+
+    This is meant to be supplied to the sort functions key attribute. It will
+    sort sort on the object type where mostly all PropertyNodes will be
+    prioritized.
+    Args:
+        child (Node, PropertyNode): The child instance supplied by the sort
+            function.
+
+    """
+    sort_order = {
+        'key': 1,
+        'failover': 2,
+        'subnet': 3,
+        'host': 4,
+        'class': 5,
+        'shared-network': 6,
+        'group': 7,
+        'subclass': 8}
+    condition_one = sort_order.get(child.type, 0)
+    condition_two = child.type
+    condition_three = [int(octet) for octet in child.value.split('.')] if \
+        child.type == 'subnet' else child.value
+    return (condition_one, condition_two, condition_three)
