@@ -71,8 +71,6 @@ def dumps(tree, level=0, result=''):
         str: A complete string that is ready to write to a suitable file
 
     """
-    if not hasattr(tree, 'children'):
-        return f'{tree};\n'
     for branch in tree.children:
         indent = level * ' '
         if isinstance(branch, PropertyNode):

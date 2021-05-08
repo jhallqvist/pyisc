@@ -19,6 +19,15 @@ class TokenSplitter:
         Args:
             token (Token): A supplied token instance.
 
+        Returns:
+            list: List of the now splitted string
+
+        Examples:
+
+            >>> token = Token('parameter_option','option domain-name "example.org";')
+            >>> TokenSplitter.switch(token)
+            ['option domain-name', '"example.org"', None, None]
+
         """
         self.token = token
         default = token.value[:-1].split() + [None, None]
