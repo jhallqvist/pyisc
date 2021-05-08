@@ -42,7 +42,7 @@ Currently a git clone is necessary. If project goes well a package on PyPi might
 
 >>> print(dhcpd.dumps(tree))
 
->>> new_node = dhcpd.Node(type='subnet', name='172.16.0.0', parameters='netmask 255.255.255.0')
+>>> new_node = dhcpd.Node(type='subnet', value='172.16.0.0', parameters='netmask 255.255.255.0')
 
 >>> tree.children[0].children.append(new_node)
 

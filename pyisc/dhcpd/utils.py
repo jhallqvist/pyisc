@@ -23,7 +23,6 @@ class TokenSplitter:
             list: List of the now splitted string
 
         Examples:
-
             >>> token = Token('parameter_option','option domain-name "example.org";')
             >>> TokenSplitter.switch(token)
             ['option domain-name', '"example.org"', None, None]
@@ -60,6 +59,14 @@ def split_at(string, sep, pos):
         pos (int): The desired occurence of the defined separator within the
             supplied string and hence the point of the split operation.
 
+    Returns:
+        list: A list of the splitted string
+
+    Examples:
+        >>> isc_string = 'option domain-name "example.org";'
+        >>> dhcpd.utils.split_at(isc_string, ' ', 2)
+        ['option domain-name', '"example.org";']
+
     """
     string = string.split(sep)
     return [sep.join(string[:pos]), sep.join(string[pos:])]
@@ -75,6 +82,14 @@ def split_from(string, sep, pos):
         pos (int): The desired first occurence of the defined separator within
             the supplied string. This will be the position of the first split
             performed.
+
+    Returns:
+        list: A list of the splitted string
+
+    Examples:
+        >>> isc_string = 'failover peer "dhcpd-failover" state'
+        >>> dhcpd.utils.split_from(isc_string, ' ', 2)
+        ['failover peer', '"dhcpd-failover"', 'state']
 
     """
     string = string.split(sep)

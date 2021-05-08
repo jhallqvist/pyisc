@@ -61,6 +61,15 @@ class DhcpdParser:
         Args:
             content (str): A supplied string to turn into tokens.
 
+        Returns:
+            list[Token]: A list of Token instances
+
+        Examples:
+            >>> isc_string = 'option domain-name "example.org";'
+            >>> parser = dhcpd.DhcpdParser()
+            >>> parser.tokenize(isc_string)
+            [Token(type='parameter_option', value='option domain-name "example.org";')]
+
         """
         scanner = re.Scanner(self.tokens, flags=re.DOTALL | re.VERBOSE)
         tokens, remainder = scanner.scan(content)
@@ -74,6 +83,15 @@ class DhcpdParser:
 
         Args:
             content (str): A supplied string to supply to the tokenize method.
+
+        Returns:
+            pyisc.dhcpd.RootNode: A tree like representation of the supplied string.
+
+        Examples:
+            >>> isc_string = 'option domain-name "example.org";'
+            >>> parser = dhcpd.DhcpdParser()
+            >>> parser.build_tree(isc_string)
+            RootNode(Root)
 
         """
         node = RootNode()
