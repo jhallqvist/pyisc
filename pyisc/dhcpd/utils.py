@@ -41,26 +41,38 @@ class TokenSplitter:
             >>> TokenSplitter.switch(token)
             ['option domain-name', '"example.org"', None, None]
 
-        """
+        """ # noqa
         self.token = token
-        default = token.value[:-1].split() + [None, None]
-        return getattr(self, str(token.type), lambda: default)()
+        default = token.value[:-1].split()
+        return getattr(self, str(token.type), lambda: default)() + [None, None]
 
     def parameter_option(self):
         """Return a list where the first two words of the string is the key."""
-        return split_at(self.token.value[:-1], ' ', 2) + [None, None]
+        return split_at(self.token.value[:-1], ' ', 2)
 
     def parameter_single_value(self):
         """Return a list where the last word in the string is the value."""
-        return self.token.value[:-1].rsplit(None, 1) + [None, None]
+        return self.token.value[:-1].rsplit(None, 1)
 
     def parameter_multiple_values(self):
         """Return a list where the expected value of the string contains space."""
-        return self.token.value[:-1].split(None, 2) + [None, None]
+        return self.token.value[:-1].split(None, 2)
 
     def parameter_single_key(self):
         """Return a list where the first word in the string is the key."""
-        return self.token.value[:-1].split(None, 1) + [None, None]
+        return self.token.value[:-1].split(None, 1)
+
+    def parameter_failover(self):
+        """Return a list from a declaration string beginning with failover."""
+        return split_from(self.token.value[:-1], ' ', 2)
+
+    def declaration_failover(self):
+        """Return a list from a declaration string beginning with failover."""
+        return split_from(self.token.value[:-1], ' ', 2)
+
+    def declaration_general(self):
+        """TEMP."""
+        return self.token.value[:-1].strip().split(None, 2)
 
 
 def split_at(string, sep, pos):

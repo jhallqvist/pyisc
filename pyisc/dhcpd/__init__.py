@@ -92,7 +92,7 @@ Attributes:
     dumps (object): Returns a string created from a PyISC DHCPd object tree
     loads (string): Returns a PyISC DHCPd object tree from a supplied string
 
-"""
+""" # noqa
 
 __all__ = ['dumps', 'loads', 'print_tree', 'sort_tree']
 __version__ = '1.0'
@@ -113,7 +113,7 @@ def loads(content):
         content (str): The string that should be converted.
 
     Returns:
-        pyisc.dhcpd.RootNode: A tree like representation of the supplied string.
+        pyisc.dhcpd.RootNode: A tree like representation of the supplied str.
 
     Examples:
         >>> from pyisc import dhcpd

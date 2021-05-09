@@ -76,7 +76,8 @@ class Node:
 
     def __str__(self):
         """Return string of instance."""
-        return f'{" ".join(filter(None, (self.type, self.value, self.parameters)))}'
+        return f'\
+            {" ".join(filter(None, (self.type, self.value, self.parameters)))}'
 
     def __repr__(self):
         """Return representation of instance."""
@@ -116,7 +117,8 @@ class PropertyNode:
 
     def __str__(self):
         """Return string of instance."""
-        return f'{" ".join(filter(None, (self.type, self.value, self.parameters)))}'
+        return f'\
+            {" ".join(filter(None, (self.type, self.value, self.parameters)))}'
 
     def __repr__(self):
         """Return representation of instance."""

@@ -29,14 +29,15 @@ class DhcpdParser:
 
     """
 
-    FAILOVER_START = r"(?:failover\s)[\w]+\s*?[^\n]*?{"
-    BLOCK_START = r"[\w]+\s*?[^\n]*?{"
+    DECLARATION_FAILOVER = r"(?:failover\s)[\w]+\s*?[^\n]*?{"
+    DECLARATION_GENERAL = r"[\w]+\s*?[^\n]*?{"
     PARAMETER_SINGLE_KEY = r"""(?:(?:allow|deny|ignore|match|spawn|range|
                             fixed-address|fixed-prefix6)\s)[\w]+\s*?[^\n]*?;"""
     PARAMETER_MULTI_VALUE = r"(?:server-duid\s)[\w]+\s*?[^\n]*?;"
     PARAMETER_SINGLE_VALUE = r"""(?:(?:hardware|host-identifier|load|lease|
                                peer|my state|peer state)\s)[\w]+\s*?[^\n]*?;"""
     PARAMETER_OPTION = r"(?:option\s)[\w]+\s*?[^\n]*?;"
+    PARAMETER_FAILOVER = r"(?:failover\s)[\w]+\s*?[^\n]*?;"
     PARAMETER_GENERAL = r"[\w]+\s*?[^\n]*?;"
     NEWLINE = r"\n"
     WHITESPACE = r"\s"
@@ -44,10 +45,10 @@ class DhcpdParser:
     SECTION_END = r"\}"
 
     tokens = [
-        (FAILOVER_START, lambda scanner, token: Token(
-            type='failover_start', value=token)),
-        (BLOCK_START, lambda scanner, token: Token(
-            type='section_start', value=token)),
+        (DECLARATION_FAILOVER, lambda scanner, token: Token(
+            type='declaration_failover', value=token)),
+        (DECLARATION_GENERAL, lambda scanner, token: Token(
+            type='declaration_general', value=token)),
         (PARAMETER_SINGLE_KEY, lambda scanner, token: Token(
             type='parameter_single_key', value=token)),
         (PARAMETER_MULTI_VALUE, lambda scanner, token: Token(
@@ -56,6 +57,8 @@ class DhcpdParser:
             type='parameter_single_value', value=token)),
         (PARAMETER_OPTION, lambda scanner, token: Token(
             type='parameter_option', value=token)),
+        (PARAMETER_FAILOVER, lambda scanner, token: Token(
+            type='parameter_failover', value=token)),
         (PARAMETER_GENERAL, lambda scanner, token: Token(
             type='parameter_general', value=token)),
         (NEWLINE, lambda scanner, token: Token(
@@ -78,13 +81,13 @@ class DhcpdParser:
         Returns:
             list[Token]: A list of Token instances
 
-        Examples:
+        Examples: 
             >>> isc_string = 'option domain-name "example.org";'
             >>> parser = dhcpd.DhcpdParser()
             >>> parser.tokenize(isc_string)
             [Token(type='parameter_option', value='option domain-name "example.org";')]
 
-        """
+        """ # noqa
         scanner = re.Scanner(self.tokens, flags=re.DOTALL | re.VERBOSE)
         tokens, remainder = scanner.scan(content)
         if remainder:
@@ -107,7 +110,7 @@ class DhcpdParser:
             >>> parser.build_tree(isc_string)
             RootNode(Root)
 
-        """
+        """ # noqa
         node = RootNode()
         node_stack = []
         splitter = TokenSplitter()
@@ -124,12 +127,9 @@ class DhcpdParser:
                 prop = PropertyNode(
                     type=key, value=value, parameters=parameters)
                 node.children.append(prop)
-            if token.type == 'section_start' or token.type == 'failover_start':
-                # Need to break out failover and split in correct way.
-                # Also need to alter TokenSplitter for failover as a parameter.
-                token, name, parameters, *_ = token.value[:-1].strip().split(
-                    None, 2) + [None, None]
-                section = Node(type=token, value=name, parameters=parameters)
+            if token.type.startswith('declaration'):
+                key, value, parameters, *_ = splitter.switch(token)
+                section = Node(type=key, value=value, parameters=parameters)
                 node.children.append(section)
                 node_stack += [node]
                 node = section
