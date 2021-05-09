@@ -1,9 +1,11 @@
 # ToDos
 
 * Function that sorts the tree. PropertyNodes need to come first and be sorted based on their key. After that comes the Nodes. Sorting is implemented but might need modification. Currently it sorts the supplied tree instead of returning a new one. Which method i preferable? Also might be of use to allow user to supply their own sorting algorithm by modifying the sort_tree function.
-* Print tree should be able to accept Node and PropertyNode Object and not just Rootnode object. 
+* Print tree should be able to accept Node and PropertyNode Object and not just Rootnode object.
 * Currently dhcpd seems to handle everything but eval and leases very well. Issue with them is strings with '=' and maybe other stuff.
 * Support for comments.
+* Write tests
+* Make dokumentation available on free GitHub pages.
 * Investigate File lock options or queues for editing file.
 * Full dictionary representation with the \__dict__ methods. Might actually skip this.
 * In a api scenario it would be prudent to return the index of any children of an object so that it can be used as an key to identify the object. Practical for alterations, delations, insertions and more.

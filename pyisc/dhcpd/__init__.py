@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# -*- coding: utf-8 -*-
 """Manipulates ISC dhcpd configuration files.
 
 Enables the conversion of ISC dhcpd conf file to a tree like structure of

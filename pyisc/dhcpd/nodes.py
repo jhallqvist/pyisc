@@ -74,10 +74,14 @@ class Node:
             set(self.children) == set(other.children)
         )
 
+    def __lt__(self, other):
+        """Return boolean value from comparison with other object."""
+        return self.type < other.type
+
     def __str__(self):
         """Return string of instance."""
-        return f'\
-            {" ".join(filter(None, (self.type, self.value, self.parameters)))}'
+        string_repr = filter(None, (self.type, self.value, self.parameters))
+        return f'{" ".join(string_repr)}'
 
     def __repr__(self):
         """Return representation of instance."""
@@ -117,8 +121,8 @@ class PropertyNode:
 
     def __str__(self):
         """Return string of instance."""
-        return f'\
-            {" ".join(filter(None, (self.type, self.value, self.parameters)))}'
+        string_repr = filter(None, (self.type, self.value, self.parameters))
+        return f'{" ".join(string_repr)}'
 
     def __repr__(self):
         """Return representation of instance."""
