@@ -24,14 +24,26 @@ class RootNode:
         """Initialize attributes for the class.
 
         Args:
-            type (str): A name for the instance. Defaults to 'Root' if none is
-                supplied.
+            type (str): A name for the instance. Defaults to 'Root' if
+                none is supplied.
             children (list): Initially an empty list. Children will get
                 appended as needed.
 
         """
         self.type = type
         self.children = []
+
+    def __eq__(self, other):
+        """Return boolean value from comparison with other object."""
+        if other is None:
+            return False
+        return (
+            self.type == other.type and
+            set(self.children) == set(other.children)
+        )
+
+    def __hash__(self):
+        return sum(hash(x) for x in [self.type] + self.children)
 
     def __str__(self):
         """Return string of instance."""
@@ -50,12 +62,14 @@ class Node:
 
         Args:
             type (str): A name for the instance.
-            value (str): The value for the type. In the case of a subnet type
-                this would be an ip address. Not always assigned.
+            value (str): The value for the type. In the case of a
+                subnet type this would be an ip address. Not always
+                assigned.
             children (list): Initially an empty list. Children will get
                 appended as needed.
-            parameters (str): Optional data for some of the nodes. Nodes of
-                type subnet will have 'netmask x.x.x.x' as parameters.
+            parameters (str): Optional data for some of the nodes.
+                Nodes of type subnet will have 'netmask x.x.x.x' as
+                parameters.
 
         """
         self.type = type
@@ -78,6 +92,11 @@ class Node:
         """Return boolean value from comparison with other object."""
         return self.type < other.type
 
+    def __hash__(self):
+        return sum(
+            hash(x) for x in [self.type, self.value, self.parameters]
+            + self.children)
+
     def __str__(self):
         """Return string of instance."""
         string_repr = filter(None, (self.type, self.value, self.parameters))
@@ -97,8 +116,8 @@ class PropertyNode:
         Args:
             type (str): A name for the instance.
             value (str): The value for the type.
-            parameters (str): Optional data for some of the nodes. Nodes of
-                type failover or subclass will have parameters.
+            parameters (str): Optional data for some of the nodes. Nodes
+                of type failover or subclass will have parameters.
 
         """
         self.type = type
@@ -118,6 +137,9 @@ class PropertyNode:
     def __lt__(self, other):
         """Return boolean value from comparison with other object."""
         return self.type < other.type
+
+    def __hash__(self):
+        return sum(hash(x) for x in [self.type, self.value, self.parameters])
 
     def __str__(self):
         """Return string of instance."""

@@ -1,5 +1,3 @@
-"""Contains the parser for DHCPd configuration files/strings."""
-
 # Copyright 2021 Jonas Hallqvist
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Contains the parser for DHCPd configuration files/strings."""
+
 import re
 from pyisc.dhcpd.nodes import Token, Node, PropertyNode, RootNode
 from pyisc.dhcpd.utils import TokenSplitter
@@ -22,10 +22,10 @@ from pyisc.dhcpd.utils import TokenSplitter
 class DhcpdParser:
     """A parser for ISC DHCPD configs.
 
-    The constants are the various RegEx patterns that is used in the tokens
-    variable. Token variable is a list of tuples that conains previously
-    mentioned RegEx patterns as well as lambda functions that are meant to be
-    used by the re.Scanner in tokenize function.
+    The constants are the various RegEx patterns that is used in the
+    tokens variable. Token variable is a list of tuples that conains
+    previously mentioned RegEx patterns as well as lambda functions
+    that are meant to be used by the re.Scanner in tokenize function.
 
     """
 
@@ -81,7 +81,7 @@ class DhcpdParser:
         Returns:
             list[Token]: A list of Token instances
 
-        Examples: 
+        Examples:
             >>> isc_string = 'option domain-name "example.org";'
             >>> parser = dhcpd.DhcpdParser()
             >>> parser.tokenize(isc_string)
@@ -99,10 +99,12 @@ class DhcpdParser:
         Return a tree like structure of token objects.
 
         Args:
-            content (str): A supplied string to supply to the tokenize method.
+            content (str): A supplied string to supply to the tokenize
+                method.
 
         Returns:
-            pyisc.dhcpd.RootNode: A tree like representation of the supplied string.
+            pyisc.dhcpd.RootNode: A tree like representation of the
+                supplied string.
 
         Examples:
             >>> isc_string = 'option domain-name "example.org";'

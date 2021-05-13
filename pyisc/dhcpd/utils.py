@@ -18,12 +18,12 @@
 class TokenSplitter:
     """A static class used to provide case / switch like functionality.
 
-    The switch takes a supplied token and matches the type of that token to a
-    method. If a match is found that method is executed and the result
-    returned.
-    If a match is not found the default lambda expression will be used instead.
-    The entire purpose is to split a value of the supplied token the desired
-    way.
+    The switch takes a supplied token and matches the type of that
+    token to a method. If a match is found that method is executed
+    and the result returned.
+    If a match is not found the default lambda expression will be
+    used instead. The entire purpose is to split a value of the
+    supplied token the desired way.
     """
 
     def switch(self, token):
@@ -31,47 +31,87 @@ class TokenSplitter:
         Return list of splitted token string.
 
         Args:
-            token (Token): A supplied token instance.
+            token (pyisc.dhcpd.nodes.Token): A supplied token instance.
 
         Returns:
             list: List of the now splitted string
 
         Examples:
-            >>> token = Token('parameter_option','option domain-name "example.org";')
-            >>> TokenSplitter.switch(token)
+            >>> token = Token('parameter_option',
+            ...               'option domain-name "example.org";')
+            >>> splitter = TokenSplitter()
+            >>> splitter.switch(token)
             ['option domain-name', '"example.org"', None, None]
 
-        """ # noqa
+        """
         self.token = token
         default = token.value[:-1].split()
         return getattr(self, str(token.type), lambda: default)() + [None, None]
 
     def parameter_option(self):
-        """Return a list where the first two words of the string is the key."""
+        """Return a list of an option string.
+
+        Expects a string where the the first two words are to be
+        considered the key and everything after that is the value,
+        whether that is a single word or multiple words (usually
+        separated by a comma)
+
+        """
         return split_at(self.token.value[:-1], ' ', 2)
 
     def parameter_single_value(self):
-        """Return a list where the last word in the string is the value."""
+        """Return a list where the last word in the string is the value.
+
+        Expects a string where the last word or number is the value and
+        everything up until that is to be considered the key.
+
+        """
         return self.token.value[:-1].rsplit(None, 1)
 
     def parameter_multiple_values(self):
-        """Return a list where the expected value of the string contains space."""
+        """Return a list where the parameter contains space.
+
+        Expects a string where the the first two words make up the key
+        and value and everything after that is considered the parameter
+        of the future Token instance.
+
+        """
         return self.token.value[:-1].split(None, 2)
 
     def parameter_single_key(self):
-        """Return a list where the first word in the string is the key."""
+        """Return a list where the first word in the string is the key.
+
+        Expects a string where the first word in the string is the key
+        and everything after that is the value.
+
+        """
         return self.token.value[:-1].split(None, 1)
 
     def parameter_failover(self):
-        """Return a list from a declaration string beginning with failover."""
+        """Return a list from a failover parameter string.
+
+        Expects a string that starts with failover and ends with a
+        semicolon.
+
+        """
         return split_from(self.token.value[:-1], ' ', 2)
 
     def declaration_failover(self):
-        """Return a list from a declaration string beginning with failover."""
+        """Return a list from a failover declaration string.
+
+        Expects a string that starts with failover and ends with a
+        left curly bracket.
+
+        """
         return split_from(self.token.value[:-1], ' ', 2)
 
     def declaration_general(self):
-        """TEMP."""
+        """Return a list from a general declaration string.
+
+        Splits any declaration string that is not processesed by a more
+        specific match from the parser.
+
+        """
         return self.token.value[:-1].strip().split(None, 2)
 
 
@@ -82,8 +122,9 @@ def split_at(string, sep, pos):
     Args:
         string (str): The supplied string that will be splitted.
         sep (str): The desired separator to use for the split.
-        pos (int): The desired occurence of the defined separator within the
-            supplied string and hence the point of the split operation.
+        pos (int): The desired occurence of the defined separator
+            within the supplied string and hence the point of the split
+            operation.
 
     Returns:
         list: A list of the splitted string
@@ -105,9 +146,9 @@ def split_from(string, sep, pos):
     Args:
         string (str): The supplied string that will be splitted.
         sep (str): The desired separator to use for the split.
-        pos (int): The desired first occurence of the defined separator within
-            the supplied string. This will be the position of the first split
-            performed.
+        pos (int): The desired first occurence of the defined separator
+            within the supplied string. This will be the position of
+            the first split performed.
 
     Returns:
         list: A list of the splitted string
@@ -125,12 +166,13 @@ def split_from(string, sep, pos):
 def sort_tree_algorithm(child):
     """Return tuple of values for sorting.
 
-    This is meant to be supplied to the sort functions key attribute. It will
-    sort sort on the object type where mostly all PropertyNodes will be
-    prioritized.
+    This is meant to be supplied to the sort functions key attribute.
+    It will sort sort on the object type where mostly all PropertyNodes
+    will be prioritized.
+
     Args:
-        child (Node, PropertyNode): The child instance supplied by the sort
-            function.
+        child (pyisc.dhcpd.nodes.Node, pyisc.dhcpd.nodes.PropertyNode):
+            The child instance supplied by the sort function.
 
     """
     sort_order = {
