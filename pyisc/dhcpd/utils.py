@@ -45,7 +45,7 @@ class TokenSplitter:
 
         """
         self.token = token
-        default = token.value[:-1].split()
+        default = 'No split method found'
         return getattr(self, str(token.type), lambda: default)() + [None, None]
 
     def parameter_option(self):
@@ -96,6 +96,15 @@ class TokenSplitter:
         """
         return split_from(self.token.value[:-1], ' ', 2)
 
+    def parameter_general(self):
+        """Return a list from a general parameter string.
+
+        Splits any parameter string that is not processesed by a more
+        specific match from the parser.
+
+        """
+        return self.token.value[:-1].split()
+
     def declaration_failover(self):
         """Return a list from a failover declaration string.
 
@@ -103,7 +112,7 @@ class TokenSplitter:
         left curly bracket.
 
         """
-        return split_from(self.token.value[:-1], ' ', 2)
+        return split_from(self.token.value[:-2], ' ', 2)
 
     def declaration_general(self):
         """Return a list from a general declaration string.
@@ -160,7 +169,7 @@ def split_from(string, sep, pos):
 
     """
     string = string.split(sep)
-    return [sep.join(string[:2])] + string[2:]
+    return [sep.join(string[:pos])] + string[pos:]
 
 
 def sort_tree_algorithm(child):
@@ -174,6 +183,9 @@ def sort_tree_algorithm(child):
         child (pyisc.dhcpd.nodes.Node, pyisc.dhcpd.nodes.PropertyNode):
             The child instance supplied by the sort function.
 
+    Returns:
+        tuple: A tuple with three entires representing the sorting conditions
+            in order of decreasing order.
     """
     sort_order = {
         'key': 1,

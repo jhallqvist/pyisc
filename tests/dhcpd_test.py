@@ -1,13 +1,15 @@
 """TEMP."""
 
 
-from context import pyisc, data_folder
-from test_vars import expected_dhcpd
+from .test_vars import expected_dhcpd
+import pathlib
 import unittest
+import pyisc
 
 
 class TestStringToTree(unittest.TestCase):
     def setUp(self):
+        data_folder = pathlib.Path(__file__).parent.parent.joinpath('data')
         dhcpd_file = data_folder.joinpath('dhcpd-classes.conf')
         self.testfile = open(dhcpd_file)
         self.testdata = self.testfile.read()
@@ -50,7 +52,7 @@ class TestTokenization(unittest.TestCase):
         self.assertEqual(declaration_token, expected_declaration)
 
 
-class InsertIntoTree(unittest.TestCase):
+class TestInsertIntoTree(unittest.TestCase):
     def setUp(self):
         self.original_string = 'subnet 10.152.187.0 netmask 255.255.255.0 {\n}'
         self.modified_string = 'subnet 10.152.187.0 netmask 255.255.255.0 ' + \
