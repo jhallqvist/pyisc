@@ -10,8 +10,9 @@
 * Full dictionary representation with the \__dict__ methods. Might actually skip this.
 * In a api scenario it would be prudent to return the index of any children of an object so that it can be used as an key to identify the object. Practical for alterations, delations, insertions and more.
 * Rewamp init files? I think one at the pyisc top level would suffice and maybe move the funcions in the current dhcpd init to a new py file.
-* ~~Change constructor attributes of Node and ProprteyNode to match in order to make sorting cleaner?~~
 * Inline Documentation....
+* Make decorators for loads, dumps, print_tree and sort_tree in order to reduce duplicate code?
+* ~~Change constructor attributes of Node and ProprteyNode to match in order to make sorting cleaner?~~
 
 ```python
 from pyisc import dhcpd

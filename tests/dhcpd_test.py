@@ -1,7 +1,7 @@
 """TEMP."""
 
 
-from .test_vars import expected_dhcpd
+from .dhcpd_vars import expected_dhcpd
 import pathlib
 import unittest
 import pyisc

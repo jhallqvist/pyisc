@@ -112,7 +112,7 @@ class DhcpdParser:
             >>> parser.build_tree(isc_string)
             RootNode(Root)
 
-        """ # noqa
+        """
         node = RootNode()
         node_stack = []
         splitter = TokenSplitter()
