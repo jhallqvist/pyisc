@@ -12,23 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Contains the parser for DHCPd configuration files/strings."""
+"""Contains the base parsing components for use in the various submodules."""
 
-import re
-from pyisc.dhcpd.nodes import Token, Node, PropertyNode, RootNode
-from pyisc.dhcpd.utils import TokenSplitter
+from pyisc.shared.parsing import BaseParser, Token
+from pyisc.shared.nodes import RootNode, Node, PropertyNode
+from pyisc.dhcpd.utils import DhcpdSplitter
 
 
-class DhcpdParser:
+class DhcpdParser(BaseParser):
     """A parser for ISC DHCPD configs.
 
     The constants are the various RegEx patterns that is used in the
-    tokens variable. Token variable is a list of tuples that conains
+    tokens variable. Token variable is a list of tuples that contains
     previously mentioned RegEx patterns as well as lambda functions
     that are meant to be used by the re.Scanner in tokenize function.
 
     """
-
     DECLARATION_FAILOVER = r"(?:failover\s)[\w]+\s*?[^\n]*?{"
     DECLARATION_GENERAL = r"[\w]+\s*?[^\n]*?{"
     PARAMETER_SINGLE_KEY = r"""(?:(?:allow|deny|ignore|match|spawn|range|
@@ -39,9 +38,6 @@ class DhcpdParser:
     PARAMETER_OPTION = r"(?:option\s)[\w]+\s*?[^\n]*?;"
     PARAMETER_FAILOVER = r"(?:failover\s)[\w]+\s*?[^\n]*?;"
     PARAMETER_GENERAL = r"[\w]+\s*?[^\n]*?;"
-    NEWLINE = r"\n"
-    WHITESPACE = r"\s"
-    COMMENT = r"\#.*?\n"
     SECTION_END = r"\}"
 
     tokens = [
@@ -61,38 +57,9 @@ class DhcpdParser:
             type='parameter_failover', value=token)),
         (PARAMETER_GENERAL, lambda scanner, token: Token(
             type='parameter_general', value=token)),
-        (NEWLINE, lambda scanner, token: Token(
-            type='newline', value=token)),
-        (WHITESPACE, lambda scanner, token: Token(
-            type='whitespace', value=token)),
-        (COMMENT, lambda scanner, token: Token(
-            type='comment', value=token)),
         (SECTION_END, lambda scanner, token: Token(
             type='section_end', value=token)),
-    ]
-
-    def tokenize(self, content):
-        """
-        Return list of token objects.
-
-        Args:
-            content (str): A supplied string to turn into tokens.
-
-        Returns:
-            list[Token]: A list of Token instances
-
-        Examples:
-            >>> isc_string = 'option domain-name "example.org";'
-            >>> parser = dhcpd.DhcpdParser()
-            >>> parser.tokenize(isc_string)
-            [Token(type='parameter_option', value='option domain-name "example.org";')]
-
-        """ # noqa
-        scanner = re.Scanner(self.tokens, flags=re.DOTALL | re.VERBOSE)
-        tokens, remainder = scanner.scan(content)
-        if remainder:
-            raise Exception(f'Invalid tokens: {remainder}, Tokens: {tokens}')
-        return tokens
+    ] + BaseParser.tokens
 
     def build_tree(self, content):
         """
@@ -103,7 +70,7 @@ class DhcpdParser:
                 method.
 
         Returns:
-            pyisc.dhcpd.RootNode: A tree like representation of the
+            pyisc.shared.nodes.RootNode: A tree like representation of the
                 supplied string.
 
         Examples:
@@ -115,23 +82,31 @@ class DhcpdParser:
         """
         node = RootNode()
         node_stack = []
-        splitter = TokenSplitter()
+        splitter = DhcpdSplitter()
         next_comment = None
         for token in self.tokenize(content):
             if token.type in ['whitespace', 'newline']:
                 continue
             if token.type == 'section_end':
                 node = node_stack.pop()
-            if token.type == 'comment':
-                continue
+            if token.type.startswith('comment'):
+                if not next_comment:
+                    next_comment = ''
+                else:
+                    next_comment += '\n'
+                next_comment += token.value.strip()
             if token.type.startswith('parameter'):
                 key, value, parameters, *_ = splitter.switch(token)
                 prop = PropertyNode(
                     type=key, value=value, parameters=parameters)
+                prop.comment = next_comment
+                next_comment = None
                 node.children.append(prop)
             if token.type.startswith('declaration'):
                 key, value, parameters, *_ = splitter.switch(token)
                 section = Node(type=key, value=value, parameters=parameters)
+                section.comment = next_comment
+                next_comment = None
                 node.children.append(section)
                 node_stack += [node]
                 node = section

@@ -74,6 +74,7 @@ class Node:
         self.value = value
         self.children = []
         self.parameters = parameters
+        self.comment = None
 
     def __eq__(self, other):
         """Return boolean value from comparison with other object."""
@@ -121,6 +122,7 @@ class PropertyNode:
         self.type = type
         self.value = value
         self.parameters = parameters
+        self.comment = None
 
     def __eq__(self, other):
         """Return boolean value from comparison with other object."""

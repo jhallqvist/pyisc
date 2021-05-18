@@ -3,7 +3,7 @@
 * Function that sorts the tree. PropertyNodes need to come first and be sorted based on their key. After that comes the Nodes. Sorting is implemented but might need modification. Currently it sorts the supplied tree instead of returning a new one. Which method i preferable? Also might be of use to allow user to supply their own sorting algorithm by modifying the sort_tree function.
 * Print tree should be able to accept Node and PropertyNode Object and not just Rootnode object.
 * Currently dhcpd seems to handle everything but eval and leases very well. Issue with them is strings with '=' and maybe other stuff.
-* Support for comments.
+* Support for comments is done. But inline comments will not be supported.
 * Write tests
 * Make dokumentation available on free GitHub pages.
 * Investigate File lock options or queues for editing file.
@@ -12,6 +12,8 @@
 * Rewamp init files? I think one at the pyisc top level would suffice and maybe move the funcions in the current dhcpd init to a new py file.
 * Inline Documentation....
 * Make decorators for loads, dumps, print_tree and sort_tree in order to reduce duplicate code?
+* Bind sort seems to be ok if it is just alphanmerical sort.
+* Split methods for bind module.
 * ~~Change constructor attributes of Node and ProprteyNode to match in order to make sorting cleaner?~~
 
 ```python
