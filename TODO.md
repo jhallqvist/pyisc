@@ -1,19 +1,23 @@
 # ToDos
 
-* Function that sorts the tree. PropertyNodes need to come first and be sorted based on their key. After that comes the Nodes. Sorting is implemented but might need modification. Currently it sorts the supplied tree instead of returning a new one. Which method i preferable? Also might be of use to allow user to supply their own sorting algorithm by modifying the sort_tree function.
-* Print tree should be able to accept Node and PropertyNode Object and not just Rootnode object.
+* Function that sorts the tree. PropertyNodes need to come first and be sorted based on their key. After that comes the Nodes.
+  * ~~Sorting is implemented but might need modification. Currently it sorts the supplied tree instead of returning a new one. Which method i preferable?~~
+    * ~~Chose to rewrite sort_tree function with a nested function so now it does not modify the original tree but returns a new, sorted one instead.~~
+  * Might be of use to allow user to supply their own sorting algorithm by modifying the sort_tree function.
+* ~~Print tree should be able to accept Node and PropertyNode Object and not just Rootnode object.~~
+  * ~~Done with the help of a nested inner function that handles the recursion. This function will now always print the supplied object and its children.~~
 * Currently dhcpd seems to handle everything but eval and leases very well. Issue with them is strings with '=' and maybe other stuff.
-* Support for comments is done. But inline comments will not be supported.
+* ~~Support for comments is done. But inline comments will not be supported~~.
 * Write tests
 * Make dokumentation available on free GitHub pages.
 * Investigate File lock options or queues for editing file.
 * Full dictionary representation with the \__dict__ methods. Might actually skip this.
 * In a api scenario it would be prudent to return the index of any children of an object so that it can be used as an key to identify the object. Practical for alterations, delations, insertions and more.
-* Rewamp init files? I think one at the pyisc top level would suffice and maybe move the funcions in the current dhcpd init to a new py file.
 * Inline Documentation....
-* Make decorators for loads, dumps, print_tree and sort_tree in order to reduce duplicate code?
-* Bind sort seems to be ok if it is just alphanmerical sort.
+* Make decorators for loads, dumps in order to reduce duplicate code?
+* Bind sort seems to be ok if it is just alphanumerical sort.
 * Split methods for bind module.
+* A test and example of combining two files (i.e. load both and insert one into the other).
 * ~~Change constructor attributes of Node and ProprteyNode to match in order to make sorting cleaner?~~
 
 ```python

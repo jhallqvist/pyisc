@@ -14,6 +14,9 @@
 
 """General helper functions and classes for the module."""
 
+import copy
+from pyisc.shared.nodes import Node
+
 
 class TokenSplitter:
     """A static class used to provide case / switch like functionality.
@@ -115,7 +118,7 @@ def sort_tree_algorithm(child):
     """
     sort_order = {
         'key': 1,
-        'failover': 2,
+        'failover peer': 2,
         'subnet': 3,
         'host': 4,
         'class': 5,
@@ -127,3 +130,54 @@ def sort_tree_algorithm(child):
     condition_three = [int(octet) for octet in child.value.split('.')] if \
         child.type == 'subnet' else child.value
     return (condition_one, condition_two, condition_three)
+
+
+def sort_tree(tree):
+    """Sorts the supplied PyISC tree object.
+
+    This functions sorts the supplied object tree recursively, based on
+    a sorting algorithm.
+
+    Args:
+        tree (pyisc.shared.nodes.RootNode): The tree structure.
+
+    Returns:
+        nothing
+
+    """
+    tree_copy = copy.deepcopy(tree)
+
+    def inner_func(tree):
+        tree.children.sort(key=sort_tree_algorithm)
+        for child in tree.children:
+            if isinstance(child, Node):
+                inner_func(child)
+
+    inner_func(tree_copy)
+    return tree_copy
+
+
+def print_tree(tree, level=0):
+    """Print a string representation of the PyISC object tree.
+
+    This function takes a PyISC object tree structure and prints it.
+
+    Args:
+        tree (pyisc.shared.nodes.RootNode): The tree structure.
+        level (int): The starting indentation for the RootNode.
+                     Should be left alone in the default level 0.
+
+    Returns:
+        stdout: A printed representaton of the PyISC tree object
+
+    """
+    print(tree)
+
+    def inner_func(tree, level):
+        for branch in tree.children:
+            indent = level * ' '
+            print(f'{indent}{branch}')
+            if isinstance(branch, Node):
+                inner_func(branch, level+4)
+
+    inner_func(tree, level+4)
