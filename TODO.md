@@ -4,10 +4,7 @@
   * ~~Sorting is implemented but might need modification. Currently it sorts the supplied tree instead of returning a new one. Which method i preferable?~~
     * ~~Chose to rewrite sort_tree function with a nested function so now it does not modify the original tree but returns a new, sorted one instead.~~
   * Might be of use to allow user to supply their own sorting algorithm by modifying the sort_tree function.
-* ~~Print tree should be able to accept Node and PropertyNode Object and not just Rootnode object.~~
-  * ~~Done with the help of a nested inner function that handles the recursion. This function will now always print the supplied object and its children.~~
 * Currently dhcpd seems to handle everything but eval and leases very well. Issue with them is strings with '=' and maybe other stuff.
-* ~~Support for comments is done. But inline comments will not be supported~~.
 * Write tests
 * Make dokumentation available on free GitHub pages.
 * Investigate File lock options or queues for editing file.
@@ -18,18 +15,26 @@
 * Bind sort seems to be ok if it is just alphanumerical sort.
 * Split methods for bind module.
 * A test and example of combining two files (i.e. load both and insert one into the other).
+* Make an \__iter__ method for objects with children (RootNode & Node) for easier iteration:
+
+  ```python
+  def __iter__(self):
+      return iter(self.children)
+  ```
+
 * ~~Change constructor attributes of Node and ProprteyNode to match in order to make sorting cleaner?~~
+* ~~Make a dumps function take an argument for disabling comments. Defalt is enabled~~.
+* ~~Support for comments is done. But inline comments will not be supported~~.
+* ~~Print tree should be able to accept Node and PropertyNode Object and not just Rootnode object.~~
+  * ~~Done with the help of a nested inner function that handles the recursion. This function will now always print the supplied object and its children.~~
 
 ```python
 from pyisc import dhcpd
-import copy
 
-with open('tests/dhcpd1.conf', 'r') as infile:
+with open('old_tests/dhcpd1.conf', 'r') as infile:
     conf = infile.read()
 
 kaka = dhcpd.loads(conf)
-
-kaka_copy = copy.deepcopy(kaka)
 
 sort_tree(kaka_copy)
 ```

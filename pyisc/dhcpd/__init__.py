@@ -137,7 +137,7 @@ def loads(content):
     return parser.build_tree(content)
 
 
-def dumps(tree, level=0, result=''):
+def dumps(tree, level=0, result='', enable_comments=True):
     r"""Return a string of the PyISC object tree.
 
     This function takes a PyISC object tree structure and converts it
@@ -150,6 +150,8 @@ def dumps(tree, level=0, result=''):
         result (str): The string that all objects in the tree structure
             will be added to. Should be left alone in the default blank
             string state.
+        enable_comments (boolean): Determines if the function will include
+            comments or not in the generated string.
 
     Returns:
         str: A complete string that is ready to write to a suitable
@@ -163,13 +165,14 @@ def dumps(tree, level=0, result=''):
     """
     for branch in tree.children:
         indent = level * ' '
-        if branch.comment:
+        if branch.comment and enable_comments:
             result += f'{branch.comment}\n'
         if isinstance(branch, PropertyNode):
             result += f'{indent}{branch};\n'
         if isinstance(branch, Node):
             result += f'{indent}{branch} {{\n'
-            result = dumps(branch, level=level+4, result=result)
+            result = dumps(branch, level=level+4, result=result,
+                           enable_comments=enable_comments)
             result += f'{indent}}}\n'
             # if level == 0:
             #     result += '\n'

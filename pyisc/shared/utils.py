@@ -18,6 +18,19 @@ import copy
 from pyisc.shared.nodes import Node
 
 
+class color:
+    PURPLE = '\033[95m'
+    CYAN = '\033[96m'
+    DARKCYAN = '\033[36m'
+    BLUE = '\033[94m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    END = '\033[0m'
+
+
 class TokenSplitter:
     """A static class used to provide case / switch like functionality.
 
@@ -124,7 +137,8 @@ def sort_tree_algorithm(child):
         'class': 5,
         'shared-network': 6,
         'group': 7,
-        'subclass': 8}
+        'subclass': 8
+    }
     condition_one = sort_order.get(child.type, 0)
     condition_two = child.type
     condition_three = [int(octet) for octet in child.value.split('.')] if \
@@ -142,7 +156,7 @@ def sort_tree(tree):
         tree (pyisc.shared.nodes.RootNode): The tree structure.
 
     Returns:
-        nothing
+        pyisc.shared.nodes.RootNode: A sorted copy of the inputted tree object.
 
     """
     tree_copy = copy.deepcopy(tree)
@@ -157,7 +171,7 @@ def sort_tree(tree):
     return tree_copy
 
 
-def print_tree(tree, level=0):
+def print_tree(tree, level=0, enable_index=False):
     """Print a string representation of the PyISC object tree.
 
     This function takes a PyISC object tree structure and prints it.
@@ -165,7 +179,9 @@ def print_tree(tree, level=0):
     Args:
         tree (pyisc.shared.nodes.RootNode): The tree structure.
         level (int): The starting indentation for the RootNode.
-                     Should be left alone in the default level 0.
+            Should be left alone in the default level 0.
+        enable_index (boolean): If set to True the function will print an index
+            number in front of each object in the tree.
 
     Returns:
         stdout: A printed representaton of the PyISC tree object
@@ -174,9 +190,113 @@ def print_tree(tree, level=0):
     print(tree)
 
     def inner_func(tree, level):
+        for index, branch in enumerate(tree.children):
+            indent = level * ' '
+            if enable_index:
+                print(f'{indent}{index}: {branch}')
+            else:
+                print(f'{indent}{branch}')
+            if isinstance(branch, Node):
+                inner_func(branch, level+4)
+
+    inner_func(tree, level+4)
+
+
+def get_node(tree, node_type, node_value=None):
+    """Return a specific node that matches the search criteria.
+
+    This function will return the first match of an object from a PyISC object
+    tree.
+
+    Args:
+        tree (pyisc.shared.nodes.RootNode): The tree structure.
+        node_type (str): A string that will should be matched to the type
+            attribute of Node instance.
+        node_value (str): A string that will should be matched to the value
+            attribute of Node instance.
+
+    Returns:
+        pyisc.shared.nodes.Node: The found object.
+
+    Examples:
+        >>> pyisc.shared.utils.get_node(isc_tree, 'subnet', '192.168.1.0')
+        Node(subnet, 192.168.1.0, netmask 255.255.252.0)
+
+    """
+    for branch in tree.children:
+        if (node_type == branch.type and node_value == branch.value):
+            return branch
+        if isinstance(branch, Node):
+            result = get_node(
+                branch,
+                node_type=node_type,
+                node_value=node_value)
+            if result:
+                return result
+
+
+def get_node_types(tree, node_type, node_list=None):
+    """Return a list of nodes matching search criteria.
+
+    The function returns a list containing all the nodes of a certain type
+    found in the supplied PyISC object tree.
+
+    Args:
+        tree (pyisc.shared.nodes.RootNode): The tree structure.
+        node_type (str): A string that will should be matched to the type
+            attribute of Node instance.
+        node_list (None): Initially this will be None but as the function runs
+            this will be replaced by a list that contains all nodes matching
+            the search string.
+
+    Returns:
+        list: A list that contains all found node objects.
+
+    Examples:
+        >>> get_node_types(isc_tree, 'host')
+        [Node(host, passacaglia, None), Node(host, fantasia, None), Node(...)]
+
+    """
+    if not node_list:
+        node_list = []
+    for branch in tree.children:
+        if branch.type == node_type:
+            node_list.append(branch)
+        if isinstance(branch, Node):
+            get_node_types(branch, node_type=node_type, node_list=node_list)
+    return node_list
+
+
+def find_node(tree, node_type, node_value=None, level=0):
+    """Prints entire tree and highlights the specific node with bold text or
+    similar."""
+    print(tree)
+
+    def inner_func(tree, level):
         for branch in tree.children:
             indent = level * ' '
-            print(f'{indent}{branch}')
+            if (node_type == branch.type and node_value == branch.value):
+                print(f'{indent}{color.BOLD}{branch}{color.END}')
+            else:
+                print(f'{indent}{branch}')
+            if isinstance(branch, Node):
+                inner_func(branch, level+4)
+
+    inner_func(tree, level+4)
+
+
+def find_node_types(tree, node_type, level=0):
+    """Prints entire tree and highlights the node with a specific node type
+    with bold text or similar."""
+    print(tree)
+
+    def inner_func(tree, level):
+        for branch in tree.children:
+            indent = level * ' '
+            if (node_type == branch.type):
+                print(f'{indent}{color.BOLD}{branch}{color.END}')
+            else:
+                print(f'{indent}{branch}')
             if isinstance(branch, Node):
                 inner_func(branch, level+4)
 
