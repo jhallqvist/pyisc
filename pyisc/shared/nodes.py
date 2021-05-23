@@ -18,7 +18,7 @@
 class RootNode:
     """Represents the root of the tree."""
 
-    def __init__(self, type='Root'):
+    def __init__(self, type='Root', children=None):
         """Initialize attributes for the class.
 
         Args:
@@ -29,7 +29,7 @@ class RootNode:
 
         """
         self.type = type
-        self.children = []
+        self._children = [] if not children else children
 
     def __eq__(self, other):
         """Return boolean value from comparison with other object."""
@@ -41,6 +41,7 @@ class RootNode:
         )
 
     def __hash__(self):
+        """Return hash(self)."""
         return sum(hash(x) for x in [self.type] + self.children)
 
     def __str__(self):
@@ -51,11 +52,33 @@ class RootNode:
         """Return representation of instance."""
         return f'RootNode({self.type}, children: {len(self.children)})'
 
+    def __iter__(self):
+        """Implement iter(self) with child objects in instance."""
+        return iter(self.children)
+
+    @property
+    def children(self):
+        """Getter for self._children."""
+        return self._children
+
+    @children.setter
+    def children(self, val):
+        """Setter for self._children."""
+        self._children = val
+
+    def append(self, val):
+        """Implements append method on self to append directly to children."""
+        return self.children.append(val)
+
+    def extend(self, val):
+        """Implements extend method on self to extend directly to children."""
+        return self.children.extend(val)
+
 
 class Node:
     """Represents an entity capable of having properties."""
 
-    def __init__(self, type=None, value=None, parameters=None):
+    def __init__(self, type=None, value=None, parameters=None, children=None):
         """Initialize attributes for the class.
 
         Args:
@@ -72,7 +95,7 @@ class Node:
         """
         self.type = type
         self.value = value
-        self.children = []
+        self.children = [] if not children else children
         self.parameters = parameters
         self.comment = None
 
@@ -104,6 +127,28 @@ class Node:
     def __repr__(self):
         """Return representation of instance."""
         return f'Node({self.type}, {self.value}, {self.parameters})'
+
+    def __iter__(self):
+        """Implement iter(self) with child objects in instance."""
+        return iter(self.children)
+
+    @property
+    def children(self):
+        """Getter for self._children."""
+        return self._children
+
+    @children.setter
+    def children(self, val):
+        """Setter for self._children."""
+        self._children = val
+
+    def append(self, val):
+        """Implements append method on self to append directly to children."""
+        return self.children.append(val)
+
+    def extend(self, val):
+        """Implements extend method on self to extend directly to children."""
+        return self.children.extend(val)
 
 
 class PropertyNode:

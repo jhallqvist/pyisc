@@ -147,9 +147,9 @@ __all__ = ['dumps', 'loads', 'print_tree', 'sort_tree']
 __version__ = '1.0'
 __author__ = 'Jonas Hallqvist'
 
-from pyisc.shared.nodes import Node, PropertyNode
+# from pyisc.shared.nodes import Node, PropertyNode
 # from pyisc.shared.utils import sort_tree_algorithm
-from pyisc.shared.utils import print_tree, sort_tree
+from pyisc.shared.utils import print_tree, sort_tree, string_constructor
 from pyisc.bind.parsing import BindParser
 
 
@@ -179,7 +179,7 @@ def loads(content):
     return parser.build_tree(content)
 
 
-def dumps(tree, level=0, result='', enable_comments=True):
+def dumps(tree, enable_comments=True):
     r"""Return a string of the PyISC object tree.
 
     This function takes a PyISC object tree structure and converts it
@@ -187,11 +187,6 @@ def dumps(tree, level=0, result='', enable_comments=True):
 
     Args:
         tree (pyisc.shared.nodes.RootNode): The tree structure.
-        level (int): The starting indentation for the RootNode.
-            Should be left alone in the default level 0.
-        result (str): The string that all objects in the tree structure
-            will be added to. Should be left alone in the default blank
-            string state.
         enable_comments (boolean): Determines if the function will include
             comments or not in the generated string.
 
@@ -205,57 +200,7 @@ def dumps(tree, level=0, result='', enable_comments=True):
         'zone "example.com" {\n    type master;\n};\n'
 
     """
-    for branch in tree.children:
-        indent = level * ' '
-        if branch.comment:
-            result += f'{branch.comment}\n'
-        if isinstance(branch, PropertyNode):
-            result += f'{indent}{branch};\n'
-        if isinstance(branch, Node):
-            result += f'{indent}{branch} {{\n'
-            result = dumps(branch, level=level+4, result=result,
-                           enable_comments=enable_comments)
-            result += f'{indent}}};\n'
-            # if level == 0:
-            #     result += '\n'
-    return result
-
-
-# def print_tree(tree, level=0):
-#     """Print a string representation of the PyISC object tree.
-
-#     This function takes a PyISC object tree structure and prints it.
-
-#     Args:
-#         tree (pyisc.shared.nodes.RootNode): The tree structure.
-#         level (int): The starting indentation for the RootNode.
-#                      Should be left alone in the default level 0.
-
-#     Returns:
-#         stdout: A printed representaton of the PyISC tree object
-
-#     """
-#     for branch in tree.children:
-#         indent = level * ' '
-#         print(f'{indent}{branch}')
-#         if isinstance(branch, Node):
-#             print_tree(branch, level+4)
-
-
-# def sort_tree(tree):
-#     """Sorts the supplied PyISC tree object.
-
-#     This functions sorts the supplied object tree recursively, based on
-#     a sorting algorithm.
-
-#     Args:
-#         tree (pyisc.shared.nodes.RootNode): The tree structure.
-
-#     Returns:
-#         nothing
-
-#     """
-#     tree.children.sort(key=sort_tree_algorithm)
-#     for child in tree.children:
-#         if isinstance(child, Node):
-#             sort_tree(child)
+    section_end = '};'
+    result = ''
+    level = 0
+    return string_constructor(**locals())

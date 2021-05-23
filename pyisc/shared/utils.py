@@ -15,7 +15,7 @@
 """General helper functions and classes for the module."""
 
 import copy
-from pyisc.shared.nodes import Node
+from pyisc.shared.nodes import Node, PropertyNode
 
 
 class color:
@@ -301,3 +301,24 @@ def find_node_types(tree, node_type, level=0):
                 inner_func(branch, level+4)
 
     inner_func(tree, level+4)
+
+
+def string_constructor(tree, level=0, result='', enable_comments=True,
+                       section_end=None):
+    """Return a string of PyISC tree."""
+    for branch in tree.children:
+        indent = level * ' '
+        if branch.comment and enable_comments:
+            result += f'{branch.comment}\n'
+        if isinstance(branch, PropertyNode):
+            result += f'{indent}{branch};\n'
+        if isinstance(branch, Node):
+            result += f'{indent}{branch} {{\n'
+            result = string_constructor(
+                            tree=branch, level=level+4, result=result,
+                            enable_comments=enable_comments,
+                            section_end=section_end)
+            result += f'{indent}{section_end}\n'
+            # if level == 0:
+            #     result += '\n'
+    return result

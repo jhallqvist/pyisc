@@ -15,7 +15,7 @@
 - [ ]  Bind sort seems to be ok if it is just alphanumerical sort.
 - [ ]  Split methods for bind module.
 - [ ]  A test and example of combining two files (i.e. load both and insert one into the other).
-- [ ]  Make an \__iter__ method for objects with children (RootNode & Node) for easier iteration:
+- [x]  Make an \__iter__ method for objects with children (RootNode & Node) for easier iteration:
 - [x] Change constructor attributes of Node and ProprteyNode to match in order to make sorting cleaner?
 - [x] Make a dumps function take an argument for disabling comments. Defalt is enabled.
 - [x] Support for comments is done. But inline comments will not be supported.

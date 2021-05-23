@@ -1,71 +1,133 @@
 """TEMP."""
 
 
-from pyisc import shared
+from pyisc.shared.nodes import RootNode, Node, PropertyNode
 
-expected_bind = shared.nodes.RootNode('Root')
+expected_bind = RootNode('Root')
 
-# Child 1
-new_node = shared.nodes.Node('options', None, None)
-child = shared.nodes.PropertyNode('directory', '"/var/lib/named"', None)
-new_node.children.append(child)
-child = shared.nodes.PropertyNode(
-    'dump-file',
-    '"/var/log/named_dump.db"',
-    None)
-new_node.children.append(child)
-child = shared.nodes.PropertyNode(
-    'statistics-file',
-    '"/var/log/named.stats"',
-    None)
-new_node.children.append(child)
-child = shared.nodes.Node('forwarders', None, None)
-sub_child = shared.nodes.PropertyNode('62.31.176.39', None, None)
-child.children.append(sub_child)
-sub_child = shared.nodes.PropertyNode('193.38.113.3', None, None)
-child.children.append(sub_child)
-new_node.children.append(child)
-child = shared.nodes.Node('listen-on-v6', None, None)
-sub_child = shared.nodes.PropertyNode('any', None, None)
-child.children.append(sub_child)
-new_node.children.append(child)
-child = shared.nodes.PropertyNode('notify', 'no', None)
-new_node.children.append(child)
-expected_bind.children.append(new_node)
-# Child 2
-new_node = shared.nodes.Node('zone', '"."', 'in')
-child = shared.nodes.PropertyNode('type', 'hint', None)
-new_node.children.append(child)
-child = shared.nodes.PropertyNode('file', '"root.hint"', None)
-new_node.children.append(child)
-expected_bind.children.append(new_node)
-# Child 3
-new_node = shared.nodes.Node('zone', '"localhost"', 'in')
-child = shared.nodes.PropertyNode('type', 'master', None)
-new_node.children.append(child)
-child = shared.nodes.PropertyNode('file', '"localhost.zone"', None)
-new_node.children.append(child)
-expected_bind.children.append(new_node)
-# Child 4
-new_node = shared.nodes.Node('zone', '"0.0.127.in-addr.arpa"', 'in')
-child = shared.nodes.PropertyNode('type', 'master', None)
-new_node.children.append(child)
-child = shared.nodes.PropertyNode('file', '"127.0.0.zone"', None)
-new_node.children.append(child)
-expected_bind.children.append(new_node)
-# Child 5
-new_node = shared.nodes.Node('zone', '"spring.wellho.net"', 'in')
-child = shared.nodes.PropertyNode('type', 'master', None)
-new_node.children.append(child)
-child = shared.nodes.PropertyNode(
-    'file',
-    '"/var/lib/named/wellho.zone"',
-    None)
-new_node.children.append(child)
-expected_bind.children.append(new_node)
-# Child 6
-new_node = shared.nodes.PropertyNode(
-    'include',
-    '"/etc/named.conf.include"',
-    None)
-expected_bind.children.append(new_node)
+child1 = Node(
+    type='options',
+    value=None,
+    parameters=None,
+    children=[
+        PropertyNode(
+            type='directory',
+            value='"/var/lib/named"',
+            parameters=None),
+        PropertyNode(
+            type='dump-file',
+            value='"/var/log/named_dump.db"',
+            parameters=None),
+        PropertyNode(
+            type='statistics-file',
+            value='"/var/log/named.stats"',
+            parameters=None),
+        Node(
+            type='forwarders',
+            value=None,
+            parameters=None,
+            children=[
+                PropertyNode(
+                    type='62.31.176.39',
+                    value=None,
+                    parameters=None),
+                PropertyNode(
+                    type='193.38.113.3',
+                    value=None,
+                    parameters=None)
+            ]
+        ),
+        Node(
+            type='listen-on-v6',
+            value=None,
+            parameters=None,
+            children=[
+                PropertyNode(
+                    type='any',
+                    value=None,
+                    parameters=None)
+            ]
+        ),
+        PropertyNode(
+            type='notify',
+            value='no',
+            parameters=None)
+        ])
+
+child2 = Node(
+    type='zone',
+    value='"."',
+    parameters='in',
+    children=[
+        PropertyNode(
+            type='type',
+            value='hint',
+            parameters=None),
+        PropertyNode(
+            type='file',
+            value='"root.hint"',
+            parameters=None)
+    ]
+)
+
+child3 = Node(
+    type='zone',
+    value='"localhost"',
+    parameters='in',
+    children=[
+        PropertyNode(
+            type='type',
+            value='master',
+            parameters=None),
+        PropertyNode(
+            type='file',
+            value='"localhost.zone"',
+            parameters=None)
+    ]
+)
+
+child4 = Node(
+    type='zone',
+    value='"0.0.127.in-addr.arpa"',
+    parameters='in',
+    children=[
+        PropertyNode(
+            type='type',
+            value='master',
+            parameters=None),
+        PropertyNode('file', '"127.0.0.zone"', None)
+    ]
+)
+
+child5 = Node(
+    type='zone',
+    value='"spring.wellho.net"',
+    parameters='in',
+    children=[
+        PropertyNode(
+            type='type',
+            value='master',
+            parameters=None),
+        PropertyNode(
+            type='file',
+            value='"/var/lib/named/wellho.zone"',
+            parameters=None)
+    ]
+)
+
+child6 = PropertyNode(
+    type='include',
+    value='"/etc/named.conf.include"',
+    parameters=None
+)
+
+expected_bind.extend(
+    [
+        child1,
+        child2,
+        child3,
+        child4,
+        child5,
+        child6
+    ]
+)
