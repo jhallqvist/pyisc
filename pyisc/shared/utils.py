@@ -113,6 +113,26 @@ def split_from(string, sep, pos):
     return [sep.join(string[:pos])] + string[pos:]
 
 
+def event_split(string, event_type):
+    """Return a list of event type and event action.
+
+    Args:
+        string (str): The supplied string that will be splitted.
+        event_type (str): The event type (execute, log, set, etc).
+
+    Returns:
+        list: A list of the splitted string
+
+    Examples:
+        >>> isc_string = 'set ClientIP = binary-to-ascii(10, 8, ".", leased-address);'
+        >>> shared.utils.event_split(isc_string, 'set')
+        ['set', ' ClientIP = binary-to-ascii(10, 8, ".", leased-address);']
+
+    """
+    word_len = len(event_type)
+    return [string[:word_len].strip(), string[word_len:].strip()]
+
+
 def sort_tree_algorithm(child):
     """Return tuple of values for sorting.
 

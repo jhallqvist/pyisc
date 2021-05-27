@@ -30,12 +30,16 @@ class DhcpdParser(BaseParser):
     """
     DECLARATION_FAILOVER = r"(?:failover\s)[\w]+\s*?[^\n]*?{"
     DECLARATION_GENERAL = r"[\w]+\s*?[^\n]*?{"
-    PARAMETER_SINGLE_KEY = r"""(?:(?:allow|deny|ignore|match|spawn|range|
-                            fixed-address|fixed-prefix6)\s)[\w]+\s*?[^\n]*?;"""
-    PARAMETER_MULTI_VALUE = r"(?:server-duid\s)[\w]+\s*?[^\n]*?;"
+    EVENTS_GENERAL = r"(?:set|execute|log)[\w\s(]+\s*?[^\n]*?;"
+    PARAMETER_BOOLEAN = r"(?:not\s)?(?:authoritative);"
+    PARAMETER_SINGLE_KEY = r"""(?:(?:allow|deny|ignore|match|spawn|
+                            range6?(?!.*temporary)|fixed-address6?|
+                            fixed-prefix6|prefix6|dynamic-bootp
+                            -lease-cutoff)\s)[\w]+\s*?[^\n]*?;"""
+    # PARAMETER_MULTI_VALUE = r"(?:server-duid\s)[\w]+\s*?[^\n]*?;"
     PARAMETER_SINGLE_VALUE = r"""(?:(?:hardware|host-identifier|load|lease|
-                               peer|my state|peer state)\s)[\w]+\s*?[^\n]*?;"""
-    PARAMETER_OPTION = r"(?:option\s)[\w]+\s*?[^\n]*?;"
+                               peer|my\sstate)\s)[\w]+\s*?[^\n]*?;"""
+    PARAMETER_OPTION = r"(?:(?:option|server-duid)\s)[\w]+\s*?[^\n]*?;"
     PARAMETER_FAILOVER = r"(?:failover\s)[\w]+\s*?[^\n]*?;"
     PARAMETER_GENERAL = r"[\w]+\s*?[^\n]*?;"
     SECTION_END = r"\}"
@@ -45,10 +49,14 @@ class DhcpdParser(BaseParser):
             type='declaration_failover', value=token)),
         (DECLARATION_GENERAL, lambda scanner, token: Token(
             type='declaration_general', value=token)),
+        (EVENTS_GENERAL, lambda scanner, token: Token(
+            type='event_general', value=token)),
+        (PARAMETER_BOOLEAN, lambda scanner, token: Token(
+            type='parameter_boolean', value=token)),
         (PARAMETER_SINGLE_KEY, lambda scanner, token: Token(
             type='parameter_single_key', value=token)),
-        (PARAMETER_MULTI_VALUE, lambda scanner, token: Token(
-            type='parameter_multiple_values', value=token)),
+        # (PARAMETER_MULTI_VALUE, lambda scanner, token: Token(
+        #     type='parameter_multiple_values', value=token)),
         (PARAMETER_SINGLE_VALUE, lambda scanner, token: Token(
             type='parameter_single_value', value=token)),
         (PARAMETER_OPTION, lambda scanner, token: Token(
@@ -95,6 +103,11 @@ class DhcpdParser(BaseParser):
                 else:
                     next_comment += '\n'
                 next_comment += token.value.strip()
+            if token.type.startswith('event'):
+                key, value, parameters, *_ = splitter.switch(token)
+                prop = PropertyNode(
+                    type=key, value=value, parameters=parameters)
+                node.children.append(prop)
             if token.type.startswith('parameter'):
                 key, value, parameters, *_ = splitter.switch(token)
                 prop = PropertyNode(

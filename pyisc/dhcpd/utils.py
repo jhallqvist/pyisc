@@ -14,7 +14,8 @@
 
 """General helper functions and classes for the module."""
 
-from pyisc.shared.utils import TokenSplitter, split_at, split_from
+import re
+from pyisc.shared.utils import TokenSplitter, split_at, split_from, event_split
 
 
 class DhcpdSplitter(TokenSplitter):
@@ -28,6 +29,15 @@ class DhcpdSplitter(TokenSplitter):
 
         """
         return split_at(self.token.value[:-1], ' ', 2)
+
+    def parameter_boolean(self):
+        """Return a list of the supplied string
+
+        Expects a string that is not to be splitted at all, only returned in a
+        list without the trailing semi-colon.
+
+        """
+        return [self.token.value[:-1]]
 
     def parameter_single_value(self):
         """Return a list where the last word in the string is the value.
@@ -92,3 +102,7 @@ class DhcpdSplitter(TokenSplitter):
 
         """
         return self.token.value[:-1].strip().split(None, 2)
+
+    def event_general(self):
+        event_type = re.search('execute|set|log', self.token.value).group()
+        return event_split(self.token.value[:-1].strip(), event_type)
