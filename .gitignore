@@ -4,6 +4,10 @@
 
 ### Project Specific
 **/old*
+temp*
+
+### Editor files
+.vscode
 
 ### macOS ###
 # General
