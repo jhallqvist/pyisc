@@ -29,16 +29,17 @@ class DhcpdParser(BaseParser):
 
     """
     DECLARATION_FAILOVER = r"(?:failover\s)[\w]+\s*?[^\n]*?{"
-    DECLARATION_GENERAL = r"[\w]+\s*?[^\n]*?{"
+    DECLARATION_GENERAL = r"[\w]+\s*?[^\n=]*?{"
     EVENTS_GENERAL = r"(?:set|execute|log)[\w\s(]+\s*?[^\n]*?;"
     PARAMETER_BOOLEAN = r"(?:not\s)?(?:authoritative);"
     PARAMETER_SINGLE_KEY = r"""(?:(?:allow|deny|ignore|match|spawn|
                             range6?(?!.*temporary)|fixed-address6?|
                             fixed-prefix6|prefix6|dynamic-bootp
                             -lease-cutoff)\s)[\w]+\s*?[^\n]*?;"""
+    FORMULA_GENERAL = r"(?:option|v6relay)[^\n=]*?=[^\n]*?;"
     # PARAMETER_MULTI_VALUE = r"(?:server-duid\s)[\w]+\s*?[^\n]*?;"
     PARAMETER_SINGLE_VALUE = r"""(?:(?:hardware|host-identifier|load|lease|
-                               peer|my\sstate)\s)[\w]+\s*?[^\n]*?;"""
+                              peer|my\sstate)\s)[\w]+\s*?[^\n]*?;"""
     PARAMETER_OPTION = r"(?:(?:option|server-duid)\s)[\w]+\s*?[^\n]*?;"
     PARAMETER_FAILOVER = r"(?:failover\s)[\w]+\s*?[^\n]*?;"
     PARAMETER_GENERAL = r"[\w]+\s*?[^\n]*?;"
@@ -51,6 +52,8 @@ class DhcpdParser(BaseParser):
             type='declaration_general', value=token)),
         (EVENTS_GENERAL, lambda scanner, token: Token(
             type='event_general', value=token)),
+        (FORMULA_GENERAL, lambda scanner, token: Token(
+            type='formula_general', value=token)),
         (PARAMETER_BOOLEAN, lambda scanner, token: Token(
             type='parameter_boolean', value=token)),
         (PARAMETER_SINGLE_KEY, lambda scanner, token: Token(
@@ -104,6 +107,11 @@ class DhcpdParser(BaseParser):
                     next_comment += '\n'
                 next_comment += token.value.strip()
             if token.type.startswith('event'):
+                key, value, parameters, *_ = splitter.switch(token)
+                prop = PropertyNode(
+                    type=key, value=value, parameters=parameters)
+                node.children.append(prop)
+            if token.type.startswith('formula'):
                 key, value, parameters, *_ = splitter.switch(token)
                 prop = PropertyNode(
                     type=key, value=value, parameters=parameters)

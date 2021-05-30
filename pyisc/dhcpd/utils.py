@@ -92,7 +92,7 @@ class DhcpdSplitter(TokenSplitter):
         left curly bracket.
 
         """
-        return split_from(self.token.value[:-2], ' ', 2)
+        return split_from(self.token.value[:-1].strip(), ' ', 2)
 
     def declaration_general(self):
         """Return a list from a general declaration string.
@@ -104,5 +104,10 @@ class DhcpdSplitter(TokenSplitter):
         return self.token.value[:-1].strip().split(None, 2)
 
     def event_general(self):
+        """TEMP."""
         event_type = re.search('execute|set|log', self.token.value).group()
         return event_split(self.token.value[:-1].strip(), event_type)
+
+    def formula_general(self):
+        """TEMP."""
+        return [part.strip() for part in self.token.value[:-1].split('=')]

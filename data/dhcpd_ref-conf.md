@@ -176,7 +176,12 @@
 |remote-port 68;|remote-port|68|None|
 |server-identifier 10.10.10.58;|server-identifier|10.10.10.58|None|
 |server-id-check on;|server-id-check|on|None|
+|server-duid LLT [ hardware-type timestamp hardware-address ];|server-duid LLT|[ hardware-type timestamp hardware-address ]|None|
+|server-duid EN enterprise-number enterprise-identifier;|server-duid EN|enterprise-number enterprise-identifier|None|
+|server-duid LL [ hardware-type hardware-address ];|server-duid LL|[ hardware-type hardware-address ]|None|
 |server-name "toccata.fugue.com";|server-name|"toccata.fugue.com"|None|
+|dhcpv6-set-tee-times true;|dhcpv6-set-tee-times|true|None|
+|site-option-space "pxelinux";|site-option-space|"pxelinux"|None|
 |stash-agent-options true;|stash-agent-options|true|None|
 |update-conflict-detection true;|update-conflict-detection|true|None|
 |update-optimization false;|update-optimization|false|None|

@@ -1,8 +1,12 @@
+# Used to generate a target table for the different parsed files.
 import pathlib
 import inspect
 from pyisc import dhcpd
 
-file_array = ['data/dhcpd_ref-conf.conf']
+file_array = [
+    'data/dhcpd_ref-conf.conf',
+    'data/dhcpd_ref-options.conf'
+]
 parser = dhcpd.parsing.DhcpdParser()
 
 for file in file_array:

@@ -1,17 +1,12 @@
-"""TEMP."""
-
-
-from .dhcpd_vars import expected_dhcpd
-import pathlib
 import unittest
+from .dhcpd_vars import expected_dhcpd
 from pyisc import dhcpd, shared
 
 
 class TestStringToTree(unittest.TestCase):
     def setUp(self):
-        data_folder = pathlib.Path(__file__).parent.parent.joinpath('data')
-        dhcpd_file = data_folder.joinpath('dhcpd-classes.conf')
-        self.testfile = open(dhcpd_file)
+        dhcpd_file = 'tests/data/dhcpd-classes.conf'
+        self.testfile = open(dhcpd_file, 'r')
         self.testdata = self.testfile.read()
 
     def tearDown(self):
