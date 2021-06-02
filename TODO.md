@@ -18,10 +18,9 @@
 ## BIND
 
 - [ ]  Differences from DHCPD sub-module that needs to be implemented here as well:
-  - [ ]  Sorting. Is alphanumerical good enough?
+  - [ ]  Sorting. Is alphanumerical good enough?
   - [ ]  Split methods and tokenization.
   - [ ]  Reference markdown files
-
 
 ## Shared/Common
 
