@@ -1,4 +1,5 @@
 import unittest
+import inspect
 from .dhcpd_vars import expected_dhcpd
 from pyisc import dhcpd, shared
 
@@ -62,6 +63,39 @@ class TestInsertIntoTree(unittest.TestCase):
         tree.children[0].children.append(new_prop)
         self.new_string = dhcpd.dumps(tree)
         self.assertEqual(self.modified_string, self.new_string)
+
+
+class TestParsingConfFile(unittest.TestCase):
+    def setUp(self):
+        conf_reference_file = 'data/dhcpd_ref-conf.conf'
+        self.conf_file = open(conf_reference_file, 'r')
+        self.confdata = self.conf_file.read()
+        reference_file = 'data/dhcpd_ref-conf.md'
+        self.ref_file = open(reference_file, 'r')
+        self.refdata = self.ref_file.read()
+        self.parser = dhcpd.parsing.DhcpdParser()
+        self.reference_head = inspect.cleandoc('''# DHCPd statements
+
+        | Original statement | Key | Value | Optional/Parameter |
+        | :----------------- | :-- | :---- | :----------------- |
+        ''') + '\n'
+
+    def tearDown(self):
+        self.conf_file.close()
+        self.ref_file.close()
+
+    def test_parse_equality(self):
+        result = ''
+        result += self.reference_head
+        conf_splitted = self.confdata.splitlines()
+        for row in conf_splitted:
+            if not row.startswith('#'):
+                node = self.parser.build_tree(row).children[0]
+                joined_str = "|".join(
+                    [str(x) for x in [node.type, node.value, node.parameters]])
+                final_string = "|" + "|".join((row, joined_str)) + "|" + '\n'
+                result += final_string
+        self.assertEqual(self.refdata, result)
 
 
 if __name__ == '__main__':

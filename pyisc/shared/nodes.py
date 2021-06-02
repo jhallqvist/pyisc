@@ -13,6 +13,7 @@
 # limitations under the License.
 
 """Contains the different node object definitions."""
+import json
 
 
 class RootNode:
@@ -55,6 +56,10 @@ class RootNode:
     def __iter__(self):
         """Implement iter(self) with child objects in instance."""
         return iter(self.children)
+
+    def as_dict(self):
+        json_str = json.dumps(self, default=lambda x: x.__dict__)
+        return json.loads(json_str)
 
     @property
     def children(self):
