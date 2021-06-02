@@ -1,0 +1,1150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>pyisc.shared.utils API documentation</title>
+<meta name="description" content="General helper functions and classes for the module." />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>pyisc.shared.utils</code></h1>
+</header>
+<section id="section-intro">
+<p>General helper functions and classes for the module.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python"># Copyright 2021 Jonas Hallqvist
+
+# Licensed under the Apache License, Version 2.0 (the &#34;License&#34;);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#     http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an &#34;AS IS&#34; BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+&#34;&#34;&#34;General helper functions and classes for the module.&#34;&#34;&#34;
+
+import copy
+from pyisc.shared.nodes import Node, PropertyNode
+
+
+class color:
+    PURPLE = &#39;\033[95m&#39;
+    CYAN = &#39;\033[96m&#39;
+    DARKCYAN = &#39;\033[36m&#39;
+    BLUE = &#39;\033[94m&#39;
+    GREEN = &#39;\033[92m&#39;
+    YELLOW = &#39;\033[93m&#39;
+    RED = &#39;\033[91m&#39;
+    BOLD = &#39;\033[1m&#39;
+    UNDERLINE = &#39;\033[4m&#39;
+    END = &#39;\033[0m&#39;
+
+
+class TokenSplitter:
+    &#34;&#34;&#34;A static class used to provide case / switch like functionality.
+
+    The switch takes a supplied token and matches the type of that
+    token to a method. If a match is found that method is executed
+    and the result returned.
+    If a match is not found the default lambda expression will be
+    used instead. The entire purpose is to split a value of the
+    supplied token the desired way.
+    &#34;&#34;&#34;
+
+    def switch(self, token):
+        &#34;&#34;&#34;
+        Return list of splitted token string.
+
+        Args:
+            token (pyisc.shared.parsing.Token): A supplied token instance.
+
+        Returns:
+            list: List of the now splitted string
+
+        Examples:
+            &gt;&gt;&gt; token = Token(&#39;parameter_option&#39;,
+            ...               &#39;option domain-name &#34;example.org&#34;;&#39;)
+            &gt;&gt;&gt; splitter = TokenSplitter()
+            &gt;&gt;&gt; splitter.switch(token)
+            [&#39;option domain-name&#39;, &#39;&#34;example.org&#34;&#39;, None, None]
+
+        &#34;&#34;&#34;
+        self.token = token
+        default = &#39;No split method found&#39;
+        return getattr(self, str(token.type), lambda: default)() + [None, None]
+
+
+def split_at(string, sep, pos):
+    &#34;&#34;&#34;
+    Return string splitted at the desired separator.
+
+    Args:
+        string (str): The supplied string that will be splitted.
+        sep (str): The desired separator to use for the split.
+        pos (int): The desired occurence of the defined separator
+            within the supplied string and hence the point of the split
+            operation.
+
+    Returns:
+        list: A list of the splitted string
+
+    Examples:
+        &gt;&gt;&gt; isc_string = &#39;option domain-name &#34;example.org&#34;;&#39;
+        &gt;&gt;&gt; shared.utils.split_at(isc_string, &#39; &#39;, 2)
+        [&#39;option domain-name&#39;, &#39;&#34;example.org&#34;;&#39;]
+
+    &#34;&#34;&#34;
+    string = string.split(sep)
+    return [sep.join(string[:pos]), sep.join(string[pos:])]
+
+
+def split_from(string, sep, pos):
+    &#34;&#34;&#34;
+    Return string splitted from the desired separator.
+
+    Args:
+        string (str): The supplied string that will be splitted.
+        sep (str): The desired separator to use for the split.
+        pos (int): The desired first occurence of the defined separator
+            within the supplied string. This will be the position of
+            the first split performed.
+
+    Returns:
+        list: A list of the splitted string
+
+    Examples:
+        &gt;&gt;&gt; isc_string = &#39;failover peer &#34;dhcpd-failover&#34; state&#39;
+        &gt;&gt;&gt; shared.utils.split_from(isc_string, &#39; &#39;, 2)
+        [&#39;failover peer&#39;, &#39;&#34;dhcpd-failover&#34;&#39;, &#39;state&#39;]
+
+    &#34;&#34;&#34;
+    string = string.split(sep)
+    return [sep.join(string[:pos])] + string[pos:]
+
+
+def event_split(string, event_type):
+    &#34;&#34;&#34;Return a list of event type and event action.
+
+    Args:
+        string (str): The supplied string that will be splitted.
+        event_type (str): The event type (execute, log, set, etc).
+
+    Returns:
+        list: A list of the splitted string
+
+    Examples:
+        &gt;&gt;&gt; isc_string = &#39;set ClientIP = binary-to-ascii(10, 8, &#34;.&#34;, leased-address);&#39;
+        &gt;&gt;&gt; shared.utils.event_split(isc_string, &#39;set&#39;)
+        [&#39;set&#39;, &#39; ClientIP = binary-to-ascii(10, 8, &#34;.&#34;, leased-address);&#39;]
+
+    &#34;&#34;&#34;
+    word_len = len(event_type)
+    return [string[:word_len].strip(), string[word_len:].strip()]
+
+
+def sort_tree_algorithm(child):
+    &#34;&#34;&#34;Return tuple of values for sorting.
+
+    This is meant to be supplied to the sort functions key attribute.
+    It will sort sort on the object type where mostly all PropertyNodes
+    will be prioritized.
+
+    Args:
+        string (str): The supplied string that will be splitted.
+        child (pyisc.shared.nodes.Node, pyisc.shared.nodes.PropertyNode): The
+            child instance supplied by the sort function.
+
+    Returns:
+        tuple: A tuple with three entires representing the sorting conditions
+            in order of decreasing order.
+    &#34;&#34;&#34;
+    sort_order = {
+        &#39;key&#39;: 1,
+        &#39;failover peer&#39;: 2,
+        &#39;subnet&#39;: 3,
+        &#39;host&#39;: 4,
+        &#39;class&#39;: 5,
+        &#39;shared-network&#39;: 6,
+        &#39;group&#39;: 7,
+        &#39;subclass&#39;: 8
+    }
+    condition_one = sort_order.get(child.type, 0)
+    condition_two = child.type
+    condition_three = [int(octet) for octet in child.value.split(&#39;.&#39;)] if \
+        child.type == &#39;subnet&#39; else child.value
+    return (condition_one, condition_two, condition_three)
+
+
+def sort_tree(tree):
+    &#34;&#34;&#34;Sorts the supplied PyISC tree object.
+
+    This functions sorts the supplied object tree recursively, based on
+    a sorting algorithm.
+
+    Args:
+        tree (pyisc.shared.nodes.RootNode): The tree structure.
+
+    Returns:
+        pyisc.shared.nodes.RootNode: A sorted copy of the inputted tree object.
+
+    &#34;&#34;&#34;
+    tree_copy = copy.deepcopy(tree)
+
+    def inner_func(tree):
+        tree.children.sort(key=sort_tree_algorithm)
+        for child in tree.children:
+            if isinstance(child, Node):
+                inner_func(child)
+
+    inner_func(tree_copy)
+    return tree_copy
+
+
+def print_tree(tree, level=0, enable_index=False):
+    &#34;&#34;&#34;Print a string representation of the PyISC object tree.
+
+    This function takes a PyISC object tree structure and prints it.
+
+    Args:
+        tree (pyisc.shared.nodes.RootNode): The tree structure.
+        level (int): The starting indentation for the RootNode.
+            Should be left alone in the default level 0.
+        enable_index (boolean): If set to True the function will print an index
+            number in front of each object in the tree.
+
+    Returns:
+        stdout: A printed representaton of the PyISC tree object
+
+    &#34;&#34;&#34;
+    print(tree)
+
+    def inner_func(tree, level):
+        for index, branch in enumerate(tree.children):
+            indent = level * &#39; &#39;
+            if enable_index:
+                print(f&#39;{indent}{index}: {branch}&#39;)
+            else:
+                print(f&#39;{indent}{branch}&#39;)
+            if isinstance(branch, Node):
+                inner_func(branch, level+4)
+
+    inner_func(tree, level+4)
+
+
+def get_node(tree, node_type, node_value=None):
+    &#34;&#34;&#34;Return a specific node that matches the search criteria.
+
+    This function will return the first match of an object from a PyISC object
+    tree.
+
+    Args:
+        tree (pyisc.shared.nodes.RootNode): The tree structure.
+        node_type (str): A string that will should be matched to the type
+            attribute of Node instance.
+        node_value (str): A string that will should be matched to the value
+            attribute of Node instance.
+
+    Returns:
+        pyisc.shared.nodes.Node: The found object.
+
+    Examples:
+        &gt;&gt;&gt; pyisc.shared.utils.get_node(isc_tree, &#39;subnet&#39;, &#39;192.168.1.0&#39;)
+        Node(subnet, 192.168.1.0, netmask 255.255.252.0)
+
+    &#34;&#34;&#34;
+    for branch in tree.children:
+        if (node_type == branch.type and node_value == branch.value):
+            return branch
+        if isinstance(branch, Node):
+            result = get_node(
+                branch,
+                node_type=node_type,
+                node_value=node_value)
+            if result:
+                return result
+
+
+def get_node_types(tree, node_type, node_list=None):
+    &#34;&#34;&#34;Return a list of nodes matching search criteria.
+
+    The function returns a list containing all the nodes of a certain type
+    found in the supplied PyISC object tree.
+
+    Args:
+        tree (pyisc.shared.nodes.RootNode): The tree structure.
+        node_type (str): A string that will should be matched to the type
+            attribute of Node instance.
+        node_list (None): Initially this will be None but as the function runs
+            this will be replaced by a list that contains all nodes matching
+            the search string.
+
+    Returns:
+        list: A list that contains all found node objects.
+
+    Examples:
+        &gt;&gt;&gt; get_node_types(isc_tree, &#39;host&#39;)
+        [Node(host, passacaglia, None), Node(host, fantasia, None), Node(...)]
+
+    &#34;&#34;&#34;
+    if not node_list:
+        node_list = []
+    for branch in tree.children:
+        if branch.type == node_type:
+            node_list.append(branch)
+        if isinstance(branch, Node):
+            get_node_types(branch, node_type=node_type, node_list=node_list)
+    return node_list
+
+
+def find_node(tree, node_type, node_value=None, level=0):
+    &#34;&#34;&#34;Prints entire tree and highlights the specific node with bold text or
+    similar.&#34;&#34;&#34;
+    print(tree)
+
+    def inner_func(tree, level):
+        for branch in tree.children:
+            indent = level * &#39; &#39;
+            if (node_type == branch.type and node_value == branch.value):
+                print(f&#39;{indent}{color.BOLD}{branch}{color.END}&#39;)
+            else:
+                print(f&#39;{indent}{branch}&#39;)
+            if isinstance(branch, Node):
+                inner_func(branch, level+4)
+
+    inner_func(tree, level+4)
+
+
+def find_node_types(tree, node_type, level=0):
+    &#34;&#34;&#34;Prints entire tree and highlights the node with a specific node type
+    with bold text or similar.&#34;&#34;&#34;
+    print(tree)
+
+    def inner_func(tree, level):
+        for branch in tree.children:
+            indent = level * &#39; &#39;
+            if (node_type == branch.type):
+                print(f&#39;{indent}{color.BOLD}{branch}{color.END}&#39;)
+            else:
+                print(f&#39;{indent}{branch}&#39;)
+            if isinstance(branch, Node):
+                inner_func(branch, level+4)
+
+    inner_func(tree, level+4)
+
+
+def string_constructor(tree, level=0, result=&#39;&#39;, enable_comments=True,
+                       section_end=None):
+    &#34;&#34;&#34;Return a string of PyISC tree.&#34;&#34;&#34;
+    for branch in tree.children:
+        indent = level * &#39; &#39;
+        if branch.comment and enable_comments:
+            result += f&#39;{branch.comment}\n&#39;
+        if isinstance(branch, PropertyNode):
+            result += f&#39;{indent}{branch};\n&#39;
+        if isinstance(branch, Node):
+            result += f&#39;{indent}{branch} {{\n&#39;
+            result = string_constructor(
+                            tree=branch, level=level+4, result=result,
+                            enable_comments=enable_comments,
+                            section_end=section_end)
+            result += f&#39;{indent}{section_end}\n&#39;
+            # if level == 0:
+            #     result += &#39;\n&#39;
+    return result</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="pyisc.shared.utils.event_split"><code class="name flex">
+<span>def <span class="ident">event_split</span></span>(<span>string, event_type)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a list of event type and event action.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>string</code></strong> :&ensp;<code>str</code></dt>
+<dd>The supplied string that will be splitted.</dd>
+<dt><strong><code>event_type</code></strong> :&ensp;<code>str</code></dt>
+<dd>The event type (execute, log, set, etc).</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list</code></dt>
+<dd>A list of the splitted string</dd>
+</dl>
+<h2 id="examples">Examples</h2>
+<pre><code class="python-repl">&gt;&gt;&gt; isc_string = 'set ClientIP = binary-to-ascii(10, 8, &quot;.&quot;, leased-address);'
+&gt;&gt;&gt; shared.utils.event_split(isc_string, 'set')
+['set', ' ClientIP = binary-to-ascii(10, 8, &quot;.&quot;, leased-address);']
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def event_split(string, event_type):
+    &#34;&#34;&#34;Return a list of event type and event action.
+
+    Args:
+        string (str): The supplied string that will be splitted.
+        event_type (str): The event type (execute, log, set, etc).
+
+    Returns:
+        list: A list of the splitted string
+
+    Examples:
+        &gt;&gt;&gt; isc_string = &#39;set ClientIP = binary-to-ascii(10, 8, &#34;.&#34;, leased-address);&#39;
+        &gt;&gt;&gt; shared.utils.event_split(isc_string, &#39;set&#39;)
+        [&#39;set&#39;, &#39; ClientIP = binary-to-ascii(10, 8, &#34;.&#34;, leased-address);&#39;]
+
+    &#34;&#34;&#34;
+    word_len = len(event_type)
+    return [string[:word_len].strip(), string[word_len:].strip()]</code></pre>
+</details>
+</dd>
+<dt id="pyisc.shared.utils.find_node"><code class="name flex">
+<span>def <span class="ident">find_node</span></span>(<span>tree, node_type, node_value=None, level=0)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Prints entire tree and highlights the specific node with bold text or
+similar.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def find_node(tree, node_type, node_value=None, level=0):
+    &#34;&#34;&#34;Prints entire tree and highlights the specific node with bold text or
+    similar.&#34;&#34;&#34;
+    print(tree)
+
+    def inner_func(tree, level):
+        for branch in tree.children:
+            indent = level * &#39; &#39;
+            if (node_type == branch.type and node_value == branch.value):
+                print(f&#39;{indent}{color.BOLD}{branch}{color.END}&#39;)
+            else:
+                print(f&#39;{indent}{branch}&#39;)
+            if isinstance(branch, Node):
+                inner_func(branch, level+4)
+
+    inner_func(tree, level+4)</code></pre>
+</details>
+</dd>
+<dt id="pyisc.shared.utils.find_node_types"><code class="name flex">
+<span>def <span class="ident">find_node_types</span></span>(<span>tree, node_type, level=0)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Prints entire tree and highlights the node with a specific node type
+with bold text or similar.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def find_node_types(tree, node_type, level=0):
+    &#34;&#34;&#34;Prints entire tree and highlights the node with a specific node type
+    with bold text or similar.&#34;&#34;&#34;
+    print(tree)
+
+    def inner_func(tree, level):
+        for branch in tree.children:
+            indent = level * &#39; &#39;
+            if (node_type == branch.type):
+                print(f&#39;{indent}{color.BOLD}{branch}{color.END}&#39;)
+            else:
+                print(f&#39;{indent}{branch}&#39;)
+            if isinstance(branch, Node):
+                inner_func(branch, level+4)
+
+    inner_func(tree, level+4)</code></pre>
+</details>
+</dd>
+<dt id="pyisc.shared.utils.get_node"><code class="name flex">
+<span>def <span class="ident">get_node</span></span>(<span>tree, node_type, node_value=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a specific node that matches the search criteria.</p>
+<p>This function will return the first match of an object from a PyISC object
+tree.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>tree</code></strong> :&ensp;<code><a title="pyisc.shared.nodes.RootNode" href="nodes.html#pyisc.shared.nodes.RootNode">RootNode</a></code></dt>
+<dd>The tree structure.</dd>
+<dt><strong><code>node_type</code></strong> :&ensp;<code>str</code></dt>
+<dd>A string that will should be matched to the type
+attribute of Node instance.</dd>
+<dt><strong><code>node_value</code></strong> :&ensp;<code>str</code></dt>
+<dd>A string that will should be matched to the value
+attribute of Node instance.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="pyisc.shared.nodes.Node" href="nodes.html#pyisc.shared.nodes.Node">Node</a></code></dt>
+<dd>The found object.</dd>
+</dl>
+<h2 id="examples">Examples</h2>
+<pre><code class="python-repl">&gt;&gt;&gt; pyisc.shared.utils.get_node(isc_tree, 'subnet', '192.168.1.0')
+Node(subnet, 192.168.1.0, netmask 255.255.252.0)
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_node(tree, node_type, node_value=None):
+    &#34;&#34;&#34;Return a specific node that matches the search criteria.
+
+    This function will return the first match of an object from a PyISC object
+    tree.
+
+    Args:
+        tree (pyisc.shared.nodes.RootNode): The tree structure.
+        node_type (str): A string that will should be matched to the type
+            attribute of Node instance.
+        node_value (str): A string that will should be matched to the value
+            attribute of Node instance.
+
+    Returns:
+        pyisc.shared.nodes.Node: The found object.
+
+    Examples:
+        &gt;&gt;&gt; pyisc.shared.utils.get_node(isc_tree, &#39;subnet&#39;, &#39;192.168.1.0&#39;)
+        Node(subnet, 192.168.1.0, netmask 255.255.252.0)
+
+    &#34;&#34;&#34;
+    for branch in tree.children:
+        if (node_type == branch.type and node_value == branch.value):
+            return branch
+        if isinstance(branch, Node):
+            result = get_node(
+                branch,
+                node_type=node_type,
+                node_value=node_value)
+            if result:
+                return result</code></pre>
+</details>
+</dd>
+<dt id="pyisc.shared.utils.get_node_types"><code class="name flex">
+<span>def <span class="ident">get_node_types</span></span>(<span>tree, node_type, node_list=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a list of nodes matching search criteria.</p>
+<p>The function returns a list containing all the nodes of a certain type
+found in the supplied PyISC object tree.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>tree</code></strong> :&ensp;<code><a title="pyisc.shared.nodes.RootNode" href="nodes.html#pyisc.shared.nodes.RootNode">RootNode</a></code></dt>
+<dd>The tree structure.</dd>
+<dt><strong><code>node_type</code></strong> :&ensp;<code>str</code></dt>
+<dd>A string that will should be matched to the type
+attribute of Node instance.</dd>
+<dt><strong><code>node_list</code></strong> :&ensp;<code>None</code></dt>
+<dd>Initially this will be None but as the function runs
+this will be replaced by a list that contains all nodes matching
+the search string.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list</code></dt>
+<dd>A list that contains all found node objects.</dd>
+</dl>
+<h2 id="examples">Examples</h2>
+<pre><code class="python-repl">&gt;&gt;&gt; get_node_types(isc_tree, 'host')
+[Node(host, passacaglia, None), Node(host, fantasia, None), Node(...)]
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_node_types(tree, node_type, node_list=None):
+    &#34;&#34;&#34;Return a list of nodes matching search criteria.
+
+    The function returns a list containing all the nodes of a certain type
+    found in the supplied PyISC object tree.
+
+    Args:
+        tree (pyisc.shared.nodes.RootNode): The tree structure.
+        node_type (str): A string that will should be matched to the type
+            attribute of Node instance.
+        node_list (None): Initially this will be None but as the function runs
+            this will be replaced by a list that contains all nodes matching
+            the search string.
+
+    Returns:
+        list: A list that contains all found node objects.
+
+    Examples:
+        &gt;&gt;&gt; get_node_types(isc_tree, &#39;host&#39;)
+        [Node(host, passacaglia, None), Node(host, fantasia, None), Node(...)]
+
+    &#34;&#34;&#34;
+    if not node_list:
+        node_list = []
+    for branch in tree.children:
+        if branch.type == node_type:
+            node_list.append(branch)
+        if isinstance(branch, Node):
+            get_node_types(branch, node_type=node_type, node_list=node_list)
+    return node_list</code></pre>
+</details>
+</dd>
+<dt id="pyisc.shared.utils.print_tree"><code class="name flex">
+<span>def <span class="ident">print_tree</span></span>(<span>tree, level=0, enable_index=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Print a string representation of the PyISC object tree.</p>
+<p>This function takes a PyISC object tree structure and prints it.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>tree</code></strong> :&ensp;<code><a title="pyisc.shared.nodes.RootNode" href="nodes.html#pyisc.shared.nodes.RootNode">RootNode</a></code></dt>
+<dd>The tree structure.</dd>
+<dt><strong><code>level</code></strong> :&ensp;<code>int</code></dt>
+<dd>The starting indentation for the RootNode.
+Should be left alone in the default level 0.</dd>
+<dt><strong><code>enable_index</code></strong> :&ensp;<code>boolean</code></dt>
+<dd>If set to True the function will print an index
+number in front of each object in the tree.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>stdout</code></dt>
+<dd>A printed representaton of the PyISC tree object</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def print_tree(tree, level=0, enable_index=False):
+    &#34;&#34;&#34;Print a string representation of the PyISC object tree.
+
+    This function takes a PyISC object tree structure and prints it.
+
+    Args:
+        tree (pyisc.shared.nodes.RootNode): The tree structure.
+        level (int): The starting indentation for the RootNode.
+            Should be left alone in the default level 0.
+        enable_index (boolean): If set to True the function will print an index
+            number in front of each object in the tree.
+
+    Returns:
+        stdout: A printed representaton of the PyISC tree object
+
+    &#34;&#34;&#34;
+    print(tree)
+
+    def inner_func(tree, level):
+        for index, branch in enumerate(tree.children):
+            indent = level * &#39; &#39;
+            if enable_index:
+                print(f&#39;{indent}{index}: {branch}&#39;)
+            else:
+                print(f&#39;{indent}{branch}&#39;)
+            if isinstance(branch, Node):
+                inner_func(branch, level+4)
+
+    inner_func(tree, level+4)</code></pre>
+</details>
+</dd>
+<dt id="pyisc.shared.utils.sort_tree"><code class="name flex">
+<span>def <span class="ident">sort_tree</span></span>(<span>tree)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sorts the supplied PyISC tree object.</p>
+<p>This functions sorts the supplied object tree recursively, based on
+a sorting algorithm.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>tree</code></strong> :&ensp;<code><a title="pyisc.shared.nodes.RootNode" href="nodes.html#pyisc.shared.nodes.RootNode">RootNode</a></code></dt>
+<dd>The tree structure.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="pyisc.shared.nodes.RootNode" href="nodes.html#pyisc.shared.nodes.RootNode">RootNode</a></code></dt>
+<dd>A sorted copy of the inputted tree object.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def sort_tree(tree):
+    &#34;&#34;&#34;Sorts the supplied PyISC tree object.
+
+    This functions sorts the supplied object tree recursively, based on
+    a sorting algorithm.
+
+    Args:
+        tree (pyisc.shared.nodes.RootNode): The tree structure.
+
+    Returns:
+        pyisc.shared.nodes.RootNode: A sorted copy of the inputted tree object.
+
+    &#34;&#34;&#34;
+    tree_copy = copy.deepcopy(tree)
+
+    def inner_func(tree):
+        tree.children.sort(key=sort_tree_algorithm)
+        for child in tree.children:
+            if isinstance(child, Node):
+                inner_func(child)
+
+    inner_func(tree_copy)
+    return tree_copy</code></pre>
+</details>
+</dd>
+<dt id="pyisc.shared.utils.sort_tree_algorithm"><code class="name flex">
+<span>def <span class="ident">sort_tree_algorithm</span></span>(<span>child)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return tuple of values for sorting.</p>
+<p>This is meant to be supplied to the sort functions key attribute.
+It will sort sort on the object type where mostly all PropertyNodes
+will be prioritized.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>string</code></strong> :&ensp;<code>str</code></dt>
+<dd>The supplied string that will be splitted.</dd>
+<dt><strong><code>child</code></strong> :&ensp;<code><a title="pyisc.shared.nodes.Node" href="nodes.html#pyisc.shared.nodes.Node">Node</a>, <a title="pyisc.shared.nodes.PropertyNode" href="nodes.html#pyisc.shared.nodes.PropertyNode">PropertyNode</a></code></dt>
+<dd>The
+child instance supplied by the sort function.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple</code></dt>
+<dd>A tuple with three entires representing the sorting conditions
+in order of decreasing order.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def sort_tree_algorithm(child):
+    &#34;&#34;&#34;Return tuple of values for sorting.
+
+    This is meant to be supplied to the sort functions key attribute.
+    It will sort sort on the object type where mostly all PropertyNodes
+    will be prioritized.
+
+    Args:
+        string (str): The supplied string that will be splitted.
+        child (pyisc.shared.nodes.Node, pyisc.shared.nodes.PropertyNode): The
+            child instance supplied by the sort function.
+
+    Returns:
+        tuple: A tuple with three entires representing the sorting conditions
+            in order of decreasing order.
+    &#34;&#34;&#34;
+    sort_order = {
+        &#39;key&#39;: 1,
+        &#39;failover peer&#39;: 2,
+        &#39;subnet&#39;: 3,
+        &#39;host&#39;: 4,
+        &#39;class&#39;: 5,
+        &#39;shared-network&#39;: 6,
+        &#39;group&#39;: 7,
+        &#39;subclass&#39;: 8
+    }
+    condition_one = sort_order.get(child.type, 0)
+    condition_two = child.type
+    condition_three = [int(octet) for octet in child.value.split(&#39;.&#39;)] if \
+        child.type == &#39;subnet&#39; else child.value
+    return (condition_one, condition_two, condition_three)</code></pre>
+</details>
+</dd>
+<dt id="pyisc.shared.utils.split_at"><code class="name flex">
+<span>def <span class="ident">split_at</span></span>(<span>string, sep, pos)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return string splitted at the desired separator.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>string</code></strong> :&ensp;<code>str</code></dt>
+<dd>The supplied string that will be splitted.</dd>
+<dt><strong><code>sep</code></strong> :&ensp;<code>str</code></dt>
+<dd>The desired separator to use for the split.</dd>
+<dt><strong><code>pos</code></strong> :&ensp;<code>int</code></dt>
+<dd>The desired occurence of the defined separator
+within the supplied string and hence the point of the split
+operation.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list</code></dt>
+<dd>A list of the splitted string</dd>
+</dl>
+<h2 id="examples">Examples</h2>
+<pre><code class="python-repl">&gt;&gt;&gt; isc_string = 'option domain-name &quot;example.org&quot;;'
+&gt;&gt;&gt; shared.utils.split_at(isc_string, ' ', 2)
+['option domain-name', '&quot;example.org&quot;;']
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def split_at(string, sep, pos):
+    &#34;&#34;&#34;
+    Return string splitted at the desired separator.
+
+    Args:
+        string (str): The supplied string that will be splitted.
+        sep (str): The desired separator to use for the split.
+        pos (int): The desired occurence of the defined separator
+            within the supplied string and hence the point of the split
+            operation.
+
+    Returns:
+        list: A list of the splitted string
+
+    Examples:
+        &gt;&gt;&gt; isc_string = &#39;option domain-name &#34;example.org&#34;;&#39;
+        &gt;&gt;&gt; shared.utils.split_at(isc_string, &#39; &#39;, 2)
+        [&#39;option domain-name&#39;, &#39;&#34;example.org&#34;;&#39;]
+
+    &#34;&#34;&#34;
+    string = string.split(sep)
+    return [sep.join(string[:pos]), sep.join(string[pos:])]</code></pre>
+</details>
+</dd>
+<dt id="pyisc.shared.utils.split_from"><code class="name flex">
+<span>def <span class="ident">split_from</span></span>(<span>string, sep, pos)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return string splitted from the desired separator.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>string</code></strong> :&ensp;<code>str</code></dt>
+<dd>The supplied string that will be splitted.</dd>
+<dt><strong><code>sep</code></strong> :&ensp;<code>str</code></dt>
+<dd>The desired separator to use for the split.</dd>
+<dt><strong><code>pos</code></strong> :&ensp;<code>int</code></dt>
+<dd>The desired first occurence of the defined separator
+within the supplied string. This will be the position of
+the first split performed.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list</code></dt>
+<dd>A list of the splitted string</dd>
+</dl>
+<h2 id="examples">Examples</h2>
+<pre><code class="python-repl">&gt;&gt;&gt; isc_string = 'failover peer &quot;dhcpd-failover&quot; state'
+&gt;&gt;&gt; shared.utils.split_from(isc_string, ' ', 2)
+['failover peer', '&quot;dhcpd-failover&quot;', 'state']
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def split_from(string, sep, pos):
+    &#34;&#34;&#34;
+    Return string splitted from the desired separator.
+
+    Args:
+        string (str): The supplied string that will be splitted.
+        sep (str): The desired separator to use for the split.
+        pos (int): The desired first occurence of the defined separator
+            within the supplied string. This will be the position of
+            the first split performed.
+
+    Returns:
+        list: A list of the splitted string
+
+    Examples:
+        &gt;&gt;&gt; isc_string = &#39;failover peer &#34;dhcpd-failover&#34; state&#39;
+        &gt;&gt;&gt; shared.utils.split_from(isc_string, &#39; &#39;, 2)
+        [&#39;failover peer&#39;, &#39;&#34;dhcpd-failover&#34;&#39;, &#39;state&#39;]
+
+    &#34;&#34;&#34;
+    string = string.split(sep)
+    return [sep.join(string[:pos])] + string[pos:]</code></pre>
+</details>
+</dd>
+<dt id="pyisc.shared.utils.string_constructor"><code class="name flex">
+<span>def <span class="ident">string_constructor</span></span>(<span>tree, level=0, result='', enable_comments=True, section_end=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a string of PyISC tree.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def string_constructor(tree, level=0, result=&#39;&#39;, enable_comments=True,
+                       section_end=None):
+    &#34;&#34;&#34;Return a string of PyISC tree.&#34;&#34;&#34;
+    for branch in tree.children:
+        indent = level * &#39; &#39;
+        if branch.comment and enable_comments:
+            result += f&#39;{branch.comment}\n&#39;
+        if isinstance(branch, PropertyNode):
+            result += f&#39;{indent}{branch};\n&#39;
+        if isinstance(branch, Node):
+            result += f&#39;{indent}{branch} {{\n&#39;
+            result = string_constructor(
+                            tree=branch, level=level+4, result=result,
+                            enable_comments=enable_comments,
+                            section_end=section_end)
+            result += f&#39;{indent}{section_end}\n&#39;
+            # if level == 0:
+            #     result += &#39;\n&#39;
+    return result</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="pyisc.shared.utils.TokenSplitter"><code class="flex name class">
+<span>class <span class="ident">TokenSplitter</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>A static class used to provide case / switch like functionality.</p>
+<p>The switch takes a supplied token and matches the type of that
+token to a method. If a match is found that method is executed
+and the result returned.
+If a match is not found the default lambda expression will be
+used instead. The entire purpose is to split a value of the
+supplied token the desired way.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TokenSplitter:
+    &#34;&#34;&#34;A static class used to provide case / switch like functionality.
+
+    The switch takes a supplied token and matches the type of that
+    token to a method. If a match is found that method is executed
+    and the result returned.
+    If a match is not found the default lambda expression will be
+    used instead. The entire purpose is to split a value of the
+    supplied token the desired way.
+    &#34;&#34;&#34;
+
+    def switch(self, token):
+        &#34;&#34;&#34;
+        Return list of splitted token string.
+
+        Args:
+            token (pyisc.shared.parsing.Token): A supplied token instance.
+
+        Returns:
+            list: List of the now splitted string
+
+        Examples:
+            &gt;&gt;&gt; token = Token(&#39;parameter_option&#39;,
+            ...               &#39;option domain-name &#34;example.org&#34;;&#39;)
+            &gt;&gt;&gt; splitter = TokenSplitter()
+            &gt;&gt;&gt; splitter.switch(token)
+            [&#39;option domain-name&#39;, &#39;&#34;example.org&#34;&#39;, None, None]
+
+        &#34;&#34;&#34;
+        self.token = token
+        default = &#39;No split method found&#39;
+        return getattr(self, str(token.type), lambda: default)() + [None, None]</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="pyisc.bind.utils.BindSplitter" href="../bind/utils.html#pyisc.bind.utils.BindSplitter">BindSplitter</a></li>
+<li><a title="pyisc.dhcpd.utils.DhcpdSplitter" href="../dhcpd/utils.html#pyisc.dhcpd.utils.DhcpdSplitter">DhcpdSplitter</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pyisc.shared.utils.TokenSplitter.switch"><code class="name flex">
+<span>def <span class="ident">switch</span></span>(<span>self, token)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return list of splitted token string.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>token</code></strong> :&ensp;<code><a title="pyisc.shared.parsing.Token" href="parsing.html#pyisc.shared.parsing.Token">Token</a></code></dt>
+<dd>A supplied token instance.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list</code></dt>
+<dd>List of the now splitted string</dd>
+</dl>
+<h2 id="examples">Examples</h2>
+<pre><code class="python-repl">&gt;&gt;&gt; token = Token('parameter_option',
+...               'option domain-name &quot;example.org&quot;;')
+&gt;&gt;&gt; splitter = TokenSplitter()
+&gt;&gt;&gt; splitter.switch(token)
+['option domain-name', '&quot;example.org&quot;', None, None]
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def switch(self, token):
+    &#34;&#34;&#34;
+    Return list of splitted token string.
+
+    Args:
+        token (pyisc.shared.parsing.Token): A supplied token instance.
+
+    Returns:
+        list: List of the now splitted string
+
+    Examples:
+        &gt;&gt;&gt; token = Token(&#39;parameter_option&#39;,
+        ...               &#39;option domain-name &#34;example.org&#34;;&#39;)
+        &gt;&gt;&gt; splitter = TokenSplitter()
+        &gt;&gt;&gt; splitter.switch(token)
+        [&#39;option domain-name&#39;, &#39;&#34;example.org&#34;&#39;, None, None]
+
+    &#34;&#34;&#34;
+    self.token = token
+    default = &#39;No split method found&#39;
+    return getattr(self, str(token.type), lambda: default)() + [None, None]</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pyisc.shared.utils.color"><code class="flex name class">
+<span>class <span class="ident">color</span></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class color:
+    PURPLE = &#39;\033[95m&#39;
+    CYAN = &#39;\033[96m&#39;
+    DARKCYAN = &#39;\033[36m&#39;
+    BLUE = &#39;\033[94m&#39;
+    GREEN = &#39;\033[92m&#39;
+    YELLOW = &#39;\033[93m&#39;
+    RED = &#39;\033[91m&#39;
+    BOLD = &#39;\033[1m&#39;
+    UNDERLINE = &#39;\033[4m&#39;
+    END = &#39;\033[0m&#39;</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyisc.shared.utils.color.BLUE"><code class="name">var <span class="ident">BLUE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="pyisc.shared.utils.color.BOLD"><code class="name">var <span class="ident">BOLD</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="pyisc.shared.utils.color.CYAN"><code class="name">var <span class="ident">CYAN</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="pyisc.shared.utils.color.DARKCYAN"><code class="name">var <span class="ident">DARKCYAN</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="pyisc.shared.utils.color.END"><code class="name">var <span class="ident">END</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="pyisc.shared.utils.color.GREEN"><code class="name">var <span class="ident">GREEN</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="pyisc.shared.utils.color.PURPLE"><code class="name">var <span class="ident">PURPLE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="pyisc.shared.utils.color.RED"><code class="name">var <span class="ident">RED</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="pyisc.shared.utils.color.UNDERLINE"><code class="name">var <span class="ident">UNDERLINE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="pyisc.shared.utils.color.YELLOW"><code class="name">var <span class="ident">YELLOW</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="pyisc.shared" href="index.html">pyisc.shared</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="two-column">
+<li><code><a title="pyisc.shared.utils.event_split" href="#pyisc.shared.utils.event_split">event_split</a></code></li>
+<li><code><a title="pyisc.shared.utils.find_node" href="#pyisc.shared.utils.find_node">find_node</a></code></li>
+<li><code><a title="pyisc.shared.utils.find_node_types" href="#pyisc.shared.utils.find_node_types">find_node_types</a></code></li>
+<li><code><a title="pyisc.shared.utils.get_node" href="#pyisc.shared.utils.get_node">get_node</a></code></li>
+<li><code><a title="pyisc.shared.utils.get_node_types" href="#pyisc.shared.utils.get_node_types">get_node_types</a></code></li>
+<li><code><a title="pyisc.shared.utils.print_tree" href="#pyisc.shared.utils.print_tree">print_tree</a></code></li>
+<li><code><a title="pyisc.shared.utils.sort_tree" href="#pyisc.shared.utils.sort_tree">sort_tree</a></code></li>
+<li><code><a title="pyisc.shared.utils.sort_tree_algorithm" href="#pyisc.shared.utils.sort_tree_algorithm">sort_tree_algorithm</a></code></li>
+<li><code><a title="pyisc.shared.utils.split_at" href="#pyisc.shared.utils.split_at">split_at</a></code></li>
+<li><code><a title="pyisc.shared.utils.split_from" href="#pyisc.shared.utils.split_from">split_from</a></code></li>
+<li><code><a title="pyisc.shared.utils.string_constructor" href="#pyisc.shared.utils.string_constructor">string_constructor</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="pyisc.shared.utils.TokenSplitter" href="#pyisc.shared.utils.TokenSplitter">TokenSplitter</a></code></h4>
+<ul class="">
+<li><code><a title="pyisc.shared.utils.TokenSplitter.switch" href="#pyisc.shared.utils.TokenSplitter.switch">switch</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyisc.shared.utils.color" href="#pyisc.shared.utils.color">color</a></code></h4>
+<ul class="two-column">
+<li><code><a title="pyisc.shared.utils.color.BLUE" href="#pyisc.shared.utils.color.BLUE">BLUE</a></code></li>
+<li><code><a title="pyisc.shared.utils.color.BOLD" href="#pyisc.shared.utils.color.BOLD">BOLD</a></code></li>
+<li><code><a title="pyisc.shared.utils.color.CYAN" href="#pyisc.shared.utils.color.CYAN">CYAN</a></code></li>
+<li><code><a title="pyisc.shared.utils.color.DARKCYAN" href="#pyisc.shared.utils.color.DARKCYAN">DARKCYAN</a></code></li>
+<li><code><a title="pyisc.shared.utils.color.END" href="#pyisc.shared.utils.color.END">END</a></code></li>
+<li><code><a title="pyisc.shared.utils.color.GREEN" href="#pyisc.shared.utils.color.GREEN">GREEN</a></code></li>
+<li><code><a title="pyisc.shared.utils.color.PURPLE" href="#pyisc.shared.utils.color.PURPLE">PURPLE</a></code></li>
+<li><code><a title="pyisc.shared.utils.color.RED" href="#pyisc.shared.utils.color.RED">RED</a></code></li>
+<li><code><a title="pyisc.shared.utils.color.UNDERLINE" href="#pyisc.shared.utils.color.UNDERLINE">UNDERLINE</a></code></li>
+<li><code><a title="pyisc.shared.utils.color.YELLOW" href="#pyisc.shared.utils.color.YELLOW">YELLOW</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>
