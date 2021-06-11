@@ -52,7 +52,7 @@ class BaseParser:
 
         Examples:
             >>> isc_string = 'option domain-name "example.org";'
-
+            [Token(type='parameter_option', value='option domain-name "example.org";')]
 
         """
         scanner = re.Scanner(self.tokens, flags=re.DOTALL | re.VERBOSE)

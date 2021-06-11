@@ -194,6 +194,8 @@ class PropertyNode:
     def __str__(self):
         """Return string of instance."""
         string_repr = filter(None, (self.type, self.value, self.parameters))
+        if self.type in ('execute', 'log', 'concat'):
+            return f'{"".join(string_repr)}'
         return f'{" ".join(string_repr)}'
 
     def __repr__(self):

@@ -36,7 +36,7 @@ class DhcpdParser(BaseParser):
                             range6?(?!.*temporary)|fixed-address6?|
                             fixed-prefix6|prefix6|dynamic-bootp
                             -lease-cutoff)\s)[\w]+\s*?[^\n]*?;"""
-    FORMULA_GENERAL = r"(?:option|v6relay)[^\n=]*?=[^\n]*?;"
+    EXPRESSION_GENERAL = r"(?:option|v6relay)[^\n=]*?=[^\n]*?;"
     # PARAMETER_MULTI_VALUE = r"(?:server-duid\s)[\w]+\s*?[^\n]*?;"
     PARAMETER_SINGLE_VALUE = r"""(?:(?:hardware|host-identifier|load|lease|
                               peer|my\sstate)\s)[\w]+\s*?[^\n]*?;"""
@@ -52,8 +52,8 @@ class DhcpdParser(BaseParser):
             type='declaration_general', value=token)),
         (EVENTS_GENERAL, lambda scanner, token: Token(
             type='event_general', value=token)),
-        (FORMULA_GENERAL, lambda scanner, token: Token(
-            type='formula_general', value=token)),
+        (EXPRESSION_GENERAL, lambda scanner, token: Token(
+            type='expression_general', value=token)),
         (PARAMETER_BOOLEAN, lambda scanner, token: Token(
             type='parameter_boolean', value=token)),
         (PARAMETER_SINGLE_KEY, lambda scanner, token: Token(
@@ -111,7 +111,7 @@ class DhcpdParser(BaseParser):
                 prop = PropertyNode(
                     type=key, value=value, parameters=parameters)
                 node.children.append(prop)
-            if token.type.startswith('formula'):
+            if token.type.startswith('expression'):
                 key, value, parameters, *_ = splitter.switch(token)
                 prop = PropertyNode(
                     type=key, value=value, parameters=parameters)

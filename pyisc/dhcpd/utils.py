@@ -108,6 +108,6 @@ class DhcpdSplitter(TokenSplitter):
         event_type = re.search('execute|set|log', self.token.value).group()
         return event_split(self.token.value[:-1].strip(), event_type)
 
-    def formula_general(self):
+    def expression_general(self):
         """TEMP."""
         return [part.strip() for part in self.token.value[:-1].split('=')]
