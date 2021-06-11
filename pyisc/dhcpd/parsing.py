@@ -37,7 +37,6 @@ class DhcpdParser(BaseParser):
                             fixed-prefix6|prefix6|dynamic-bootp
                             -lease-cutoff)\s)[\w]+\s*?[^\n]*?;"""
     EXPRESSION_GENERAL = r"(?:option|v6relay)[^\n=]*?=[^\n]*?;"
-    # PARAMETER_MULTI_VALUE = r"(?:server-duid\s)[\w]+\s*?[^\n]*?;"
     PARAMETER_SINGLE_VALUE = r"""(?:(?:hardware|host-identifier|load|lease|
                               peer|my\sstate)\s)[\w]+\s*?[^\n]*?;"""
     PARAMETER_OPTION = r"(?:(?:option|server-duid)\s)[\w]+\s*?[^\n]*?;"
@@ -58,8 +57,6 @@ class DhcpdParser(BaseParser):
             type='parameter_boolean', value=token)),
         (PARAMETER_SINGLE_KEY, lambda scanner, token: Token(
             type='parameter_single_key', value=token)),
-        # (PARAMETER_MULTI_VALUE, lambda scanner, token: Token(
-        #     type='parameter_multiple_values', value=token)),
         (PARAMETER_SINGLE_VALUE, lambda scanner, token: Token(
             type='parameter_single_value', value=token)),
         (PARAMETER_OPTION, lambda scanner, token: Token(
@@ -106,17 +103,7 @@ class DhcpdParser(BaseParser):
                 else:
                     next_comment += '\n'
                 next_comment += token.value.strip()
-            if token.type.startswith('event'):
-                key, value, parameters, *_ = splitter.switch(token)
-                prop = PropertyNode(
-                    type=key, value=value, parameters=parameters)
-                node.children.append(prop)
-            if token.type.startswith('expression'):
-                key, value, parameters, *_ = splitter.switch(token)
-                prop = PropertyNode(
-                    type=key, value=value, parameters=parameters)
-                node.children.append(prop)
-            if token.type.startswith('parameter'):
+            if token.type.startswith(('parameter', 'expression', 'event')):
                 key, value, parameters, *_ = splitter.switch(token)
                 prop = PropertyNode(
                     type=key, value=value, parameters=parameters)

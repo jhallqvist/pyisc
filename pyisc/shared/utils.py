@@ -128,45 +128,12 @@ def event_split(string, event_type):
         >>> shared.utils.event_split(isc_string, 'set')
         ['set', ' ClientIP = binary-to-ascii(10, 8, ".", leased-address);']
 
-    """
+    """ # noqa
     word_len = len(event_type)
     return [string[:word_len].strip(), string[word_len:].strip()]
 
 
-def sort_tree_algorithm(child):
-    """Return tuple of values for sorting.
-
-    This is meant to be supplied to the sort functions key attribute.
-    It will sort sort on the object type where mostly all PropertyNodes
-    will be prioritized.
-
-    Args:
-        string (str): The supplied string that will be splitted.
-        child (pyisc.shared.nodes.Node, pyisc.shared.nodes.PropertyNode): The
-            child instance supplied by the sort function.
-
-    Returns:
-        tuple: A tuple with three entires representing the sorting conditions
-            in order of decreasing order.
-    """
-    sort_order = {
-        'key': 1,
-        'failover peer': 2,
-        'subnet': 3,
-        'host': 4,
-        'class': 5,
-        'shared-network': 6,
-        'group': 7,
-        'subclass': 8
-    }
-    condition_one = sort_order.get(child.type, 0)
-    condition_two = child.type
-    condition_three = [int(octet) for octet in child.value.split('.')] if \
-        child.type == 'subnet' else child.value
-    return (condition_one, condition_two, condition_three)
-
-
-def sort_tree(tree):
+def sort_tree(tree, sort_algorithm=None):
     """Sorts the supplied PyISC tree object.
 
     This functions sorts the supplied object tree recursively, based on
@@ -182,7 +149,7 @@ def sort_tree(tree):
     tree_copy = copy.deepcopy(tree)
 
     def inner_func(tree):
-        tree.children.sort(key=sort_tree_algorithm)
+        tree.children.sort(key=sort_algorithm)
         for child in tree.children:
             if isinstance(child, Node):
                 inner_func(child)

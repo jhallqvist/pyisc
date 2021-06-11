@@ -104,10 +104,52 @@ class DhcpdSplitter(TokenSplitter):
         return self.token.value[:-1].strip().split(None, 2)
 
     def event_general(self):
-        """TEMP."""
+        """Return a list from a event type string.
+
+        Expects a string that starts with execute, set or log.
+
+        """
         event_type = re.search('execute|set|log', self.token.value).group()
         return event_split(self.token.value[:-1].strip(), event_type)
 
     def expression_general(self):
-        """TEMP."""
+        """Return a list from a general expression string.
+
+        Expects a string that contains a '=' character and uses that to as a
+        split point.
+
+        """
         return [part.strip() for part in self.token.value[:-1].split('=')]
+
+
+def dhcpd_sort_order(child):
+    """Return tuple of values for sorting.
+
+    This is meant to be supplied to the sort functions key attribute.
+    It will sort sort on the object type where mostly all PropertyNodes
+    will be prioritized.
+
+    Args:
+        string (str): The supplied string that will be splitted.
+        child (pyisc.shared.nodes.Node, pyisc.shared.nodes.PropertyNode): The
+            child instance supplied by the sort function.
+
+    Returns:
+        tuple: A tuple with three entires representing the sorting conditions
+            in order of decreasing order.
+    """
+    sort_order = {
+        'key': 1,
+        'failover peer': 2,
+        'subnet': 3,
+        'host': 4,
+        'class': 5,
+        'shared-network': 6,
+        'group': 7,
+        'subclass': 8
+    }
+    condition_one = sort_order.get(child.type, 0)
+    condition_two = child.type
+    condition_three = [int(octet) for octet in child.value.split('.')] if \
+        child.type == 'subnet' else child.value
+    return (condition_one, condition_two, condition_three)

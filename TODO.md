@@ -2,6 +2,7 @@
 
 ## DHCPD
 
+- [ ] Add print_tree, sort, get_node and other functions from shared.utils as methods to either the Parser class or a new class? Advantage of this would b a simpler way of working with the tree. Maybe combine this with a new init for the Parser class that would need the unparsed string (ie. a self.content to the parser class).
 - [ ] Parsing status:
   - [x] DHCPd Conf - Parses as expected.
   - [x] DHCPd Option - Parses as expected.
@@ -12,15 +13,16 @@
   - [ ] A test and example of combining two files (i.e. load both and insert one into the other).
   - [ ] A test for loads and dumps function.
   - [ ] Tests to verify string gets expected token?
-- [x] Change 'formula_general' to 'expression_general'.
 - [ ] Implement a isinstance check for append and extend to make certain only allowed objects gets injected.
 - [ ] Clean up commented code that is no longer needed.
-- [ ] Combine event and expression/formula action in build_tree with parameter action as they do the same thing.
 - [ ] Investigate if there is a gain to create more node types for events and expressions/formula.
-- [ ] Add missing Docstrings for event and expression functions in DhcpdSplitter class.
 - [ ] Find out more about events. Aside from log, execute, set and concat - what more actions exists if any. Should they all be treated equally when parsing?
-  - Currently the dumps function adds a space between execute/log and the paranthesis. This needs to be investigated to make certain that that space is allowed by dhcpd daemon and doesn't cause a errouneous conf file. A config verification of __dhcpd -t -cf /etc/dhcp/dhcpd.conf__ allows the space so whould be ok.
-  UPDATE: I have modified the dunder str method for ProperyNode to return a differnet join if type is execute, log or concat. This returns the string in a more pleasing and correct manner.
+  - ~~Currently the dumps function adds a space between execute/log and the paranthesis. This needs to be investigated to make certain that that space is allowed by dhcpd daemon and doesn't cause a errouneous conf file.~~
+    - ~~A config verification of __dhcpd -t -cf /etc/dhcp/dhcpd.conf__ allows the space so whould be ok.~~
+  - ~~UPDATE: I have modified the dunder str method for ProperyNode to return a different join if type is execute, log or concat. This returns the string in a more pleasing and correct manner.~~
+- [x] Add missing Docstrings for event and expression functions in DhcpdSplitter class.
+- [x] Combine event and expression/formula action in build_tree with parameter action as they do the same thing.
+- [x] Change 'formula_general' to 'expression_general'.
 
 ## BIND
 
@@ -41,12 +43,12 @@
 - [ ] Function that sorts the tree. PropertyNodes need to come first and be sorted based on their key. After that comes the Nodes.
   - [x] Sorting is implemented but might need modification. Currently it sorts the supplied tree instead of returning a new one. Which method i preferable?
     - [x] Chose to rewrite sort_tree function with a nested function so now it does not modify the original tree but returns a new, sorted one instead.
-  - [ ] Might be of use to allow user to supply their own sorting algorithm by modifying the sort_tree function.
-- [ ] Make dokumentation available on free GitHub pages.
+  - [x] Might be of use to allow user to supply their own sorting algorithm by modifying the sort_tree function.
+- [x] Make documentation available on free GitHub pages.
 - [ ] Full dictionary representation with the \__dict__ methods. Might actually skip this.
   - Currently a as_dict method has been created for the RootNode class that works well enough for this.
 - [ ] Inline Documentation....
-- [ ] Make decorators for loads, dumps in order to reduce duplicate code?
+- [ ] ~~Make decorators for loads, dumps in order to reduce duplicate code?~~
 - [x] Make an \__iter__ method for objects with children (RootNode & Node) for easier iteration:
 - [x] Change constructor attributes of Node and ProprteyNode to match in order to make sorting cleaner?
 - [x] Make a dumps function take an argument for disabling comments. Defalt is enabled.

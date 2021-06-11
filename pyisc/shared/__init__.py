@@ -20,5 +20,5 @@ sub-modules to reduce duplication in the code.
 
 """
 
-__version__ = '1.0'
+__version__ = '0.3.1'
 __author__ = 'Jonas Hallqvist'

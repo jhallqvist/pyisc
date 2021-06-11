@@ -102,7 +102,7 @@ Attributes:
 """
 
 __all__ = ['dumps', 'loads', 'print_tree', 'sort_tree']
-__version__ = '1.0'
+__version__ = '0.4.0'
 __author__ = 'Jonas Hallqvist'
 
 # from pyisc.shared.nodes import Node, PropertyNode

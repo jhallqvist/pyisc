@@ -6,7 +6,7 @@ sys.path.append("..")
 from pyisc import dhcpd
 
 file_array = [
-    '../data/dhcpd_ref-conf.conf',
+    '../data/dhcpd_ref-dhcpd.conf',
     '../data/dhcpd_ref-options.conf'
 ]
 parser = dhcpd.parsing.DhcpdParser()

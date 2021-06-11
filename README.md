@@ -67,10 +67,6 @@ shared-network 224-29 {
 }
 ```
 
-## Withstanding issues
-
-* Rework the generate_stmt.py to better group statements into groups and split on those (bools, split on nth occurence and so on).
-
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.

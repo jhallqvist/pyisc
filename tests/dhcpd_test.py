@@ -67,10 +67,10 @@ class TestInsertIntoTree(unittest.TestCase):
 
 class TestParsingConfFile(unittest.TestCase):
     def setUp(self):
-        conf_reference_file = 'data/dhcpd_ref-conf.conf'
+        conf_reference_file = 'data/dhcpd_ref-dhcpd.conf'
         self.conf_file = open(conf_reference_file, 'r')
         self.confdata = self.conf_file.read()
-        reference_file = 'data/dhcpd_ref-conf.md'
+        reference_file = 'data/dhcpd_ref-dhcpd.md'
         self.ref_file = open(reference_file, 'r')
         self.refdata = self.ref_file.read()
         self.parser = dhcpd.parsing.DhcpdParser()

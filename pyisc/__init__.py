@@ -22,7 +22,7 @@ for Bind9s named.conf file the bind subpackage is used.
 """
 
 __all__ = ['dhcpd', 'bind']
-__version__ = '1.0'
+__version__ = '0.3.1'
 __author__ = 'Jonas Hallqvist'
 
 from pyisc import dhcpd, bind
