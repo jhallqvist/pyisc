@@ -83,7 +83,7 @@ class RootNode:
 class Node:
     """Represents an entity capable of having properties."""
 
-    def __init__(self, type=None, value=None, parameters=None, children=None):
+    def __init__(self, type=None, value=None, parameters=None, children=None, lineno=0, filename=None):
         """Initialize attributes for the class.
 
         Args:
@@ -103,6 +103,8 @@ class Node:
         self.children = [] if not children else children
         self.parameters = parameters
         self.comment = None
+        self.lineno = lineno
+        self.filename = filename
 
     def __eq__(self, other):
         """Return boolean value from comparison with other object."""
@@ -159,7 +161,7 @@ class Node:
 class PropertyNode:
     """Represents a property of a node."""
 
-    def __init__(self, type=None, value=None, parameters=None):
+    def __init__(self, type=None, value=None, parameters=None, lineno=0, filename=None):
         """Initialize attributes for the class.
 
         Args:
@@ -173,6 +175,8 @@ class PropertyNode:
         self.value = value
         self.parameters = parameters
         self.comment = None
+        self.lineno = lineno
+        self.filename = filename
 
     def __eq__(self, other):
         """Return boolean value from comparison with other object."""

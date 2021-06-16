@@ -92,8 +92,11 @@ class DhcpdParser(BaseParser):
         node_stack = []
         splitter = DhcpdSplitter()
         next_comment = None
+        lineno = 1
         for token in self.tokenize(content):
             if token.type in ['whitespace', 'newline']:
+                if token.type == 'newline':
+                    lineno += 1
                 continue
             if token.type == 'section_end':
                 node = node_stack.pop()
@@ -103,16 +106,17 @@ class DhcpdParser(BaseParser):
                 else:
                     next_comment += '\n'
                 next_comment += token.value.strip()
+                lineno += 1
             if token.type.startswith(('parameter', 'expression', 'event')):
                 key, value, parameters, *_ = splitter.switch(token)
                 prop = PropertyNode(
-                    type=key, value=value, parameters=parameters)
+                    type=key, value=value, parameters=parameters, lineno=lineno)
                 prop.comment = next_comment
                 next_comment = None
                 node.children.append(prop)
             if token.type.startswith('declaration'):
                 key, value, parameters, *_ = splitter.switch(token)
-                section = Node(type=key, value=value, parameters=parameters)
+                section = Node(type=key, value=value, parameters=parameters, lineno=lineno)
                 section.comment = next_comment
                 next_comment = None
                 node.children.append(section)
