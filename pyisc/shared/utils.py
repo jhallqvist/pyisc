@@ -15,6 +15,8 @@
 """General helper functions and classes for the module."""
 
 import copy
+import shlex
+
 from pyisc.shared.nodes import Node, PropertyNode
 
 
@@ -65,13 +67,13 @@ class TokenSplitter:
         return getattr(self, str(token.type), lambda: default)() + [None, None]
 
 
-def split_at(string, sep, pos):
+def split_at(string, pos):
     """
-    Return string splitted at the desired separator.
+    Return string splitted at the desired separator.  Whitespace is normalized,
+         except in quoted strings
 
     Args:
         string (str): The supplied string that will be splitted.
-        sep (str): The desired separator to use for the split.
         pos (int): The desired occurence of the defined separator
             within the supplied string and hence the point of the split
             operation.
@@ -81,21 +83,21 @@ def split_at(string, sep, pos):
 
     Examples:
         >>> isc_string = 'option domain-name "example.org";'
-        >>> shared.utils.split_at(isc_string, ' ', 2)
+        >>> shared.utils.split_at(isc_string, 2)
         ['option domain-name', '"example.org";']
 
     """
-    string = string.split(sep)
-    return [sep.join(string[:pos]), sep.join(string[pos:])]
+    string = shlex.split(string, posix=False)
+    return [' '.join(string[:pos]), ' '.join(string[pos:])]
 
 
-def split_from(string, sep, pos):
+def split_from(string, pos):
     """
-    Return string splitted from the desired separator.
+    Return string splitted from the desired separator.  Whitespace is normalized.
+         except in quoted strings
 
     Args:
         string (str): The supplied string that will be splitted.
-        sep (str): The desired separator to use for the split.
         pos (int): The desired first occurence of the defined separator
             within the supplied string. This will be the position of
             the first split performed.
@@ -105,12 +107,12 @@ def split_from(string, sep, pos):
 
     Examples:
         >>> isc_string = 'failover peer "dhcpd-failover" state'
-        >>> shared.utils.split_from(isc_string, ' ', 2)
+        >>> shared.utils.split_from(isc_string, 2)
         ['failover peer', '"dhcpd-failover"', 'state']
 
     """
-    string = string.split(sep)
-    return [sep.join(string[:pos])] + string[pos:]
+    string = shlex.split(string, posix=False)
+    return [' '.join(string[:pos])] + string[pos:]
 
 
 def event_split(string, event_type):

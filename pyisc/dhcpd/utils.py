@@ -28,7 +28,7 @@ class DhcpdSplitter(TokenSplitter):
         separated by a comma)
 
         """
-        return split_at(self.token.value[:-1], ' ', 2)
+        return split_at(self.token.value[:-1], 2)
 
     def parameter_boolean(self):
         """Return a list of the supplied string
@@ -74,7 +74,7 @@ class DhcpdSplitter(TokenSplitter):
         semicolon.
 
         """
-        return split_from(self.token.value[:-1], ' ', 2)
+        return split_from(self.token.value[:-1], 2)
 
     def parameter_general(self):
         """Return a list from a general parameter string.
@@ -92,7 +92,7 @@ class DhcpdSplitter(TokenSplitter):
         left curly bracket.
 
         """
-        return split_from(self.token.value[:-1].strip(), ' ', 2)
+        return split_from(self.token.value[:-1].strip(), 2)
 
     def declaration_general(self):
         """Return a list from a general declaration string.
