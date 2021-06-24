@@ -2,7 +2,9 @@
 
 ## DHCPD
 
+- [ ] Based on ISC KB I believe that all parameters and all declarations are allowed within a scoped declaration (declaration with {}). This needs to be tested as it is relevant to the validation in the future RestAPI. If this is true then there will only be a few pydantid schemas necessary which would be great.
 - [ ] Add print_tree, sort, get_node and other functions from shared.utils as methods to either the Parser class or a new class? Advantage of this would b a simpler way of working with the tree. Maybe combine this with a new init for the Parser class that would need the unparsed string (ie. a self.content to the parser class).
+- [ ] Validator for the file. The flow of editing a file should be load file to Object Tree, Edit as needed, write dump to candidate file, verify candidate file with supplied ISC tools for the task, if file ok move original and append a date prefix to the file, rename candidate to the original file name and restart server to read the file.
 - [ ] Parsing status:
   - [x] DHCPd Conf - Parses as expected.
   - [x] DHCPd Option - Parses as expected.
@@ -45,7 +47,7 @@
     - [x] Chose to rewrite sort_tree function with a nested function so now it does not modify the original tree but returns a new, sorted one instead.
   - [x] Might be of use to allow user to supply their own sorting algorithm by modifying the sort_tree function.
 - [x] Make documentation available on free GitHub pages.
-- [ ] Full dictionary representation with the \__dict__ methods. Might actually skip this.
+- [x] Full dictionary representation with the \__dict__ methods. Might actually skip this.
   - Currently a as_dict method has been created for the RootNode class that works well enough for this.
 - [ ] Inline Documentation....
 - [ ] ~~Make decorators for loads, dumps in order to reduce duplicate code?~~

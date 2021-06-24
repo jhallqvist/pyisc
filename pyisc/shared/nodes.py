@@ -57,10 +57,6 @@ class RootNode:
         """Implement iter(self) with child objects in instance."""
         return iter(self.children)
 
-    def as_dict(self):
-        json_str = json.dumps(self, default=lambda x: x.__dict__)
-        return json.loads(json_str)
-
     @property
     def children(self):
         """Getter for self._children."""
@@ -78,6 +74,14 @@ class RootNode:
     def extend(self, val):
         """Implements extend method on self to extend directly to children."""
         return self.children.extend(val)
+
+    def as_dict(self):
+        return {
+            "type": self.type,
+            "children": [
+                child.as_dict() for child in self.children
+                ]
+            }
 
 
 class Node:
@@ -155,6 +159,23 @@ class Node:
         """Implements extend method on self to extend directly to children."""
         return self.children.extend(val)
 
+    def as_dict(self):
+        return {
+            self.type: self.value,
+            "parameters": self.parameters,
+            "children": [
+                child.as_dict() for child in self.children
+                ]
+            }
+        # Dict Comprehension version
+        # return {
+        #     self.type: self.value,
+        #     "parameters": self.parameters,
+        #     "children": {
+        #         x.type: x.value, "parameters": x.parameters for x in self.children
+        #         }
+        #     }
+
 
 class PropertyNode:
     """Represents a property of a node."""
@@ -201,3 +222,9 @@ class PropertyNode:
     def __repr__(self):
         """Return representation of instance."""
         return f'PropertyNode({self.type}, {self.value}, {self.parameters})'
+
+    def as_dict(self):
+        return {
+            self.type: self.value,
+            "parameters": self.parameters
+            }
