@@ -21,8 +21,8 @@ for Bind9s named.conf file the bind subpackage is used.
 
 """
 
-__all__ = ['dhcpd', 'bind']
+__all__ = ['dhcpd']
 __version__ = '0.3.1'
 __author__ = 'Jonas Hallqvist'
 
-from pyisc import dhcpd, bind
+from pyisc import dhcpd
