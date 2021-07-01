@@ -1,6 +1,20 @@
+# Copyright 2021 Jonas Hallqvist
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#     http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from typing import NamedTuple
 import re
-from pyisc.dhcpd.nodes import (Class, Failover, Global, Group, Hardware, Host, Key, Option, Pool4, Range4, SharedNetwork, Subnet4)
+from pyisc.dhcpd.nodes import (Class, Failover, Global, Group, Hardware, Host, Include, Key, Option, Pool4, Range4, SharedNetwork, SubClass, Subnet4, Zone)
 
 class Token(NamedTuple):
     type: str
@@ -27,16 +41,18 @@ class DhcpdParser:
             ('FAILOVER',            r'failover\s+[^\n]*?{'),                # SCOPE
             ('FAILOVER_PARAMETER',  r'failover\s+[^\n]*?;'),                # PARAMETER
             ('CLASS',               r'class\s+[^\n]*?{'),                   # SCOPE
-            ('SERVER_DUID',         r'server-duid\s+[^\n]*?;'),             # PARAMETER
+            ('SERVER_DUID',         r'server-duid\s+[^\n]*?;'),             # PARAMETER - Not implemented
             ('HARDWARE',            r'hardware\s+[^\n]*?;'),                # PARAMETER
-            ('ZONE',                r'zone\s+[^\n]*?{'),                    # SCOPE
             ('KEY',                 r'key\s+[^\n]*?{'),                     # SCOPE
-            ('EVENT',               r'on\s+[^\n]*?{'),                      # SCOPE
+            ('ZONE',                r'zone\s+[^\n]*?{'),                    # SCOPE
+            ('PRIMARY',             r'primary\s+[^\n]*?;'),                 # SCOPE
+            ('KEY_PARAMETER',       r'key\s+[^\n]*?;'),                     # PARAMETER
+            ('EVENT',               r'on\s+[^\n]*?{'),                      # SCOPE - Not implemented
             ('OPTION',              r'option\s+[^\n=]*?;'),                 # PARAMETER
             ('RANGE4',              r'range\s+[^\n]*?;'),                   # PARAMETER
             ('INCLUDE',             r'include\s+[^\n]*?;'),                 # PARAMETER
             ('FAILOVER_ROLE',       r'(primary|secondary);'),               # PARAMETER
-            ('BOOLEAN',             r'\w+;'),                               # PARAMETER
+            ('AUTHORITATIVE',       r'(?:not\s+)?authoritative;'),          # PARAMETER
             ('ALLOW_MEMBER',        r'allow\s+member[^\n]*?;'),
             ('DENY_MEMBER',         r'deny\s+member[^\n]*?;'),
             ('CLASS_STATEMENT',     r'match\s+(?:if\s+)?[^\n]*?;'),
@@ -46,7 +62,7 @@ class DhcpdParser:
             ('COMMENT_UNIX',        r'\#.*'),                               # COMMENT
             ('NEWLINE',             r'\n'),
             ('SKIP',                r'[ \t]+'),
-            ('MISMATCH',            r'.'),            # Any other character
+            ('MISMATCH',            r'.'),                                  # Any other character
         ]
         tok_regex = '|'.join('(?P<%s>%s)' % pair for pair in token_specification)
         line_num = 1
@@ -59,8 +75,8 @@ class DhcpdParser:
                 line_start = mo.end()
                 line_num += 1
                 continue
-            elif kind == 'SKIP':
-                continue
+            # elif kind == 'SKIP':
+            #     continue
             elif kind == 'MISMATCH':
                 raise RuntimeError(f'{value!r} unexpected on line {line_num}')
             yield Token(kind, value, line_num, column)
@@ -78,10 +94,26 @@ class DhcpdParser:
                 if option.isdigit():
                     node_option = Option(number=option, value=value)
                 else:
+                    option = option.replace('-', '_')
                     node_option = Option(name=option, value=value)
                 node.add_option(node_option)
+            elif token.type == 'AUTHORITATIVE':
+                if 'not' in token.value:
+                    node.authoritative = False
+                else:
+                    node.authoritative = True
+            elif token.type == 'PRIMARY':
+                _, primary = token.value[:-1].split()
+                node.primary = primary
+            elif token.type == 'KEY_PARAMETER':
+                _, key = token.value[:-1].split()
+                node.key = Key(name=key)
             elif token.type == 'FAILOVER_ROLE':
                 node.role = token.value[:-1]
+            elif token.type == 'INCLUDE':
+                _, file_name = token.value[:-1].split()
+                declaration = Include(filename=file_name)
+                node.add_include(declaration)
             elif token.type == 'GENERAL_PARAMETER':
                 key, value = token.value[:-1].rsplit(' ', 1)
                 attr_key = key.replace('-', '_').replace(' ', '_')
@@ -93,6 +125,10 @@ class DhcpdParser:
             elif token.type == 'DENY_MEMBER':
                 _, value = token.value[:-1].rsplit(' ', 1)
                 node.add_denied_member(value)
+            elif token.type == 'SUBCLASS_PARAMETER':
+                _, name, match_value = token.value[:-1].split()
+                subclass = SubClass(name=name, match_value=match_value)
+                node.add_subclass(subclass)
             elif token.type == 'HARDWARE':
                 _, hardware_type, hardware_address = token.value[:-1].split()
                 node_hardware = Hardware(type=hardware_type, address=hardware_address)
@@ -162,6 +198,18 @@ class DhcpdParser:
                 _, name = token.value[:-1].split()
                 declaration = Class(name=name)
                 node.add_class(declaration)
+                node_stack.append(node)
+                node = declaration
+            elif token.type == 'SUBCLASS':
+                _, name, match_value = token.value[:-1].split()
+                declaration = SubClass(name=name, match_value=match_value)
+                node.add_subclass(declaration)
+                node_stack.append(node)
+                node = declaration
+            elif token.type == 'ZONE':
+                _, name = token.value[:-1].split()
+                declaration = Zone(name=name)
+                node.add_zone(declaration)
                 node_stack.append(node)
                 node = declaration
             else:

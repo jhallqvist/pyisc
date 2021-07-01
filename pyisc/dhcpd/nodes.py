@@ -1,8 +1,23 @@
+# Copyright 2021 Jonas Hallqvist
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#     http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from typing import List, Union
 from ipaddress import IPv4Network
 from pyisc.dhcpd.mixin import (KeyMixin, Parameters, OptionMixin, PoolMixin, RangeMixin,
                                SubnetMixin, SharedNetworkMixin, GroupMixin, 
-                               HostMixin, ClassMixin, SubClassMixin, ZoneMixin)
+                               HostMixin, ClassMixin, SubClassMixin, ZoneMixin,
+                               IncludeMixin)
 
 class Failover:
     def __init__(
@@ -105,10 +120,10 @@ class Option:
             self.__value = value
     def __str__(self) -> str:
         if isinstance(self.value, list):
-            return (f'option {self.name if self.name else self.number} '
+            return (f'option {self.name.replace("_","-") if self.name else self.number} '
                     f'{", ".join(self.value)}')
         else:
-            return (f'option {self.name if self.name else self.number} '
+            return (f'option {self.name.replace("_","-") if self.name else self.number} '
                     f'{self.value}')
     def __repr__(self) -> str:
         key = f'name="{self.name}"' if self.name else f'number="{self.number}"'
@@ -218,8 +233,12 @@ class Class:
         attrs = []
         child_indent = indent+4
         for key, value in self.__dict__.items():
+            if key == 'lease_limit':
+                new_key = key.replace("_", " ")
+            else:
+                new_key = key.replace("_", "-")
             if all((value, key != 'name')):
-                attrs.append(f'{" " * child_indent}{key} {value};')
+                attrs.append(f'{" " * child_indent}{new_key} {value};')
         return_str = (f'{" " * indent}{self.__str__()}' ' {')
         if len(attrs) > 0:
             return_str += '\n'
@@ -228,16 +247,19 @@ class Class:
         return (f'{return_str}{attrs_str}' '\n' f'{" " * indent}{section_end}')
 
 
-class SubClass:
+class SubClass(Parameters, OptionMixin):
     def __init__(
         self,
         name:           str,
         match_value:    str,
-        lease_limit:    int=None
+        lease_limit:    int=None,
+        options:        List[Option]=None,
     ) -> None:
         self.name = name
         self.match_value = match_value
         self.lease_limit = lease_limit
+        self.options = [] if not options else options
+        super().__init__()
     def __str__(self) -> str:
         return f'subclass {self.name} {self.match_value}'
     def __repr__(self) -> str:
@@ -246,7 +268,11 @@ class SubClass:
         attrs = []
         child_indent = indent+4
         for key, value in self.__dict__.items():
-            if all((value, key != 'name', key != 'match_value')):
+            new_key = key.replace("_", "-")
+            if isinstance(value, list):
+                for item in value:
+                    attrs.append(item.to_isc(indent=child_indent))
+            elif all((value, key != 'name', key != 'match_value')):
                 attrs.append(f'{" " * child_indent}{key} {value};')
         if len(attrs) == 0:
             return f'{" " * indent}{self.__str__()};'
@@ -282,10 +308,11 @@ class Host(Parameters):
         attrs = []
         child_indent = indent+4
         for key, value in self.__dict__.items():
+            new_key = key.replace("_", "-")
             if isinstance(value, Hardware):
                 attrs.append(f'{" " * child_indent}{value.to_isc()}')
             elif all((value, key != 'name')):
-                attrs.append(f'{" " * child_indent}{key} {value};')
+                attrs.append(f'{" " * child_indent}{new_key} {value};')
         return_str = (f'{" " * indent}{self.__str__()}' ' {')
         if len(attrs) > 0:
             return_str += '\n'
@@ -482,7 +509,7 @@ class Group(Parameters, SubnetMixin, SharedNetworkMixin, HostMixin, OptionMixin)
 
 
 class Global(Parameters, OptionMixin, SubnetMixin, SharedNetworkMixin,
-             GroupMixin, HostMixin, ClassMixin, SubClassMixin, KeyMixin, ZoneMixin):
+             GroupMixin, HostMixin, ClassMixin, SubClassMixin, KeyMixin, ZoneMixin, IncludeMixin):
     def __init__(
         self,
         abandon_lease_time:             str=None,
@@ -499,6 +526,7 @@ class Global(Parameters, OptionMixin, SubnetMixin, SharedNetworkMixin,
         bind_local_address6:            bool=None,
         log_facility:                   str=None,
         omapi_port:                     int=None,
+        omapi_key:                      str=None,
         persist_eui_64_leases:          bool=None,
         pid_file_name:                  str=None,
         dhcpv6_pid_file_name:           str=None,
@@ -532,8 +560,9 @@ class Global(Parameters, OptionMixin, SubnetMixin, SharedNetworkMixin,
         self.local_address = local_address
         self.local_address6 = local_address6
         self.bind_local_address6 = bind_local_address6
-        self.log_facility =log_facility
-        self.omapi_port =omapi_port
+        self.log_facility = log_facility
+        self.omapi_port = omapi_port
+        self.omapi_key = omapi_key
         self.pid_file_name =pid_file_name
         self.dhcpv6_pid_file_name = dhcpv6_pid_file_name
         self.release_on_roam = release_on_roam
@@ -563,19 +592,20 @@ class Global(Parameters, OptionMixin, SubnetMixin, SharedNetworkMixin,
         attrs = []
         sort_order = {
             'options': 1,
-            'keys': 2,
-            'zones': 3,
-            'failover': 4,
-            'subnets': 5,
-            'shared_networks': 6,
-            'classes': 7,
-            'subclasses': 8, 
-            'hosts': 9,
-            'groups': 10,
-            'includes': 11
+            'includes': 2,
+            'keys': 3,
+            'zones': 4,
+            'failover': 5,
+            'subnets': 6,
+            'shared_networks': 7,
+            'classes': 8,
+            'subclasses': 9, 
+            'hosts': 10,
+            'groups': 11
             }
         sorted_dict = sorted(self.__dict__.items(), key=lambda x: sort_order.get(x[0], 0))
         for key, value in sorted_dict:
+            new_key = key.replace("_", "-")
             if value and key == 'failover':
                 attrs.append(value.to_isc())
             elif all((isinstance(value, bool), key == 'authoritative')):
@@ -587,6 +617,6 @@ class Global(Parameters, OptionMixin, SubnetMixin, SharedNetworkMixin,
                 for item in value:
                     attrs.append(item.to_isc())
             elif value:
-                attrs.append(f'{key} {value};')
+                attrs.append(f'{new_key} {value};')
         attrs_str = "\n".join(attrs)
         return (f'{attrs_str}')
