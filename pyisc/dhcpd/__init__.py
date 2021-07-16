@@ -31,5 +31,12 @@ __all__ = []
 __version__ = '0.4.0'
 __author__ = 'Jonas Hallqvist'
 
-# from .mixin import *
+from pyisc.dhcpd.parsing import DhcpdParser
 from pyisc.dhcpd.nodes import *
+
+def loads(content):
+    parser = DhcpdParser()
+    return parser.construct_tree(content)
+
+def dumps(object_tree):
+    return object_tree.to_isc()

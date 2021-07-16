@@ -52,7 +52,7 @@ class PoolMixin:
         pass
 
 class OptionMixin:
-    def add_option(self, option: 'Option4'):
+    def add_option(self, option: 'Option'):
         self.options.append(option)
     def find_option(self, option):
         pass
@@ -116,6 +116,7 @@ class KeyMixin:
         pass
 
 class IncludeMixin:
+    """Methods for working with the Include class as an attribute."""
     def add_include(self, include: 'Include'):
         self.includes.append(include)
     def find_include(self, include):
@@ -124,6 +125,12 @@ class IncludeMixin:
         pass
 
 class Parameters:
+    """Contains all inheritable ISC Parameters.
+    
+    Parameters not found in this class belong in certain scopes and hence are
+    declared as an attribute directly in that class.
+
+    """
     def __init__(
         self,
         # abandon_lease_time=None,

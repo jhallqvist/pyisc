@@ -136,6 +136,29 @@ class Option:
         return f'{" " * indent}{self.__str__()};'
 
 
+class Hardware:
+    def __init__(self, type: str, address:str) -> None:
+        self.type = type
+        self.address = address
+    def __str__(self) -> str:
+        return f'hardware {self.type} {self.address}'
+    def __repr__(self) -> str:
+        return f'Hardware(type="{self.type}", address="{self.address}")'
+    def to_isc(self, indent=0):
+        return f'{" " * indent}{self.__str__()};'
+
+
+class ServerDuid:
+    def __init__(self) -> None:
+        pass
+    def __str__(self) -> str:
+        pass
+    def __repr__(self) -> str:
+        pass
+    def to_isc(self, indent=0):
+        pass
+
+
 class Key:
     def __init__(
         self,
@@ -188,28 +211,6 @@ class Zone:
         section_end = '}'
         return (f'{return_str}{attrs_str}' '\n' f'{" " * indent}{section_end}')
 
-
-class Hardware:
-    def __init__(self, type: str, address:str) -> None:
-        self.type = type
-        self.address = address
-    def __str__(self) -> str:
-        return f'hardware {self.type} {self.address}'
-    def __repr__(self) -> str:
-        return f'Hardware(type="{self.type}", address="{self.address}")'
-    def to_isc(self, indent=0):
-        return f'{" " * indent}{self.__str__()};'
-
-
-class ServerDuid:
-    def __init__(self) -> None:
-        pass
-    def __str__(self) -> str:
-        pass
-    def __repr__(self) -> str:
-        pass
-    def to_isc(self, indent=0):
-        pass
 
 class Class:
     def __init__(
