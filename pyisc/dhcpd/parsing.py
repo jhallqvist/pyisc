@@ -18,6 +18,12 @@ from pyisc.dhcpd.nodes import (Class, Failover, Global, Group, Hardware, Host, I
 from pyisc.dhcpd.utils import TokenProcessor
 
 class Token(NamedTuple):
+    """A class to implement tokens for text classification.
+
+    Description here.
+
+    """
+
     type: str
     value: str
     line: int
@@ -84,7 +90,7 @@ class DhcpdParser:
 
     def construct_tree(self, content):
         isc_declarations = ('KEY', 'SUBNET4', 'SHARED_NETWORK', 'FAILOVER', 'POOL', 'GROUP', 'HOST', 'DHCP_CLASS', 'SUBCLASS', 'ZONE')
-        parameters = ('AUTHORITATIVE', 'FAILOVER_PARAMETER', 'RANGE4', 'OPTION', 'SUBCLASS_PARAMETER', 'HARDWARE', 'KEY_PARAMETER', 'PRIMARY', 'FAILOVER_ROLE', 'INCLUDE', 'GENERAL_PARAMETER', 'ALLOW_MEMBER', 'DENY_MEMBER', 'CLASS_STATEMENT', 'SPAWN_CLASS')
+        # parameters = ('AUTHORITATIVE', 'FAILOVER_PARAMETER', 'RANGE4', 'OPTION', 'SUBCLASS_PARAMETER', 'HARDWARE', 'KEY_PARAMETER', 'PRIMARY', 'FAILOVER_ROLE', 'INCLUDE', 'GENERAL_PARAMETER', 'ALLOW_MEMBER', 'DENY_MEMBER', 'CLASS_STATEMENT', 'SPAWN_CLASS')
         node = Global()
         node_stack = []
         processor = TokenProcessor()
