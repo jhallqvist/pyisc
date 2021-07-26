@@ -160,7 +160,7 @@ class Parameters:
     def __init__(
         self,
         # abandon_lease_time=None,
-        adaptive_lease_time_threshold=None,
+        adaptive_lease_time_threshold: int=None,
         # always_broadcast=None,
         always_reply_rfc1048=None,
         # authoritative=None,
@@ -237,7 +237,13 @@ class Parameters:
         use_lease_addr_for_default_route=None,
         vendor_option_space=None,
 
-    ) -> object:
+    ) -> None:
+        """Initialize attributes for the class.
+        
+        Args:
+            adaptive_lease_time_threshold (int): A percentage value 
+                    between 1 and 99.
+        """
         # self.abandon_lease_time = abandon_lease_time
         self.adaptive_lease_time_threshold = adaptive_lease_time_threshold
         # self.always_broadcast = always_broadcast

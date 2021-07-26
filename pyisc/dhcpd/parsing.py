@@ -18,11 +18,7 @@ from pyisc.dhcpd.nodes import Global
 from pyisc.dhcpd.utils import TokenProcessor
 
 class Token(NamedTuple):
-    """A class to implement tokens for text classification.
-
-    Description here.
-
-    """
+    """A class to implement tokens for text classification."""
 
     type: str
     value: str
@@ -43,17 +39,17 @@ class DhcpdParser:
             ('POOL',                r'pool\s+[^\n]*?{'),                    # SCOPE
             ('GROUP',               r'group\s+[^\n]*?{'),                   # SCOPE
             ('HOST',                r'host\s+[^\n]*?{'),                    # SCOPE
-            ('SUBCLASS',            r'subclass\s+[^\n]*?{'),                # SCOPE
-            ('SUBCLASS_PARAMETER',  r'subclass\s+[^\n]*?;'),                # PARAMETER
+            ('SUBCLASS',            r'subclass\s+[^\n]*?({|;)'),                # SCOPE
+            # ('SUBCLASS_PARAMETER',  r'subclass\s+[^\n]*?;'),                # PARAMETER
             ('FAILOVER',            r'failover\s+[^\n]*?({|;)'),                # SCOPE
             # ('FAILOVER_PARAMETER',  r'failover\s+[^\n]*?;'),                # PARAMETER
             ('DHCP_CLASS',          r'class\s+[^\n]*?{'),                   # SCOPE
             ('SERVER_DUID',         r'server-duid\s+[^\n]*?;'),             # PARAMETER - Not implemented
             ('HARDWARE',            r'hardware\s+[^\n]*?;'),                # PARAMETER
-            ('KEY',                 r'key\s+[^\n]*?{'),                     # SCOPE
+            ('KEY',                 r'key\s+[^\n]*?({|;)'),                     # SCOPE
             ('ZONE',                r'zone\s+[^\n]*?{'),                    # SCOPE
             ('PRIMARY',             r'primary\s+[^\n]*?;'),                 # SCOPE
-            ('KEY_PARAMETER',       r'key\s+[^\n]*?;'),                     # PARAMETER
+            # ('KEY_PARAMETER',       r'key\s+[^\n]*?;'),                     # PARAMETER
             ('EVENT',               r'on\s+[^\n]*?{'),                      # SCOPE - Not implemented
             ('OPTION',              r'option\s+[^\n=]*?;'),                 # PARAMETER
             ('RANGE4',              r'range\s+[^\n]*?;'),                   # PARAMETER
@@ -68,7 +64,7 @@ class DhcpdParser:
             ('SCOPE_END',           r'}'),
             ('COMMENT_UNIX',        r'\#.*'),                               # COMMENT - Not implemented
             ('NEWLINE',             r'\n'),
-            ('SKIP',                r'[ \t]+'),
+            ('WHITESPACE',                r'[ \t]+'),
             ('MISMATCH',            r'.'),                                  # Any other character
         ]
         tok_regex = '|'.join('(?P<%s>%s)' % pair for pair in token_specification)
@@ -82,7 +78,7 @@ class DhcpdParser:
                 line_start = mo.end()
                 line_num += 1
                 continue
-            # elif kind == 'SKIP':
+            # elif kind == 'WHITESPACE':
             #     continue
             elif kind == 'MISMATCH':
                 raise RuntimeError(f'{value!r} unexpected on line {line_num}')
@@ -97,7 +93,7 @@ class DhcpdParser:
         node_stack = []
         processor = TokenProcessor()
         for token in self.tokenize(content):
-            if token.type in ('NEWLINE', 'SKIP', 'COMMENT_UNIX'):
+            if token.type in ('NEWLINE', 'WHITESPACE', 'COMMENT_UNIX'):
                 continue
             elif token.type == 'SCOPE_END':
                 node = node_stack.pop()

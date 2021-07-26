@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Tuple
 from pyisc.dhcpd.nodes import (DhcpClass, Group, Hardware, Host, Include, Key,
                                 Failover, Option, Pool4, Range4, SubClass,
                                 Subnet4, SharedNetwork, Zone)
@@ -25,12 +26,12 @@ class TokenProcessor:
 
     """
 
-    def switch(self, token):
+    def switch(self, token) -> Tuple:
         """
         Returns a tuple of value/object and metod.
         
         Args:
-            token (pyisc.parsing.Token): A supplied token instance.
+            token (pyisc.dhcpd.parsing.Token): A supplied token instance.
         
         Returns:
             tuple: Tuple containing value or object in first position
@@ -51,61 +52,78 @@ class TokenProcessor:
         self.token = token
         default = (None, 'Unknown operation')
         return getattr(self, str(token.type).lower(), lambda: default)()
-    def authoritative(self):
+    def authoritative(self) -> Tuple:
         """Returns tuple for the authoritative command."""
         if 'not' in self.token.value:
             return (False, 'authoritative')
         return (True, 'authoritative')
-    def failover_parameter(self):
-        """Returns tuple for the failover command when used as an attribute."""
-        *_, peer = self.token.value[:-1].split()
-        return (Failover(name=peer), 'failover')
-    def hardware(self):
+    # def failover_parameter(self):
+    #     """Returns tuple for the failover command when used as an attribute."""
+    #     *_, peer = self.token.value[:-1].split()
+    #     return (Failover(name=peer), 'failover')
+    def hardware(self) -> Tuple:
         """Returns tuple for the hardware command."""
         _, hardware_type, hardware_address = self.token.value[:-1].split()
         node_hardware = Hardware(type=hardware_type, address=hardware_address)
         return (node_hardware, 'hardware')
-    def primary(self):
+    def primary(self) -> Tuple:
+        """Returns tuple for the zone primary command."""
         _, primary = self.token.value[:-1].split()
         return (primary, 'primary')
-    def key_parameter(self):
-        _, key = self.token.value[:-1].split()
-        return (Key(name=key), 'key')
-    def failover_role(self):
+    # def key_parameter(self) -> Tuple:
+    #     """Returns tuple for the zone key command."""
+    #     _, name = self.token.value[:-1].split()
+    #     if self.token.value[-1] == '{':
+    #         method = 'add_key'
+    #     else:
+    #         method = 'key'
+    #     return (Key(name=name), method)
+    def failover_role(self) -> Tuple:
+        """Returns tuple for the failover role."""
         role = self.token.value[:-1]
         return (role, 'role')
-    def include(self):
+    def include(self) -> Tuple:
+        """Returns tuple for the include declaration."""
         _, file_name = self.token.value[:-1].split()
         declaration = Include(filename=file_name)
         return (declaration, 'add_include')
-    def general_parameter(self):
+    def general_parameter(self) -> Tuple:
+        """Returns tuple for the all other parameters."""
         key, value = self.token.value[:-1].rsplit(' ', 1)
+        if value.isdigit():
+            value = int(value)
         attr_key = key.replace('-', '_').replace(' ', '_')
         return (value, attr_key)
-    def allow_member(self):
+    def allow_member(self) -> Tuple:
+        """Returns tuple for the allow member of statement."""
         _, value = self.token.value[:-1].rsplit(' ', 1)
         return (value, 'add_allowed_member')
-    def deny_member(self):
+    def deny_member(self) -> Tuple:
+        """Returns tuple for the deny member of statement."""
         _, value = self.token.value[:-1].rsplit(' ', 1)
         return (value, 'add_denied_member')
-    def class_statement(self):
+    def class_statement(self) -> Tuple:
+        """Returns tuple for the match statement of the class declaration."""
         _, statement = self.token.value[:-1].split(' ', 1)
         return (statement, 'match')
-    def spawn_class(self):
+    def spawn_class(self) -> Tuple:
+        """Returns tuple for the spawn statement of the class declaration."""
         _, statement =  self.token.value[:-1].split(' ', 1)
         return (statement, 'spawn')
-    def range4(self):
+    def range4(self) -> Tuple:
+        """Returns tuple for the range statement for ipv4 configuration."""
         if self.token.value.count(' ') == 1:
             _, range_start = self.token.value[:-1].split()
-            subnet_range = Range4(start=range_start)
+            range_end = flag = None
         elif self.token.value.count(' ') == 2:
             _, range_start, range_end = self.token.value[:-1].split()
-            subnet_range = Range4(start=range_start, end=range_end)
+            flag = None
         else:
             _, flag, range_start, range_end = self.token.value[:-1].split()
-            subnet_range = Range4(start=range_start, end=range_end, flag=flag)
+        subnet_range = Range4(start=range_start, end=range_end, flag=flag)
         return (subnet_range, 'add_range')
-    def option(self):
+    def option(self) -> Tuple:
+        """Returns tuple for the option command."""
         _, option, value = self.token.value[:-1].split(' ', 2)
         if option.isdigit():
             node_option = Option(number=option, value=value)
@@ -113,34 +131,48 @@ class TokenProcessor:
             option = option.replace('-', '_')
             node_option = Option(name=option, value=value)
         return (node_option, 'add_option')
-    def key(self):
+    def key(self) -> Tuple:
+        """Returns tuple for the key declaration."""
         _, name = self.token.value[:-1].split()
-        return (Key(name=name), 'add_key')
-    def failover(self):
+        if self.token.value[-1] == '{':
+            method = 'add_key'
+        else:
+            method = 'key'
+        return (Key(name=name), method)
+    def failover(self) -> Tuple:
+        """Returns tuple for the failover declaration and parameter."""
         *_, peer = self.token.value[:-1].split()
         return (Failover(name=peer), 'failover')
-    def subnet4(self):
+    def subnet4(self) -> Tuple:
+        """Returns tuple for the ipv4 subnet declaration."""
         _, subnet, _, netmask = self.token.value[:-1].split()
         return (Subnet4(network=f'{subnet}/{netmask}'), 'add_subnet')
-    def shared_network(self):
+    def shared_network(self) -> Tuple:
+        """Returns tuple for the shared network declaration."""
         _, name = self.token.value[:-1].split()
         return (SharedNetwork(name=name), 'add_shared_network')
-    def pool(self):
+    def pool(self) -> Tuple:
+        """Returns tuple for the ipv4 pool declaration."""
         return (Pool4(), 'add_pool')
-    def group(self):
+    def group(self) -> Tuple:
+        """Returns tuple for the group declaration."""
         return (Group(), 'add_group')
-    def host(self):
+    def host(self) -> Tuple:
+        """Returns tuple for the host declaration."""
         _, name = self.token.value[:-1].split()
         return (Host(name=name), 'add_host')
-    def dhcp_class(self):
+    def dhcp_class(self) -> Tuple:
+        """Returns tuple for the class declaration."""
         _, name = self.token.value[:-1].split()
         return (DhcpClass(name=name), 'add_class')
-    def subclass(self):
+    def subclass(self) -> Tuple:
+        """Returns tuple for the class declaration and parameter."""
         _, name, match_value = self.token.value[:-1].split()
         return (SubClass(name=name, match_value=match_value), 'add_subclass')
-    def subclass_parameter(self):
-        _, name, match_value = self.token.value[:-1].split()
-        return (SubClass(name=name, match_value=match_value), 'add_subclass')
-    def zone(self):
+    # def subclass_parameter(self):
+    #     _, name, match_value = self.token.value[:-1].split()
+    #     return (SubClass(name=name, match_value=match_value), 'add_subclass')
+    def zone(self) -> Tuple:
+        """Returns tuple for the zone declaration."""
         _, name = self.token.value[:-1].split()
         return (Zone(name=name), 'add_zone')

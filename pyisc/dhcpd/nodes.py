@@ -20,6 +20,7 @@ from pyisc.dhcpd.mixin import ( KeyMixin, Parameters, OptionMixin, PoolMixin,
                                 SubClassMixin, ZoneMixin, IncludeMixin)
 
 class Failover:
+    """Represents the Failover declaration."""
     def __init__(
         self,
         name:                       str,
@@ -35,6 +36,29 @@ class Failover:
         hba:                        Union[str, None]=None,
         load_balance_max_seconds:   Union[int, None]=None,
     ) -> None:
+        """Initialize attributes for the class.
+        
+        Args:
+            name (str): A name for the failover peer.
+            role (str): Should be either primary or secondary.
+            address (str): The IP address of the server in string format.
+            peer_address (str): The IP address of the failover peer server
+                                in string format.
+            port (int): The TCP port that the server listens for connections
+                                from failover peer.
+            peer_port (int): The TCP port that the server connects to its
+                                failover peer.
+            max_response_delay (int): Sets maximum response delay.
+            max_unacked_updates (int): Sets maximum for unacknowledged
+                                messages.
+            mclt (int): Sets maximum client lead time.
+            split (int): Sets split load between primary and secondary
+                                failover member.
+            hba (str): Sets split load between primary and secondary
+                                failover member as a bitmap.
+            load_balance_max_seconds (int): Sets cutoff for disabling load 
+                                balance.
+        """
         self.name = name
         self.role  = role
         self.address = address
@@ -52,6 +76,7 @@ class Failover:
     def __repr__(self) -> str:
         return f'Failover(name={self.name})'
     def object_tree(self, indent=0):
+        """TEMP."""
         return f'{" " * indent}{self.__repr__()}'
     # def to_dict(self):
     #     return self.__dict__
@@ -79,7 +104,16 @@ class Failover:
         #     'hba': self.hba,
         #     'load balance max seconds': self.load_balance_max_seconds
         # }
-    def to_isc(self, indent=0):
+    def to_isc(self, indent: int=0) -> str:
+        """Returns valid ISC configuration as a string.
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                            Default is 0.
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
         attrs = []
         child_indent = indent+4
         for key, value in self.__dict__.items():
@@ -101,7 +135,13 @@ class Failover:
 
 
 class Include:
+    """Represents the include declaration."""
     def __init__(self, filename: str) -> None:
+        """Initialize attributes for the class.
+        
+        Args:
+            filename (str): A path to the file that is to be included.
+        """
         self.filename = filename
     def __str__(self) -> str:
         return f'include {self.filename}'
@@ -111,16 +151,26 @@ class Include:
     #     return {}
     def object_tree(self, indent=0):
         return f'{" " * indent}{self.__repr__()}'
-    def to_isc(self, indent=0):
+    def to_isc(self, indent: int=0) -> str:
+        """Returns valid ISC configuration as a string."""
         return f'{" " * indent}{self.__str__()};'
 
 class Range4:
+    """Represents the range declaration for IPv4 objects."""
     def __init__(
         self,
         start:  str,
         end:    Union[str, None]=None,
         flag:   Union[str, None]=None
     ) -> None:
+        """Initialize attributes for the class.
+        
+        Args:
+            start (str): The first IP address in the range.
+            end (str): The last IP address in the range.
+            flag (str): If set allows BOOTP clients to get dynamically
+                        assigned addresses.
+        """
         self.start = start
         self.end = end          # Can be omitted
         self.flag = flag        # Valid value dynamic-bootp or None.
@@ -138,12 +188,25 @@ class Range4:
     #     }
     def object_tree(self, indent=0):
         return f'{" " * indent}{self.__repr__()}'
-    def to_isc(self, indent=0):
+    def to_isc(self, indent: int=0) -> str:
+        """Returns valid ISC configuration as a string."""
         return f'{" " * indent}{self.__str__()};'
 
 
 class Option:
+    """Represents an dhcp option."""
     def __init__(self, value: str, name: str=None, number: int=None) -> None:
+        """Initialize attributes for the class.
+
+        Name or number (or both) must be given. If value contains a comma it
+        is assumed that the value will be a list and the submitted string will
+        be saved accordingly.
+        
+        Args:
+            name (str): The name of the dhcp option.
+            number (str): The number of the dhcp option.
+            value (str): The value of the option.
+        """
         if not name and not number:
             raise TypeError('__init__() missing attribute: name or number')
         self.name = name
@@ -180,12 +243,20 @@ class Option:
     #     }
     def object_tree(self, indent=0):
         return f'{" " * indent}{self.__repr__()}'
-    def to_isc(self, indent=0):
+    def to_isc(self, indent: int=0) -> str:
+        """Returns valid ISC configuration as a string."""
         return f'{" " * indent}{self.__str__()};'
 
 
 class Hardware:
+    """Represents an hardware parameter."""
     def __init__(self, type: str, address:str) -> None:
+        """Initialize attributes for the class.
+        
+        Args:
+            type (str): The type of the hardware instance.
+            address (str): The address of the hardware instance.
+        """
         self.type = type
         self.address = address
     def __str__(self) -> str:
@@ -196,11 +267,13 @@ class Hardware:
     #     return {}
     def object_tree(self, indent=0):
         return f'{" " * indent}{self.__repr__()}'
-    def to_isc(self, indent=0):
+    def to_isc(self, indent: int=0) -> str:
+        """Returns valid ISC configuration as a string."""
         return f'{" " * indent}{self.__str__()};'
 
 
-class ServerDuid:
+class HostIdentifier:
+    """Represents an host identifier parameter."""
     def __init__(self) -> None:
         pass
     def __str__(self) -> str:
@@ -211,17 +284,42 @@ class ServerDuid:
     #     return {}
     def object_tree(self, indent=0):
         return f'{" " * indent}{self.__repr__()}'
-    def to_isc(self, indent=0):
+    def to_isc(self, indent: int=0) -> str:
+        """Returns valid ISC configuration as a string."""
+        pass
+
+class ServerDuid:
+    """Represents an server DUID parameter."""
+    def __init__(self) -> None:
+        pass
+    def __str__(self) -> str:
+        pass
+    def __repr__(self) -> str:
+        pass
+    # def to_dict(self):
+    #     return {}
+    def object_tree(self, indent=0):
+        return f'{" " * indent}{self.__repr__()}'
+    def to_isc(self, indent: int=0) -> str:
+        """Returns valid ISC configuration as a string."""
         pass
 
 
 class Key:
+    """Represents an key declaration and parameter."""
     def __init__(
         self,
         name:       str,
         algorithm:  str=None,
         secret:     str=None
     ) -> None:
+        """Initialize attributes for the class.
+        
+        Args:
+            name (str): The name of the key instance.
+            algorithm (str): The algorithm used for the key.
+            secret (str): The secret used by the key.
+        """
         self.name = name
         self.algorithm = algorithm
         self.secret = secret
@@ -233,7 +331,8 @@ class Key:
     #     return {}
     def object_tree(self, indent=0):
         return f'{" " * indent}{self.__repr__()}'
-    def to_isc(self, indent=0):
+    def to_isc(self, indent: int=0) -> str:
+        """Returns valid ISC configuration as a string."""
         attrs = []
         child_indent = indent+4
         for key, value in self.__dict__.items():
@@ -248,7 +347,17 @@ class Key:
 
 
 class Zone:
+    """Represents an zone declaration."""
     def __init__(self, name: str, primary: str=None, key: Key=None) -> None:
+        """Initialize attributes for the class.
+        
+        Args:
+            name (str): The name of the zone.
+            primary (str): The IP address of the primary server for the zone
+                            in string format.
+            key (pyisc.dhcpd.nodes.Key): The key used to authenticate to the
+                            primary server.
+        """
         self.name = name
         self.primary = primary
         self.key = key
@@ -260,7 +369,8 @@ class Zone:
     #     return {}
     def object_tree(self, indent=0):
         return f'{" " * indent}{self.__repr__()}'
-    def to_isc(self, indent=0):
+    def to_isc(self, indent: int=0) -> str:
+        """Returns valid ISC configuration as a string."""
         attrs = []
         child_indent = indent+4
         for key, value in self.__dict__.items():
@@ -277,6 +387,7 @@ class Zone:
 
 
 class DhcpClass:
+    """Represents an class declaration."""
     def __init__(
         self,
         name:               str,
@@ -285,6 +396,17 @@ class DhcpClass:
         spawn:              str=None,
         lease_limit:        int=None,
     ) -> None:
+        """Initialize attributes for the class.
+        
+        Args:
+            name (str): The name of the zone.
+            always_broadcast (boolean): Broadcast even if broadcast flag is
+                        unset from clients.
+            match (str): The conditional in the form of a string.
+            spawn (str): The spawn argument in the form of a string.
+            lease_limit (int): Sets the amount of clients that are allowed a
+                        lease
+        """
         self.name = name
         self.always_broadcast = always_broadcast
         self.match = match
@@ -298,7 +420,8 @@ class DhcpClass:
     #     return {}
     def object_tree(self, indent=0):
         return f'{" " * indent}{self.__repr__()}'
-    def to_isc(self, indent=0):
+    def to_isc(self, indent: int=0) -> str:
+        """Returns valid ISC configuration as a string."""
         attrs = []
         child_indent = indent+4
         for key, value in self.__dict__.items():
@@ -317,6 +440,7 @@ class DhcpClass:
 
 
 class SubClass(Parameters, OptionMixin):
+    """Represents an subclass declaration."""
     def __init__(
         self,
         name:           str,
@@ -324,6 +448,15 @@ class SubClass(Parameters, OptionMixin):
         lease_limit:    int=None,
         options:        List[Option]=None,
     ) -> None:
+        """Initialize attributes for the class.
+        
+        Args:
+            name (str): The name of the zone.
+            match_value (str): The conditional in the form of a string.
+            lease_limit (int): Sets the amount of clients that are allowed a
+                        lease
+            options (list[pyisc.dhcpd.nodes.Option]): A list of options.
+        """
         self.name = name
         self.match_value = match_value
         self.lease_limit = lease_limit
@@ -337,7 +470,8 @@ class SubClass(Parameters, OptionMixin):
     #     return {}
     def object_tree(self, indent=0):
         return f'{" " * indent}{self.__repr__()}'
-    def to_isc(self, indent=0):
+    def to_isc(self, indent: int=0) -> str:
+        """Returns valid ISC configuration as a string."""
         attrs = []
         child_indent = indent+4
         for key, value in self.__dict__.items():
@@ -355,16 +489,32 @@ class SubClass(Parameters, OptionMixin):
         return (f'{return_str}{attrs_str}' '\n' f'{" " * indent}{section_end}')
 
 class Host(Parameters):
+    """Represents an host declaration."""
     def __init__(
         self,
         name:               str,
-        always_broadcast:   bool=None,
-        fixed_address:      str=None,
-        fixed_address6:     str=None,
-        fixed_prefix6:      str=None,
-        hardware:           Hardware=None,
-        host_identifier:    str=None,
+        always_broadcast:   Union[bool, None]=None,
+        fixed_address:      Union[str, None]=None,
+        fixed_address6:     Union[str, None]=None,
+        fixed_prefix6:      Union[str, None]=None,
+        hardware:           Union[Hardware, None]=None,
+        host_identifier:    Union[HostIdentifier, None]=None,
     ) -> None:
+        """Initialize attributes for the class.
+        
+        Args:
+            name (str): The name of the zone.
+            always_broadcast (boolean): Broadcast even if broadcast flag is
+                        unset from clients.
+            fixed_address (str, list[str]): One or more IPv4 address in
+                        string format.
+            fixed_address6 (str): An IPv6 address in string format.
+            fixed_prefix6 (str, list[str]): One or more IPv prefixes.
+            hardware (pyisc.dhcpd.nodes.Hardware): The hardware address of
+                        the client.
+            host_identifier (pyisc.dhcpd.nodes.HostIdentifier): IPv6 
+                        identifier for client
+        """
         self.name = name
         self.always_broadcast = always_broadcast
         self.fixed_address = fixed_address
@@ -381,7 +531,8 @@ class Host(Parameters):
     #     return {}
     def object_tree(self, indent=0):
         return f'{" " * indent}{self.__repr__()}'
-    def to_isc(self, indent=0):
+    def to_isc(self, indent: int=0) -> str:
+        """Returns valid ISC configuration as a string."""
         attrs = []
         child_indent = indent+4
         for key, value in self.__dict__.items():
@@ -398,6 +549,7 @@ class Host(Parameters):
         return (f'{return_str}{attrs_str}' '\n' f'{" " * indent}{section_end}')
 
 class Pool4(RangeMixin):
+    """Represents an pool declaration for IPv4 objects."""
     def __init__(
         self,
         known_clients:               Union[str, None]=None,
@@ -413,6 +565,23 @@ class Pool4(RangeMixin):
         failover:                    Union[Failover, None]=None,
         ranges:                      List[Range4]=None,
     ) -> None:
+        """Initialize attributes for the class.
+
+        Args:
+            known_clients (str): pass
+            unknown_clients (str): pass
+            allow_members_of (list[str]): pass
+            deny_members_of (list[str]): pass
+            dynamic_bootp_clients (str): pass
+            authenticated_clients (str): pass
+            unauthenticated_clients (str): pass
+            all_clients (str): pass
+            allow_after (int): pass
+            deny_after (int): pass
+            failover (pyisc.dhcpd.nodes.Failover): pass
+            ranges (list[pyisc.dhcpd.nodes.Range4]): pass
+
+        """
         self.known_clients = known_clients
         self.unknown_clients = unknown_clients
         self.allow_members_of = [] if not allow_members_of else allow_members_of
@@ -449,7 +618,8 @@ class Pool4(RangeMixin):
             return_str += '\n'
         attrs_str = "\n".join(attrs)
         return f'{return_str}{attrs_str}'
-    def to_isc(self, indent=0):
+    def to_isc(self, indent: int=0) -> str:
+        """Returns valid ISC configuration as a string."""
         attrs = []
         child_indent = indent+4
         for key, value in self.__dict__.items():
@@ -479,6 +649,7 @@ class Pool4(RangeMixin):
 
 
 class Subnet4(Parameters, OptionMixin, RangeMixin, PoolMixin):
+    """Represents an subnet declaration for IPv4 objects."""
     def __init__(
         self,
         network:            str,
@@ -488,6 +659,17 @@ class Subnet4(Parameters, OptionMixin, RangeMixin, PoolMixin):
         ranges:             List[Range4]=None,
         pools:              List[Pool4]=None
     ) -> None:
+        """Initialize attributes for the class.
+
+        Args:
+            network (str): pass
+            authoritative (boolean): pass
+            server_id_check (boolean): pass
+            options (list[pyisc.dhcpd.nodes.Option]): pass
+            ranges (list[pyisc.dhcpd.nodes.Range4]): pass
+            pools (list[pyisc.dhcpd.nodes.Pool4]): pass
+
+        """
         self.network = IPv4Network(network).with_prefixlen
         self.authoritative = authoritative
         self.server_id_check = server_id_check
@@ -505,7 +687,8 @@ class Subnet4(Parameters, OptionMixin, RangeMixin, PoolMixin):
     #     return {}
     def object_tree(self, indent=0):
         return f'{" " * indent}{self.__repr__()}'
-    def to_isc(self, indent=0):
+    def to_isc(self, indent: int=0) -> str:
+        """Returns valid ISC configuration as a string."""
         attrs = []
         child_indent = indent+4
         for key, value in self.__dict__.items():
@@ -527,6 +710,7 @@ class Subnet4(Parameters, OptionMixin, RangeMixin, PoolMixin):
         return (f'{return_str}{attrs_str}' '\n' f'{" " * indent}{section_end}')
 
 class SharedNetwork(OptionMixin, SubnetMixin, PoolMixin):
+    """Represents an shared network declaration."""
     def __init__(
         self,
         name:           str,
@@ -535,6 +719,16 @@ class SharedNetwork(OptionMixin, SubnetMixin, PoolMixin):
         subnets:        List[Subnet4]=None,
         pools:          List[Pool4]=None
     ) -> None:
+        """Initialize attributes for the class.
+
+        Args:
+            name (str): pass
+            authoritative (boolean): pass
+            options (list[pyisc.dhcpd.nodes.Option]): pass
+            ranges (list[pyisc.dhcpd.nodes.Range4]): pass
+            pools (list[pyisc.dhcpd.nodes.Pool4]): pass
+
+        """
         self.name = name
         self.authoritative = authoritative
         self.options = [] if not options else options
@@ -546,7 +740,8 @@ class SharedNetwork(OptionMixin, SubnetMixin, PoolMixin):
         return f'SharedNetwork(name={self.name})'
     # def to_dict(self):
     #     return {}
-    def to_isc(self, indent=0):
+    def to_isc(self, indent: int=0) -> str:
+        """Returns valid ISC configuration as a string."""
         attrs = []
         child_indent = indent+4
         for key, value in self.__dict__.items():
@@ -569,6 +764,7 @@ class SharedNetwork(OptionMixin, SubnetMixin, PoolMixin):
 
 
 class Group(Parameters, SubnetMixin, SharedNetworkMixin, HostMixin, OptionMixin):
+    """Represents an group declaration."""
     def __init__(
         self,
         options:            List[Option]=None,
@@ -577,6 +773,15 @@ class Group(Parameters, SubnetMixin, SharedNetworkMixin, HostMixin, OptionMixin)
         # groups:             List[Group]=None,
         hosts:              List[Host]=None
     ) -> None:
+        """Initialize attributes for the class.
+
+        Args:
+            options (list[pyisc.dhcpd.nodes.Option]): pass
+            subnets (list[pyisc.dhcpd.nodes.Subnet4]): pass
+            shared_networks (list[pyisc.dhcpd.nodes.SharedNetwork]): pass
+            hosts (list[pyisc.dhcpd.nodes.Host]): pass
+
+        """
         self.options = [] if not options else options
         self.subnets = [] if not subnets else subnets
         self.shared_networks = [] if not shared_networks else shared_networks
@@ -588,7 +793,8 @@ class Group(Parameters, SubnetMixin, SharedNetworkMixin, HostMixin, OptionMixin)
         return f'Group()'
     # def to_dict(self):
     #     return {}
-    def to_isc(self, indent=0):
+    def to_isc(self, indent: int=0) -> str:
+        """Returns valid ISC configuration as a string."""
         attrs = []
         child_indent = indent+4
         for key, value in self.__dict__.items():
@@ -605,46 +811,57 @@ class Group(Parameters, SubnetMixin, SharedNetworkMixin, HostMixin, OptionMixin)
         return (f'{return_str}{attrs_str}' '\n' f'{" " * indent}{section_end}')
 
 
-class Global(Parameters, OptionMixin, SubnetMixin, SharedNetworkMixin,
-             GroupMixin, HostMixin, ClassMixin, SubClassMixin, KeyMixin, ZoneMixin, IncludeMixin):
+class Global(   Parameters, OptionMixin, SubnetMixin, SharedNetworkMixin,
+                GroupMixin, HostMixin, ClassMixin, SubClassMixin, KeyMixin,
+                ZoneMixin, IncludeMixin):
+    """Represents the global dhcp server settings."""
     def __init__(
         self,
-        abandon_lease_time:             str=None,
-        authoritative:                  bool=None,
-        db_time_format:                 str=None,
-        ddns_dual_stack_mixed_mode:     str=None,
-        ddns_guard_id_must_match:       str=None,
-        ddns_other_guard_is_dynamic:    str=None,
-        lease_file_name:                str=None,
-        dhcpv6_lease_file_name:         str=None,
-        local_port:                     int=None,
-        local_address:                  str=None,
-        local_address6:                 str=None,
-        bind_local_address6:            bool=None,
-        log_facility:                   str=None,
-        omapi_port:                     int=None,
-        omapi_key:                      str=None,
-        persist_eui_64_leases:          bool=None,
-        pid_file_name:                  str=None,
-        dhcpv6_pid_file_name:           str=None,
-        release_on_roam:                bool=None,
-        remote_port:                    int=None,
-        server_id_check:                bool=None,
-        server_duid:                    ServerDuid=None,
-        update_conflict_detection:      bool=None,
-        use_eui_64:                     bool=None,
-        options:                        List[Option]=None,
-        keys:                           List[Key]=None,
-        zones:                          List[Zone]=None,
-        failover:                       Failover=None,
-        subnets:                        List[Subnet4]=None,
-        shared_networks:                List[SharedNetwork]=None,
-        groups:                         List[Group]=None,
-        hosts:                          List[Host]=None,
-        classes:                        List[DhcpClass]=None,
-        subclasses:                     List[SubClass]=None,
-        includes:                       List[Include]=None
+        abandon_lease_time:             Union[str, None]=None,
+        authoritative:                  Union[bool, None]=None,
+        db_time_format:                 Union[str, None]=None,
+        ddns_dual_stack_mixed_mode:     Union[str, None]=None,
+        ddns_guard_id_must_match:       Union[str, None]=None,
+        ddns_other_guard_is_dynamic:    Union[str, None]=None,
+        lease_file_name:                Union[str, None]=None,
+        dhcpv6_lease_file_name:         Union[str, None]=None,
+        local_port:                     Union[int, None]=None,
+        local_address:                  Union[str, None]=None,
+        local_address6:                 Union[str, None]=None,
+        bind_local_address6:            Union[bool, None]=None,
+        log_facility:                   Union[str, None]=None,
+        omapi_port:                     Union[int, None]=None,
+        omapi_key:                      Union[str, None]=None,
+        persist_eui_64_leases:          Union[bool, None]=None,
+        pid_file_name:                  Union[str, None]=None,
+        dhcpv6_pid_file_name:           Union[str, None]=None,
+        release_on_roam:                Union[bool, None]=None,
+        remote_port:                    Union[int, None]=None,
+        server_id_check:                Union[bool, None]=None,
+        server_duid:                    Union[ServerDuid, None]=None,
+        update_conflict_detection:      Union[bool, None]=None,
+        use_eui_64:                     Union[bool, None]=None,
+        options:                        Union[List[Option], None]=None,
+        keys:                           Union[List[Key], None]=None,
+        zones:                          Union[List[Zone], None]=None,
+        failover:                       Union[Failover, None]=None,
+        subnets:                        Union[List[Subnet4], None]=None,
+        shared_networks:                Union[List[SharedNetwork], None]=None,
+        groups:                         Union[List[Group], None]=None,
+        hosts:                          Union[List[Host], None]=None,
+        classes:                        Union[List[DhcpClass], None]=None,
+        subclasses:                     Union[List[SubClass], None]=None,
+        includes:                       Union[List[Include], None]=None
     ) -> None:
+        """Initialize attributes for the class.
+
+        Args:
+            abandon_lease_time (str): pass
+            authoritative (boolean): pass
+            db_time_format (str): pass
+            ddns_dual_stack_mixed_mode (str): pass
+
+        """
         self.abandon_lease_time = abandon_lease_time
         self.authoritative = authoritative
         self.db_time_format = db_time_format
