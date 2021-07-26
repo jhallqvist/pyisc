@@ -12,44 +12,69 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import TYPE_CHECKING
+from ipaddress import IPv4Network
+from os import EX_PROTOCOL
+from typing import List, TYPE_CHECKING
 if TYPE_CHECKING:
     from pyisc.dhcpd.nodes import (
-        Subnet4, Pool4, Range4, Option4, Class, 
+        Subnet4, Pool4, Range4, Option, DhcpClass, 
         Group, Host, SharedNetwork, SubClass, Zone, Key, Include)
 
 # Methods to be inherited by objects in order to reduce duplicate code.
 # All add methods currently expects a object instance.
 class SubnetMixin:
-    """add, delete, get, modify, search in list of subnets."""
-    def add_subnet(self, subnet: 'Subnet4'):
+    """add, delete, get, modify, search in list of subnets.
+    Should handle both v4 and v6 despite what below type hint indicates."""
+    def add_subnet(self, subnet: 'Subnet4', sort: bool=True) -> None:
         self.subnets.append(subnet)
-    def find_subnet(self, network):
+        if sort:
+            self.subnets.sort(key=lambda x: IPv4Network((x.network)))
+    def find_subnet(self, network: str) -> None:
         for subnet in self.subnets:
             if subnet.network == network:
                 return subnet
-    def delete_subnet(self, network):
+            return None
+    def all_subnets(self) -> List:
+        return [[index, entity] for index, entity in enumerate(self.subnets)]
+    def delete_subnet(self, network)-> None:
         found_subnet = self.find_subnet(network)
-        self.subnets.remove(found_subnet)
+        if found_subnet:
+            self.subnets.remove(found_subnet)
+            return f'Deleted {found_subnet}.'
+        else:
+            return 'No subnet found'
 
 
 class RangeMixin:
     def add_range(self, range: 'Range4'):
         self.ranges.append(range)
-    def find_range():
-        pass
+    def find_range(self, key):
+        for index, dhcp_range in self.all_ranges():
+            if index == key:
+                return [index, dhcp_range]
+            return None
+    def all_ranges(self):
+        return [[index, entity] for index, entity in enumerate(self.ranges)]
     def delete_range():
         pass
 
 class PoolMixin:
     def add_pool(self, pool: 'Pool4'):
         self.pools.append(pool)
-    def find_pool():
-        pass # How to find an object whose uniqueness is defined by its attributes?
-    def delete_pool(self, pool):
-        # use find pool
-        # use self.pool.remove(found_pool)
-        pass
+    def find_pool(self, key):
+        try:
+            return self.all_pools()[key]
+        except:
+            return None
+    def all_pools(self):
+        return [[index, entity] for index, entity in enumerate(self.pools)]
+    def delete_pool(self, key):
+        index, found_pool = self.find_pool(key)
+        if found_pool:
+            self.pools.remove(found_pool)
+            return f'Deleted {found_pool}.'
+        else:
+            return 'No pool found'
 
 class OptionMixin:
     def add_option(self, option: 'Option'):
@@ -76,7 +101,7 @@ class GroupMixin:
         pass
 
 class ClassMixin:
-    def add_class(self, class_obj: 'Class'):
+    def add_class(self, class_obj: 'DhcpClass'):
         self.classes.append(class_obj)
     def find_class(self, class_obj):
         pass
@@ -130,6 +155,7 @@ class Parameters:
     Parameters not found in this class belong in certain scopes and hence are
     declared as an attribute directly in that class.
 
+    For a description of the various attributes refer to the ISC KB for DHCP.
     """
     def __init__(
         self,

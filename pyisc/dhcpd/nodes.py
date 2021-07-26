@@ -14,10 +14,10 @@
 
 from typing import List, Union
 from ipaddress import IPv4Network
-from pyisc.dhcpd.mixin import (KeyMixin, Parameters, OptionMixin, PoolMixin, RangeMixin,
-                               SubnetMixin, SharedNetworkMixin, GroupMixin, 
-                               HostMixin, ClassMixin, SubClassMixin, ZoneMixin,
-                               IncludeMixin)
+from pyisc.dhcpd.mixin import ( KeyMixin, Parameters, OptionMixin, PoolMixin,
+                                RangeMixin, SubnetMixin, SharedNetworkMixin,
+                                GroupMixin, HostMixin, ClassMixin,
+                                SubClassMixin, ZoneMixin, IncludeMixin)
 
 class Failover:
     def __init__(
@@ -51,6 +51,34 @@ class Failover:
         return f'failover peer {self.name}'
     def __repr__(self) -> str:
         return f'Failover(name={self.name})'
+    def object_tree(self, indent=0):
+        return f'{" " * indent}{self.__repr__()}'
+    # def to_dict(self):
+    #     return self.__dict__
+        # Option 2
+        # result_dict = {}
+        # for key, value in self.__dict__.items():
+        #     if key == 'load_balance_max_seconds':
+        #         key = key.replace("_", " ")
+        #     else:
+        #         key = key.replace("_", "-")
+        #     result_dict[key] = value
+        # return result_dict
+        # Option 3
+        # return {
+        #     'name': self.name,
+        #     'role': self.role,
+        #     'address': self.address,
+        #     'peer-address': self.peer_address,
+        #     'port': self.port,
+        #     'peer-port': self.peer_port,
+        #     'max-response-delay': self.max_response_delay,
+        #     'max-unacked-updates': self.max_unacked_updates,
+        #     'mclt': self.mclt,
+        #     'split': self.split,
+        #     'hba': self.hba,
+        #     'load balance max seconds': self.load_balance_max_seconds
+        # }
     def to_isc(self, indent=0):
         attrs = []
         child_indent = indent+4
@@ -79,6 +107,10 @@ class Include:
         return f'include {self.filename}'
     def __repr__(self) -> str:
         return f'Include(filename={self.filename})'
+    # def to_dict(self):
+    #     return {}
+    def object_tree(self, indent=0):
+        return f'{" " * indent}{self.__repr__()}'
     def to_isc(self, indent=0):
         return f'{" " * indent}{self.__str__()};'
 
@@ -98,6 +130,14 @@ class Range4:
     def __repr__(self) -> str:
         string_repr = [f'{key}="{value}"' for key, value in self.__dict__.items() if value]
         return f'Range4({", ".join(string_repr)})'
+    # def to_dict(self):
+    #     return {
+    #         'start': self.start,
+    #         'end': self.end,
+    #         'flag': self.flag
+    #     }
+    def object_tree(self, indent=0):
+        return f'{" " * indent}{self.__repr__()}'
     def to_isc(self, indent=0):
         return f'{" " * indent}{self.__str__()};'
 
@@ -132,6 +172,14 @@ class Option:
         else:
             value = f'value="{self.value}"'
         return f'Option({key}, {value})'
+    # def to_dict(self):
+    #     return {
+    #         'name': self.name,
+    #         'number': self.number,
+    #         'value': self.value
+    #     }
+    def object_tree(self, indent=0):
+        return f'{" " * indent}{self.__repr__()}'
     def to_isc(self, indent=0):
         return f'{" " * indent}{self.__str__()};'
 
@@ -144,6 +192,10 @@ class Hardware:
         return f'hardware {self.type} {self.address}'
     def __repr__(self) -> str:
         return f'Hardware(type="{self.type}", address="{self.address}")'
+    # def to_dict(self):
+    #     return {}
+    def object_tree(self, indent=0):
+        return f'{" " * indent}{self.__repr__()}'
     def to_isc(self, indent=0):
         return f'{" " * indent}{self.__str__()};'
 
@@ -155,6 +207,10 @@ class ServerDuid:
         pass
     def __repr__(self) -> str:
         pass
+    # def to_dict(self):
+    #     return {}
+    def object_tree(self, indent=0):
+        return f'{" " * indent}{self.__repr__()}'
     def to_isc(self, indent=0):
         pass
 
@@ -173,6 +229,10 @@ class Key:
         return f'key {self.name}'
     def __repr__(self) -> str:
         return f'Key(name="{self.name}")'
+    # def to_dict(self):
+    #     return {}
+    def object_tree(self, indent=0):
+        return f'{" " * indent}{self.__repr__()}'
     def to_isc(self, indent=0):
         attrs = []
         child_indent = indent+4
@@ -196,6 +256,10 @@ class Zone:
         return f'zone {self.name}'
     def __repr__(self) -> str:
         return f'Zone(name={self.name})'
+    # def to_dict(self):
+    #     return {}
+    def object_tree(self, indent=0):
+        return f'{" " * indent}{self.__repr__()}'
     def to_isc(self, indent=0):
         attrs = []
         child_indent = indent+4
@@ -212,7 +276,7 @@ class Zone:
         return (f'{return_str}{attrs_str}' '\n' f'{" " * indent}{section_end}')
 
 
-class Class:
+class DhcpClass:
     def __init__(
         self,
         name:               str,
@@ -229,7 +293,11 @@ class Class:
     def __str__(self) -> str:
         return f'class {self.name}'
     def __repr__(self) -> str:
-        return f'Class(name={self.name})'
+        return f'DhcpClass(name={self.name})'
+    # def to_dict(self):
+    #     return {}
+    def object_tree(self, indent=0):
+        return f'{" " * indent}{self.__repr__()}'
     def to_isc(self, indent=0):
         attrs = []
         child_indent = indent+4
@@ -265,6 +333,10 @@ class SubClass(Parameters, OptionMixin):
         return f'subclass {self.name} {self.match_value}'
     def __repr__(self) -> str:
         return f'SubClass(name={self.name}, match_value={self.match_value})'
+    # def to_dict(self):
+    #     return {}
+    def object_tree(self, indent=0):
+        return f'{" " * indent}{self.__repr__()}'
     def to_isc(self, indent=0):
         attrs = []
         child_indent = indent+4
@@ -305,6 +377,10 @@ class Host(Parameters):
         return f'host {self.name}'
     def __repr__(self) -> str:
         return f'Host(name={self.name})'
+    # def to_dict(self):
+    #     return {}
+    def object_tree(self, indent=0):
+        return f'{" " * indent}{self.__repr__()}'
     def to_isc(self, indent=0):
         attrs = []
         child_indent = indent+4
@@ -334,7 +410,7 @@ class Pool4(RangeMixin):
         all_clients:                 Union[str, None]=None,
         allow_after:                 Union[int, None]=None,
         deny_after:                  Union[int, None]=None,
-        failover_peer:               Union[Failover, None]=None,
+        failover:                    Union[Failover, None]=None,
         ranges:                      List[Range4]=None,
     ) -> None:
         self.known_clients = known_clients
@@ -347,7 +423,7 @@ class Pool4(RangeMixin):
         self.all_clients = all_clients
         self.allow_after = allow_after
         self.deny_after = deny_after
-        self.failover_peer = failover_peer
+        self.failover = failover
         self.ranges = [] if not ranges else ranges
     def __str__(self) -> str:
         return f'pool'
@@ -361,6 +437,18 @@ class Pool4(RangeMixin):
         self.deny_members_of.append(member)
     def delete_denied_member(self, member: str) -> None:
         self.deny_members_of.remove(member)
+    # def to_dict(self):
+    #     return {}
+    def object_tree(self, indent=0):
+        attrs = []
+        child_indent = indent+4
+        for dhcp_range in self.ranges:
+            attrs.append(f'{" " * child_indent}{dhcp_range.object_tree()}')
+        return_str = f'{" " * indent}{self.__repr__()}'
+        if len(attrs) > 0:
+            return_str += '\n'
+        attrs_str = "\n".join(attrs)
+        return f'{return_str}{attrs_str}'
     def to_isc(self, indent=0):
         attrs = []
         child_indent = indent+4
@@ -374,9 +462,9 @@ class Pool4(RangeMixin):
                 for statement in temp:
                     attrs.append(statement)
             elif all((value, key == 'ranges')):
-                for range in self.ranges:
-                    attrs.append(f'{" " * child_indent}{range.to_isc()}')
-            elif all((value, key == 'failover_peer')):
+                for dhcp_range in self.ranges:
+                    attrs.append(f'{" " * child_indent}{dhcp_range.to_isc()}')
+            elif all((value, key == 'failover')):
                 attrs.append(f'{" " * child_indent}{value};')
             elif any((value=='allow', value=='deny')):
                 attrs.append(f'{" " * child_indent}{value} {new_key};')
@@ -400,7 +488,7 @@ class Subnet4(Parameters, OptionMixin, RangeMixin, PoolMixin):
         ranges:             List[Range4]=None,
         pools:              List[Pool4]=None
     ) -> None:
-        self.network = network
+        self.network = IPv4Network(network).with_prefixlen
         self.authoritative = authoritative
         self.server_id_check = server_id_check
         self.options = [] if not options else options
@@ -413,6 +501,10 @@ class Subnet4(Parameters, OptionMixin, RangeMixin, PoolMixin):
         return f'subnet {subnet} netmask {netmask}'
     def __repr__(self) -> str:
         return f'Subnet4(network="{self.network}")'
+    # def to_dict(self):
+    #     return {}
+    def object_tree(self, indent=0):
+        return f'{" " * indent}{self.__repr__()}'
     def to_isc(self, indent=0):
         attrs = []
         child_indent = indent+4
@@ -452,6 +544,8 @@ class SharedNetwork(OptionMixin, SubnetMixin, PoolMixin):
         return f'shared-network {self.name}'
     def __repr__(self) -> str:
         return f'SharedNetwork(name={self.name})'
+    # def to_dict(self):
+    #     return {}
     def to_isc(self, indent=0):
         attrs = []
         child_indent = indent+4
@@ -492,6 +586,8 @@ class Group(Parameters, SubnetMixin, SharedNetworkMixin, HostMixin, OptionMixin)
         return f'group'
     def __repr__(self) -> str:
         return f'Group()'
+    # def to_dict(self):
+    #     return {}
     def to_isc(self, indent=0):
         attrs = []
         child_indent = indent+4
@@ -545,7 +641,7 @@ class Global(Parameters, OptionMixin, SubnetMixin, SharedNetworkMixin,
         shared_networks:                List[SharedNetwork]=None,
         groups:                         List[Group]=None,
         hosts:                          List[Host]=None,
-        classes:                        List[Class]=None,
+        classes:                        List[DhcpClass]=None,
         subclasses:                     List[SubClass]=None,
         includes:                       List[Include]=None
     ) -> None:
@@ -589,6 +685,8 @@ class Global(Parameters, OptionMixin, SubnetMixin, SharedNetworkMixin,
         return f'Global'
     def __repr__(self) -> str:
         return f'Global()'
+    # def to_dict(self):
+    #     return {}
     def to_isc(self):
         attrs = []
         sort_order = {

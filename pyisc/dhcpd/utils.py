@@ -12,27 +12,56 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pyisc.dhcpd.nodes import Class, Group, Hardware, Host, Include, Key, Failover, Option, Pool4, Range4, SubClass, Subnet4, SharedNetwork, Zone
+from pyisc.dhcpd.nodes import (DhcpClass, Group, Hardware, Host, Include, Key,
+                                Failover, Option, Pool4, Range4, SubClass,
+                                Subnet4, SharedNetwork, Zone)
 
 class TokenProcessor:
     """A processor class for tokens.
 
-    Description here.
+    This class takes a token and uses the lowercase token name to match a
+    method. If a method is found it proceeds to run that method an return
+    the value or object and the method to add it to the current working node.
 
     """
 
     def switch(self, token):
+        """
+        Returns a tuple of value/object and metod.
+        
+        Args:
+            token (pyisc.parsing.Token): A supplied token instance.
+        
+        Returns:
+            tuple: Tuple containing value or object in first position
+                    and method in second position.
+        
+        Examples:
+            >>> token = Token(type='OPTION',
+            ...               value='option domain-name "example.org";',
+            ...               line=8, column=0)
+            >>> processor = TokenProcessor()
+            >>> declaration, method = processor.switch(token)
+            >>> declaration
+            Option(name="domain_name", value=""example.org"")
+            >>> method
+            'add_option'
+
+        """
         self.token = token
-        default = 'Unknown operation'
+        default = (None, 'Unknown operation')
         return getattr(self, str(token.type).lower(), lambda: default)()
     def authoritative(self):
+        """Returns tuple for the authoritative command."""
         if 'not' in self.token.value:
             return (False, 'authoritative')
         return (True, 'authoritative')
     def failover_parameter(self):
+        """Returns tuple for the failover command when used as an attribute."""
         *_, peer = self.token.value[:-1].split()
-        return (Failover(name=peer), 'failover_peer')
+        return (Failover(name=peer), 'failover')
     def hardware(self):
+        """Returns tuple for the hardware command."""
         _, hardware_type, hardware_address = self.token.value[:-1].split()
         node_hardware = Hardware(type=hardware_type, address=hardware_address)
         return (node_hardware, 'hardware')
@@ -105,7 +134,7 @@ class TokenProcessor:
         return (Host(name=name), 'add_host')
     def dhcp_class(self):
         _, name = self.token.value[:-1].split()
-        return (Class(name=name), 'add_class')
+        return (DhcpClass(name=name), 'add_class')
     def subclass(self):
         _, name, match_value = self.token.value[:-1].split()
         return (SubClass(name=name, match_value=match_value), 'add_subclass')

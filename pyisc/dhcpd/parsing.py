@@ -14,7 +14,7 @@
 
 from typing import NamedTuple
 import re
-from pyisc.dhcpd.nodes import (Class, Failover, Global, Group, Hardware, Host, Include, Key, Option, Pool4, Range4, SharedNetwork, SubClass, Subnet4, Zone)
+from pyisc.dhcpd.nodes import Global
 from pyisc.dhcpd.utils import TokenProcessor
 
 class Token(NamedTuple):
@@ -45,8 +45,8 @@ class DhcpdParser:
             ('HOST',                r'host\s+[^\n]*?{'),                    # SCOPE
             ('SUBCLASS',            r'subclass\s+[^\n]*?{'),                # SCOPE
             ('SUBCLASS_PARAMETER',  r'subclass\s+[^\n]*?;'),                # PARAMETER
-            ('FAILOVER',            r'failover\s+[^\n]*?{'),                # SCOPE
-            ('FAILOVER_PARAMETER',  r'failover\s+[^\n]*?;'),                # PARAMETER
+            ('FAILOVER',            r'failover\s+[^\n]*?({|;)'),                # SCOPE
+            # ('FAILOVER_PARAMETER',  r'failover\s+[^\n]*?;'),                # PARAMETER
             ('DHCP_CLASS',          r'class\s+[^\n]*?{'),                   # SCOPE
             ('SERVER_DUID',         r'server-duid\s+[^\n]*?;'),             # PARAMETER - Not implemented
             ('HARDWARE',            r'hardware\s+[^\n]*?;'),                # PARAMETER
@@ -89,7 +89,9 @@ class DhcpdParser:
             yield Token(kind, value, line_num, column)
 
     def construct_tree(self, content):
-        isc_declarations = ('KEY', 'SUBNET4', 'SHARED_NETWORK', 'FAILOVER', 'POOL', 'GROUP', 'HOST', 'DHCP_CLASS', 'SUBCLASS', 'ZONE')
+        isc_declarations = ('KEY', 'SUBNET4', 'SHARED_NETWORK', 'FAILOVER',
+                            'POOL', 'GROUP', 'HOST', 'DHCP_CLASS', 'SUBCLASS',
+                            'ZONE')
         # parameters = ('AUTHORITATIVE', 'FAILOVER_PARAMETER', 'RANGE4', 'OPTION', 'SUBCLASS_PARAMETER', 'HARDWARE', 'KEY_PARAMETER', 'PRIMARY', 'FAILOVER_ROLE', 'INCLUDE', 'GENERAL_PARAMETER', 'ALLOW_MEMBER', 'DENY_MEMBER', 'CLASS_STATEMENT', 'SPAWN_CLASS')
         node = Global()
         node_stack = []
@@ -100,6 +102,7 @@ class DhcpdParser:
             elif token.type == 'SCOPE_END':
                 node = node_stack.pop()
             else:
+                # maybe value, attribute instead of declaration, method?
                 declaration, method = processor.switch(token)
                 if not hasattr(node, method):
                     raise AttributeError(f'{node} attribute {method} does not exist')
@@ -108,7 +111,8 @@ class DhcpdParser:
                     node_method(declaration)
                 else:
                     setattr(node, method, declaration)
-                if token.type in isc_declarations:
+                # if token.type in isc_declarations:
+                if token.value[-1] == '{':
                     node_stack.append(node)
                     node = declaration
             # elif token.type == 'CLASS_STATEMENT':
