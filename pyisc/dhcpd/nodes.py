@@ -19,6 +19,160 @@ from pyisc.dhcpd.mixin import ( KeyMixin, Parameters, OptionMixin, PoolMixin,
                                 GroupMixin, HostMixin, ClassMixin,
                                 SubClassMixin, ZoneMixin, IncludeMixin)
 
+# Parameter classes
+class Hardware:
+    """Represents an hardware parameter."""
+    def __init__(
+        self,
+        type: Union[str, None],
+        address: Union[str, None]
+    ) -> None:
+        """Initialize attributes for the class.
+
+        Args:
+            type (str): The type of the hardware instance.
+            address (str): The address of the hardware instance.
+
+        """
+        self.type = type
+        self.address = address
+    def __str__(self) -> str:
+        return f'hardware {self.type} {self.address}'
+    def __repr__(self) -> str:
+        return f'Hardware(type="{self.type}", address="{self.address}")'
+    # def to_dict(self):
+    #     return {}
+    def object_tree(self, indent=0):
+        return f'{" " * indent}{self.__repr__()}'
+    def to_isc(self, indent: int=0) -> str:
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                            Default is 0.
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
+        return f'{" " * indent}{self.__str__()};'
+
+
+class HostIdentifier:
+    """Represents an host identifier parameter."""
+    def __init__(self) -> None:
+        pass
+    def __str__(self) -> str:
+        pass
+    def __repr__(self) -> str:
+        pass
+    # def to_dict(self):
+    #     return {}
+    def object_tree(self, indent=0):
+        return f'{" " * indent}{self.__repr__()}'
+    def to_isc(self, indent: int=0) -> str:
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                            Default is 0.
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
+        pass
+
+
+class ServerDuid:
+    """Represents an server DUID parameter."""
+    def __init__(self) -> None:
+        pass
+    def __str__(self) -> str:
+        pass
+    def __repr__(self) -> str:
+        pass
+    def object_tree(self, indent=0):
+        return f'{" " * indent}{self.__repr__()}'
+    def to_isc(self, indent: int=0) -> str:
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                            Default is 0.
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
+        pass
+
+
+class Option:
+    """Represents an dhcp option."""
+    def __init__(
+        self,
+        value: Union[str, None],
+        name: Union[str, None]=None,
+        number: Union[int, None]=None
+    ) -> None:
+        """Initialize attributes for the class.
+
+        Name or number (or both) must be given. If value contains a comma it
+        is assumed that the value will be a list and the submitted string will
+        be saved accordingly.
+
+        Args:
+            name (str): The name of the dhcp option.
+            number (str): The number of the dhcp option.
+            value (str): The value of the option.
+
+        """
+        if not name and not number:
+            raise TypeError('__init__() missing attribute: name or number')
+        self.name = name
+        self.number = number
+        self.value = value
+    @property
+    def value(self):
+        return self.__value
+    @value.setter
+    def value(self, value: str):
+        if ',' in value:
+            self.__value = [x.strip() for x in value.split(',')]
+        else:
+            self.__value = value
+    def __str__(self) -> str:
+        if isinstance(self.value, list):
+            return (f'option {self.name.replace("_","-") if self.name else self.number} '
+                    f'{", ".join(self.value)}')
+        else:
+            return (f'option {self.name.replace("_","-") if self.name else self.number} '
+                    f'{self.value}')
+    def __repr__(self) -> str:
+        key = f'name="{self.name}"' if self.name else f'number="{self.number}"'
+        if isinstance(self.value, list):
+            value = f'value={self.value}'
+        else:
+            value = f'value="{self.value}"'
+        return f'Option({key}, {value})'
+    def object_tree(self, indent=0):
+        return f'{" " * indent}{self.__repr__()}'
+    def to_isc(self, indent: int=0) -> str:
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                            Default is 0.
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
+        return f'{" " * indent}{self.__str__()};'
+
+
+# Declarations
 class Failover:
     """Represents the Failover declaration."""
     def __init__(
@@ -37,7 +191,7 @@ class Failover:
         load_balance_max_seconds:   Union[int, None]=None,
     ) -> None:
         """Initialize attributes for the class.
-        
+
         Args:
             name (str): A name for the failover peer.
             role (str): Should be either primary or secondary.
@@ -58,6 +212,7 @@ class Failover:
                                 failover member as a bitmap.
             load_balance_max_seconds (int): Sets cutoff for disabling load 
                                 balance.
+
         """
         self.name = name
         self.role  = role
@@ -78,34 +233,9 @@ class Failover:
     def object_tree(self, indent=0):
         """TEMP."""
         return f'{" " * indent}{self.__repr__()}'
-    # def to_dict(self):
-    #     return self.__dict__
-        # Option 2
-        # result_dict = {}
-        # for key, value in self.__dict__.items():
-        #     if key == 'load_balance_max_seconds':
-        #         key = key.replace("_", " ")
-        #     else:
-        #         key = key.replace("_", "-")
-        #     result_dict[key] = value
-        # return result_dict
-        # Option 3
-        # return {
-        #     'name': self.name,
-        #     'role': self.role,
-        #     'address': self.address,
-        #     'peer-address': self.peer_address,
-        #     'port': self.port,
-        #     'peer-port': self.peer_port,
-        #     'max-response-delay': self.max_response_delay,
-        #     'max-unacked-updates': self.max_unacked_updates,
-        #     'mclt': self.mclt,
-        #     'split': self.split,
-        #     'hba': self.hba,
-        #     'load balance max seconds': self.load_balance_max_seconds
-        # }
     def to_isc(self, indent: int=0) -> str:
         """Returns valid ISC configuration as a string.
+
         Args:
             indent (int): Supply an integer to use as indentation offset.
                             Default is 0.
@@ -138,21 +268,29 @@ class Include:
     """Represents the include declaration."""
     def __init__(self, filename: str) -> None:
         """Initialize attributes for the class.
-        
+
         Args:
             filename (str): A path to the file that is to be included.
+
         """
         self.filename = filename
     def __str__(self) -> str:
         return f'include {self.filename}'
     def __repr__(self) -> str:
         return f'Include(filename={self.filename})'
-    # def to_dict(self):
-    #     return {}
     def object_tree(self, indent=0):
         return f'{" " * indent}{self.__repr__()}'
     def to_isc(self, indent: int=0) -> str:
-        """Returns valid ISC configuration as a string."""
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                            Default is 0.
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
         return f'{" " * indent}{self.__str__()};'
 
 class Range4:
@@ -164,12 +302,13 @@ class Range4:
         flag:   Union[str, None]=None
     ) -> None:
         """Initialize attributes for the class.
-        
+
         Args:
             start (str): The first IP address in the range.
             end (str): The last IP address in the range.
             flag (str): If set allows BOOTP clients to get dynamically
                         assigned addresses.
+
         """
         self.start = start
         self.end = end          # Can be omitted
@@ -180,128 +319,91 @@ class Range4:
     def __repr__(self) -> str:
         string_repr = [f'{key}="{value}"' for key, value in self.__dict__.items() if value]
         return f'Range4({", ".join(string_repr)})'
-    # def to_dict(self):
-    #     return {
-    #         'start': self.start,
-    #         'end': self.end,
-    #         'flag': self.flag
-    #     }
     def object_tree(self, indent=0):
         return f'{" " * indent}{self.__repr__()}'
     def to_isc(self, indent: int=0) -> str:
-        """Returns valid ISC configuration as a string."""
-        return f'{" " * indent}{self.__str__()};'
+        """Returns valid ISC configuration as a string.
 
-
-class Option:
-    """Represents an dhcp option."""
-    def __init__(self, value: str, name: str=None, number: int=None) -> None:
-        """Initialize attributes for the class.
-
-        Name or number (or both) must be given. If value contains a comma it
-        is assumed that the value will be a list and the submitted string will
-        be saved accordingly.
-        
         Args:
-            name (str): The name of the dhcp option.
-            number (str): The number of the dhcp option.
-            value (str): The value of the option.
+            indent (int): Supply an integer to use as indentation offset.
+                            Default is 0.
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
         """
-        if not name and not number:
-            raise TypeError('__init__() missing attribute: name or number')
-        self.name = name
-        self.number = number
-        self.value = value
-    @property
-    def value(self):
-        return self.__value
-    @value.setter
-    def value(self, value: str):
-        if ',' in value:
-            self.__value = [x.strip() for x in value.split(',')]
-        else:
-            self.__value = value
-    def __str__(self) -> str:
-        if isinstance(self.value, list):
-            return (f'option {self.name.replace("_","-") if self.name else self.number} '
-                    f'{", ".join(self.value)}')
-        else:
-            return (f'option {self.name.replace("_","-") if self.name else self.number} '
-                    f'{self.value}')
-    def __repr__(self) -> str:
-        key = f'name="{self.name}"' if self.name else f'number="{self.number}"'
-        if isinstance(self.value, list):
-            value = f'value={self.value}'
-        else:
-            value = f'value="{self.value}"'
-        return f'Option({key}, {value})'
-    # def to_dict(self):
-    #     return {
-    #         'name': self.name,
-    #         'number': self.number,
-    #         'value': self.value
-    #     }
-    def object_tree(self, indent=0):
-        return f'{" " * indent}{self.__repr__()}'
-    def to_isc(self, indent: int=0) -> str:
-        """Returns valid ISC configuration as a string."""
         return f'{" " * indent}{self.__str__()};'
 
 
-class Hardware:
-    """Represents an hardware parameter."""
-    def __init__(self, type: str, address:str) -> None:
-        """Initialize attributes for the class.
-        
-        Args:
-            type (str): The type of the hardware instance.
-            address (str): The address of the hardware instance.
-        """
-        self.type = type
-        self.address = address
-    def __str__(self) -> str:
-        return f'hardware {self.type} {self.address}'
-    def __repr__(self) -> str:
-        return f'Hardware(type="{self.type}", address="{self.address}")'
-    # def to_dict(self):
-    #     return {}
-    def object_tree(self, indent=0):
-        return f'{" " * indent}{self.__repr__()}'
-    def to_isc(self, indent: int=0) -> str:
-        """Returns valid ISC configuration as a string."""
-        return f'{" " * indent}{self.__str__()};'
-
-
-class HostIdentifier:
-    """Represents an host identifier parameter."""
+class Range6:
+    """Represents the range declaration for IPv6 objects."""
     def __init__(self) -> None:
         pass
     def __str__(self) -> str:
         pass
     def __repr__(self) -> str:
         pass
-    # def to_dict(self):
-    #     return {}
     def object_tree(self, indent=0):
         return f'{" " * indent}{self.__repr__()}'
     def to_isc(self, indent: int=0) -> str:
-        """Returns valid ISC configuration as a string."""
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                            Default is 0.
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
         pass
 
-class ServerDuid:
-    """Represents an server DUID parameter."""
+
+class Pool6:
+    """Represents an pool declaration for IPv6 objects."""
     def __init__(self) -> None:
         pass
     def __str__(self) -> str:
         pass
     def __repr__(self) -> str:
         pass
-    # def to_dict(self):
-    #     return {}
     def object_tree(self, indent=0):
         return f'{" " * indent}{self.__repr__()}'
     def to_isc(self, indent: int=0) -> str:
-        """Returns valid ISC configuration as a string."""
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                            Default is 0.
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
+        pass
+
+
+class Subnet6:
+    """Represents an subnet declaration for IPv6 objects."""
+    def __init__(self) -> None:
+        pass
+    def __str__(self) -> str:
+        pass
+    def __repr__(self) -> str:
+        pass
+    def object_tree(self, indent=0):
+        return f'{" " * indent}{self.__repr__()}'
+    def to_isc(self, indent: int=0) -> str:
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                            Default is 0.
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
         pass
 
 
@@ -310,15 +412,16 @@ class Key:
     def __init__(
         self,
         name:       str,
-        algorithm:  str=None,
-        secret:     str=None
+        algorithm:  Union[str, None]=None,
+        secret:     Union[str, None]=None
     ) -> None:
         """Initialize attributes for the class.
-        
+
         Args:
             name (str): The name of the key instance.
             algorithm (str): The algorithm used for the key.
             secret (str): The secret used by the key.
+
         """
         self.name = name
         self.algorithm = algorithm
@@ -327,12 +430,19 @@ class Key:
         return f'key {self.name}'
     def __repr__(self) -> str:
         return f'Key(name="{self.name}")'
-    # def to_dict(self):
-    #     return {}
     def object_tree(self, indent=0):
         return f'{" " * indent}{self.__repr__()}'
     def to_isc(self, indent: int=0) -> str:
-        """Returns valid ISC configuration as a string."""
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                            Default is 0.
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
         attrs = []
         child_indent = indent+4
         for key, value in self.__dict__.items():
@@ -348,15 +458,21 @@ class Key:
 
 class Zone:
     """Represents an zone declaration."""
-    def __init__(self, name: str, primary: str=None, key: Key=None) -> None:
+    def __init__(
+        self,
+        name:       str,
+        primary:    Union[str, None]=None,
+        key:        Union[Key, None]=None
+    ) -> None:
         """Initialize attributes for the class.
-        
+
         Args:
             name (str): The name of the zone.
             primary (str): The IP address of the primary server for the zone
                             in string format.
             key (pyisc.dhcpd.nodes.Key): The key used to authenticate to the
                             primary server.
+
         """
         self.name = name
         self.primary = primary
@@ -365,19 +481,26 @@ class Zone:
         return f'zone {self.name}'
     def __repr__(self) -> str:
         return f'Zone(name={self.name})'
-    # def to_dict(self):
-    #     return {}
     def object_tree(self, indent=0):
         return f'{" " * indent}{self.__repr__()}'
     def to_isc(self, indent: int=0) -> str:
-        """Returns valid ISC configuration as a string."""
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                            Default is 0.
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
         attrs = []
         child_indent = indent+4
         for key, value in self.__dict__.items():
             if all((value, key != 'name', key != 'key')):
                 attrs.append(f'{" " * child_indent}{key} {value};')
         if self.key:
-            attrs.append(f'{" " * child_indent}key {self.key.name};')
+            attrs.append(f'{" " * child_indent}{value};')
         return_str = (f'{" " * indent}{self.__str__()}' ' {')
         if len(attrs) > 0:
             return_str += '\n'
@@ -391,13 +514,13 @@ class DhcpClass:
     def __init__(
         self,
         name:               str,
-        always_broadcast:   bool=None,
-        match:              str=None,
-        spawn:              str=None,
-        lease_limit:        int=None,
+        always_broadcast:   Union[bool, None]=None,
+        match:              Union[str, None]=None,
+        spawn:              Union[str, None]=None,
+        lease_limit:        Union[int, None]=None,
     ) -> None:
         """Initialize attributes for the class.
-        
+
         Args:
             name (str): The name of the zone.
             always_broadcast (boolean): Broadcast even if broadcast flag is
@@ -406,6 +529,7 @@ class DhcpClass:
             spawn (str): The spawn argument in the form of a string.
             lease_limit (int): Sets the amount of clients that are allowed a
                         lease
+
         """
         self.name = name
         self.always_broadcast = always_broadcast
@@ -416,12 +540,19 @@ class DhcpClass:
         return f'class {self.name}'
     def __repr__(self) -> str:
         return f'DhcpClass(name={self.name})'
-    # def to_dict(self):
-    #     return {}
     def object_tree(self, indent=0):
         return f'{" " * indent}{self.__repr__()}'
     def to_isc(self, indent: int=0) -> str:
-        """Returns valid ISC configuration as a string."""
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                            Default is 0.
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
         attrs = []
         child_indent = indent+4
         for key, value in self.__dict__.items():
@@ -445,17 +576,18 @@ class SubClass(Parameters, OptionMixin):
         self,
         name:           str,
         match_value:    str,
-        lease_limit:    int=None,
-        options:        List[Option]=None,
+        lease_limit:    Union[int, None]=None,
+        options:        Union[List[Option], None]=None,
     ) -> None:
         """Initialize attributes for the class.
-        
+
         Args:
             name (str): The name of the zone.
             match_value (str): The conditional in the form of a string.
             lease_limit (int): Sets the amount of clients that are allowed a
                         lease
             options (list[pyisc.dhcpd.nodes.Option]): A list of options.
+
         """
         self.name = name
         self.match_value = match_value
@@ -466,12 +598,19 @@ class SubClass(Parameters, OptionMixin):
         return f'subclass {self.name} {self.match_value}'
     def __repr__(self) -> str:
         return f'SubClass(name={self.name}, match_value={self.match_value})'
-    # def to_dict(self):
-    #     return {}
     def object_tree(self, indent=0):
         return f'{" " * indent}{self.__repr__()}'
     def to_isc(self, indent: int=0) -> str:
-        """Returns valid ISC configuration as a string."""
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                            Default is 0.
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
         attrs = []
         child_indent = indent+4
         for key, value in self.__dict__.items():
@@ -489,7 +628,11 @@ class SubClass(Parameters, OptionMixin):
         return (f'{return_str}{attrs_str}' '\n' f'{" " * indent}{section_end}')
 
 class Host(Parameters):
-    """Represents an host declaration."""
+    """Represents an host declaration.
+    
+    TODO:
+        * Host Identifier is not present in to_isc method.
+    """
     def __init__(
         self,
         name:               str,
@@ -501,7 +644,7 @@ class Host(Parameters):
         host_identifier:    Union[HostIdentifier, None]=None,
     ) -> None:
         """Initialize attributes for the class.
-        
+
         Args:
             name (str): The name of the zone.
             always_broadcast (boolean): Broadcast even if broadcast flag is
@@ -514,6 +657,7 @@ class Host(Parameters):
                         the client.
             host_identifier (pyisc.dhcpd.nodes.HostIdentifier): IPv6 
                         identifier for client
+
         """
         self.name = name
         self.always_broadcast = always_broadcast
@@ -527,17 +671,25 @@ class Host(Parameters):
         return f'host {self.name}'
     def __repr__(self) -> str:
         return f'Host(name={self.name})'
-    # def to_dict(self):
-    #     return {}
     def object_tree(self, indent=0):
         return f'{" " * indent}{self.__repr__()}'
     def to_isc(self, indent: int=0) -> str:
-        """Returns valid ISC configuration as a string."""
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                            Default is 0.
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
         attrs = []
         child_indent = indent+4
         for key, value in self.__dict__.items():
             new_key = key.replace("_", "-")
-            if isinstance(value, Hardware):
+            # if isinstance(value, Hardware):
+            if hasattr(value, 'to_isc'):
                 attrs.append(f'{" " * child_indent}{value.to_isc()}')
             elif all((value, key != 'name')):
                 attrs.append(f'{" " * child_indent}{new_key} {value};')
@@ -554,8 +706,8 @@ class Pool4(RangeMixin):
         self,
         known_clients:               Union[str, None]=None,
         unknown_clients:             Union[str, None]=None,
-        allow_members_of:            List[str]=None,
-        deny_members_of:             List[str]=None,
+        allow_members_of:            Union[List[str], None]=None,
+        deny_members_of:             Union[List[str], None]=None,
         dynamic_bootp_clients:       Union[str, None]=None,
         authenticated_clients:       Union[str, None]=None,
         unauthenticated_clients:     Union[str, None]=None,
@@ -563,7 +715,7 @@ class Pool4(RangeMixin):
         allow_after:                 Union[int, None]=None,
         deny_after:                  Union[int, None]=None,
         failover:                    Union[Failover, None]=None,
-        ranges:                      List[Range4]=None,
+        ranges:                      Union[List[Range4], None]=None,
     ) -> None:
         """Initialize attributes for the class.
 
@@ -606,8 +758,6 @@ class Pool4(RangeMixin):
         self.deny_members_of.append(member)
     def delete_denied_member(self, member: str) -> None:
         self.deny_members_of.remove(member)
-    # def to_dict(self):
-    #     return {}
     def object_tree(self, indent=0):
         attrs = []
         child_indent = indent+4
@@ -619,7 +769,16 @@ class Pool4(RangeMixin):
         attrs_str = "\n".join(attrs)
         return f'{return_str}{attrs_str}'
     def to_isc(self, indent: int=0) -> str:
-        """Returns valid ISC configuration as a string."""
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                            Default is 0.
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
         attrs = []
         child_indent = indent+4
         for key, value in self.__dict__.items():
@@ -653,11 +812,11 @@ class Subnet4(Parameters, OptionMixin, RangeMixin, PoolMixin):
     def __init__(
         self,
         network:            str,
-        authoritative:      bool=None,
-        server_id_check:    bool=None,
-        options:            List[Option]=None,
-        ranges:             List[Range4]=None,
-        pools:              List[Pool4]=None
+        authoritative:      Union[bool, None]=None,
+        server_id_check:    Union[bool, None]=None,
+        options:            Union[List[Option], None]=None,
+        ranges:             Union[List[Range4], None]=None,
+        pools:              Union[List[Pool4], None]=None
     ) -> None:
         """Initialize attributes for the class.
 
@@ -683,12 +842,19 @@ class Subnet4(Parameters, OptionMixin, RangeMixin, PoolMixin):
         return f'subnet {subnet} netmask {netmask}'
     def __repr__(self) -> str:
         return f'Subnet4(network="{self.network}")'
-    # def to_dict(self):
-    #     return {}
     def object_tree(self, indent=0):
         return f'{" " * indent}{self.__repr__()}'
     def to_isc(self, indent: int=0) -> str:
-        """Returns valid ISC configuration as a string."""
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                            Default is 0.
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
         attrs = []
         child_indent = indent+4
         for key, value in self.__dict__.items():
@@ -714,10 +880,10 @@ class SharedNetwork(OptionMixin, SubnetMixin, PoolMixin):
     def __init__(
         self,
         name:           str,
-        authoritative:  bool=None,
-        options:        List[Option]=None,
-        subnets:        List[Subnet4]=None,
-        pools:          List[Pool4]=None
+        authoritative:  Union[bool, None]=None,
+        options:        Union[List[Option], None]=None,
+        subnets:        Union[List[Subnet4], None]=None,
+        pools:          Union[List[Pool4], None]=None
     ) -> None:
         """Initialize attributes for the class.
 
@@ -738,10 +904,17 @@ class SharedNetwork(OptionMixin, SubnetMixin, PoolMixin):
         return f'shared-network {self.name}'
     def __repr__(self) -> str:
         return f'SharedNetwork(name={self.name})'
-    # def to_dict(self):
-    #     return {}
     def to_isc(self, indent: int=0) -> str:
-        """Returns valid ISC configuration as a string."""
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                            Default is 0.
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
         attrs = []
         child_indent = indent+4
         for key, value in self.__dict__.items():
@@ -767,11 +940,10 @@ class Group(Parameters, SubnetMixin, SharedNetworkMixin, HostMixin, OptionMixin)
     """Represents an group declaration."""
     def __init__(
         self,
-        options:            List[Option]=None,
-        subnets:            List[Subnet4]=None,
-        shared_networks:    List[SharedNetwork]=None,
-        # groups:             List[Group]=None,
-        hosts:              List[Host]=None
+        options:            Union[List[Option], None]=None,
+        subnets:            Union[List[Subnet4], None]=None,
+        shared_networks:    Union[List[SharedNetwork], None]=None,
+        hosts:              Union[List[Host], None]=None
     ) -> None:
         """Initialize attributes for the class.
 
@@ -791,10 +963,17 @@ class Group(Parameters, SubnetMixin, SharedNetworkMixin, HostMixin, OptionMixin)
         return f'group'
     def __repr__(self) -> str:
         return f'Group()'
-    # def to_dict(self):
-    #     return {}
     def to_isc(self, indent: int=0) -> str:
-        """Returns valid ISC configuration as a string."""
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                            Default is 0.
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
         attrs = []
         child_indent = indent+4
         for key, value in self.__dict__.items():
@@ -902,9 +1081,17 @@ class Global(   Parameters, OptionMixin, SubnetMixin, SharedNetworkMixin,
         return f'Global'
     def __repr__(self) -> str:
         return f'Global()'
-    # def to_dict(self):
-    #     return {}
     def to_isc(self):
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                            Default is 0.
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
         attrs = []
         sort_order = {
             'options': 1,

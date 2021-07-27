@@ -57,10 +57,6 @@ class TokenProcessor:
         if 'not' in self.token.value:
             return (False, 'authoritative')
         return (True, 'authoritative')
-    # def failover_parameter(self):
-    #     """Returns tuple for the failover command when used as an attribute."""
-    #     *_, peer = self.token.value[:-1].split()
-    #     return (Failover(name=peer), 'failover')
     def hardware(self) -> Tuple:
         """Returns tuple for the hardware command."""
         _, hardware_type, hardware_address = self.token.value[:-1].split()
@@ -70,14 +66,6 @@ class TokenProcessor:
         """Returns tuple for the zone primary command."""
         _, primary = self.token.value[:-1].split()
         return (primary, 'primary')
-    # def key_parameter(self) -> Tuple:
-    #     """Returns tuple for the zone key command."""
-    #     _, name = self.token.value[:-1].split()
-    #     if self.token.value[-1] == '{':
-    #         method = 'add_key'
-    #     else:
-    #         method = 'key'
-    #     return (Key(name=name), method)
     def failover_role(self) -> Tuple:
         """Returns tuple for the failover role."""
         role = self.token.value[:-1]
@@ -169,9 +157,6 @@ class TokenProcessor:
         """Returns tuple for the class declaration and parameter."""
         _, name, match_value = self.token.value[:-1].split()
         return (SubClass(name=name, match_value=match_value), 'add_subclass')
-    # def subclass_parameter(self):
-    #     _, name, match_value = self.token.value[:-1].split()
-    #     return (SubClass(name=name, match_value=match_value), 'add_subclass')
     def zone(self) -> Tuple:
         """Returns tuple for the zone declaration."""
         _, name = self.token.value[:-1].split()
