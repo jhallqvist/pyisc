@@ -53,7 +53,7 @@ class Hardware:
 
         Args:
             indent (int): Supply an integer to use as indentation offset.
-                            Default is 0.
+                Default is 0.
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -98,7 +98,7 @@ class HostIdentifier:
 
         Args:
             indent (int): Supply an integer to use as indentation offset.
-                            Default is 0.
+                Default is 0.
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -126,7 +126,7 @@ class ServerDuid:
 
         Args:
             indent (int): Supply an integer to use as indentation offset.
-                            Default is 0.
+                Default is 0.
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -196,7 +196,7 @@ class Option:
 
         Args:
             indent (int): Supply an integer to use as indentation offset.
-                            Default is 0.
+                Default is 0.
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -225,7 +225,7 @@ class EventSet:
 
         Args:
             indent (int): Supply an integer to use as indentation offset.
-                            Default is 0.
+                Default is 0.
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -259,21 +259,21 @@ class Failover:
             role (str): Should be either primary or secondary.
             address (str): The IP address of the server in string format.
             peer_address (str): The IP address of the failover peer server
-                                in string format.
+                in string format.
             port (int): The TCP port that the server listens for connections
-                                from failover peer.
+                from failover peer.
             peer_port (int): The TCP port that the server connects to its
-                                failover peer.
+                failover peer.
             max_response_delay (int): Sets maximum response delay.
             max_unacked_updates (int): Sets maximum for unacknowledged
-                                messages.
+                messages.
             mclt (int): Sets maximum client lead time.
             split (int): Sets split load between primary and secondary
-                                failover member.
+                failover member.
             hba (str): Sets split load between primary and secondary
-                                failover member as a bitmap.
+                failover member as a bitmap.
             load_balance_max_seconds (int): Sets cutoff for disabling load
-                                balance.
+                balance.
 
         """
         self.name = name
@@ -304,7 +304,7 @@ class Failover:
 
         Args:
             indent (int): Supply an integer to use as indentation offset.
-                            Default is 0.
+                Default is 0.
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -355,7 +355,7 @@ class Include:
 
         Args:
             indent (int): Supply an integer to use as indentation offset.
-                            Default is 0.
+                Default is 0.
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -368,26 +368,29 @@ class Range4:
     """Represents the range declaration for IPv4 objects."""
     def __init__(
         self,
-        start:  str,
-        end:    Union[str, None] = None,
-        flag:   Union[str, None] = None
+        start:          str,
+        end:            Union[str, None] = None,
+        dynamic_bootp:  bool = False
     ) -> None:
         """Initialize attributes for the class.
 
         Args:
             start (str): The first IP address in the range.
             end (str): The last IP address in the range.
-            flag (str): If set allows BOOTP clients to get dynamically
-                        assigned addresses.
+            dynamic_bootp (boolean): If set allows BOOTP clients to get
+                dynamically assigned addresses.
 
         """
         self.start = start
-        self.end = end          # Can be omitted
-        self.flag = flag        # Valid value dynamic-bootp or None.
+        self.end = end
+        self.dynamic_bootp = dynamic_bootp
 
     def __str__(self) -> str:
-        list_comp = [x for x in (self.flag, self.start, self.end) if x]
-        return f'range {" ".join(list_comp)}'
+        list_comp = [x for x in (self.start, self.end) if x]
+        if self.dynamic_bootp:
+            return f'range dynamic-bootp {" ".join(list_comp)}'
+        else:
+            return f'range {" ".join(list_comp)}'
 
     def __repr__(self) -> str:
         string_repr = [f'{key}="{value}"' for key, value in self.__dict__.items() if value]
@@ -401,7 +404,7 @@ class Range4:
 
         Args:
             indent (int): Supply an integer to use as indentation offset.
-                            Default is 0.
+                Default is 0.
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -438,7 +441,7 @@ class Event(EventSetMixin):
 
         Args:
             indent (int): Supply an integer to use as indentation offset.
-                            Default is 0.
+                Default is 0.
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -462,14 +465,35 @@ class Event(EventSetMixin):
 
 class Range6:
     """Represents the range declaration for IPv6 objects."""
-    def __init__(self) -> None:
-        pass
+    def __init__(
+        self,
+        start:      str,
+        end:        Union[str, None] = None,
+        temporary:  bool = False
+    ) -> None:
+        """Initialize attributes for the class.
+
+        Args:
+            start (str): The first IP address in the range.
+            end (str): The last IP address in the range.
+            temporary (boolean): If set makes the prefix available for
+                temporary (RFC 4941) addresses.
+
+        """
+        self.start = start
+        self.end = end
+        self.temporary = temporary
 
     def __str__(self) -> str:
-        pass
+        if self.temporary:
+            list_comp = [x for x in (self.start, self.end, 'temporary') if x]
+        else:
+            list_comp = [x for x in (self.start, self.end) if x]
+        return f'range6 {" ".join(list_comp)}'
 
     def __repr__(self) -> str:
-        pass
+        return (f'Range6(start={self.start}, end={self.end}, '
+                f'temporary={self.temporary})')
 
     def object_tree(self, indent=0):
         return f'{" " * indent}{self.__repr__()}'
@@ -479,13 +503,13 @@ class Range6:
 
         Args:
             indent (int): Supply an integer to use as indentation offset.
-                            Default is 0.
+                Default is 0.
 
         Returns:
             str: A string representation of the object tree from this level.
 
         """
-        pass
+        return f'{" " * indent}{self.__str__()};'
 
 
 class Pool6:
@@ -507,7 +531,7 @@ class Pool6:
 
         Args:
             indent (int): Supply an integer to use as indentation offset.
-                            Default is 0.
+                Default is 0.
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -535,7 +559,7 @@ class Subnet6:
 
         Args:
             indent (int): Supply an integer to use as indentation offset.
-                            Default is 0.
+                Default is 0.
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -578,7 +602,7 @@ class Key:
 
         Args:
             indent (int): Supply an integer to use as indentation offset.
-                            Default is 0.
+                Default is 0.
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -610,9 +634,9 @@ class Zone:
         Args:
             name (str): The name of the zone.
             primary (str): The IP address of the primary server for the zone
-                            in string format.
+                in string format.
             key (pyisc.dhcpd.nodes.Key): The key used to authenticate to the
-                            primary server.
+                primary server.
 
         """
         self.name = name
@@ -633,7 +657,7 @@ class Zone:
 
         Args:
             indent (int): Supply an integer to use as indentation offset.
-                            Default is 0.
+                Default is 0.
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -669,11 +693,11 @@ class DhcpClass:
         Args:
             name (str): The name of the zone.
             always_broadcast (boolean): Broadcast even if broadcast flag is
-                        unset from clients.
+                unset from clients.
             match (str): The conditional in the form of a string.
             spawn (str): The spawn argument in the form of a string.
             lease_limit (int): Sets the amount of clients that are allowed a
-                        lease
+                lease
 
         """
         self.name = name
@@ -696,7 +720,7 @@ class DhcpClass:
 
         Args:
             indent (int): Supply an integer to use as indentation offset.
-                            Default is 0.
+                Default is 0.
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -734,7 +758,7 @@ class SubClass(Parameters, OptionMixin):
             name (str): The name of the zone.
             match_value (str): The conditional in the form of a string.
             lease_limit (int): Sets the amount of clients that are allowed a
-                        lease
+                lease.
             options (list[pyisc.dhcpd.nodes.Option]): A list of options.
 
         """
@@ -758,7 +782,7 @@ class SubClass(Parameters, OptionMixin):
 
         Args:
             indent (int): Supply an integer to use as indentation offset.
-                            Default is 0.
+                Default is 0.
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -801,15 +825,15 @@ class Host(Parameters):
         Args:
             name (str): The name of the zone.
             always_broadcast (boolean): Broadcast even if broadcast flag is
-                        unset from clients.
+                unset from clients.
             fixed_address (str, list[str]): One or more IPv4 address in
-                        string format.
+                string format.
             fixed_address6 (str): An IPv6 address in string format.
             fixed_prefix6 (str, list[str]): One or more IPv prefixes.
             hardware (pyisc.dhcpd.nodes.Hardware): The hardware address of
-                        the client.
+                the client.
             host_identifier (pyisc.dhcpd.nodes.HostIdentifier): IPv6
-                        identifier for client
+                identifier for client
 
         """
         self.name = name
@@ -835,7 +859,7 @@ class Host(Parameters):
 
         Args:
             indent (int): Supply an integer to use as indentation offset.
-                            Default is 0.
+                Default is 0.
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -845,7 +869,6 @@ class Host(Parameters):
         child_indent = indent+4
         for key, value in self.__dict__.items():
             new_key = key.replace("_", "-")
-            # if isinstance(value, Hardware):
             if hasattr(value, 'to_isc'):
                 attrs.append(f'{" " * child_indent}{value.to_isc()}')
             elif all((value, key != 'name')):
@@ -939,7 +962,7 @@ class Pool4(RangeMixin):
 
         Args:
             indent (int): Supply an integer to use as indentation offset.
-                            Default is 0.
+                Default is 0.
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -1018,7 +1041,7 @@ class Subnet4(Parameters, OptionMixin, RangeMixin, PoolMixin):
 
         Args:
             indent (int): Supply an integer to use as indentation offset.
-                            Default is 0.
+                Default is 0.
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -1082,7 +1105,7 @@ class SharedNetwork(OptionMixin, SubnetMixin, PoolMixin):
 
         Args:
             indent (int): Supply an integer to use as indentation offset.
-                            Default is 0.
+                Default is 0.
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -1145,7 +1168,7 @@ class Group(Parameters, SubnetMixin, SharedNetworkMixin, HostMixin,
 
         Args:
             indent (int): Supply an integer to use as indentation offset.
-                            Default is 0.
+                Default is 0.
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -1268,7 +1291,7 @@ class Global(Parameters, OptionMixin, SubnetMixin, SharedNetworkMixin,
 
         Args:
             indent (int): Supply an integer to use as indentation offset.
-                            Default is 0.
+                Default is 0.
 
         Returns:
             str: A string representation of the object tree from this level.

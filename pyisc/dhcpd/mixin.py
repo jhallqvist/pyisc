@@ -13,10 +13,10 @@
 # limitations under the License.
 
 from ipaddress import IPv4Network
-from typing import List, TYPE_CHECKING
+from typing import List, Union, TYPE_CHECKING
 if TYPE_CHECKING:
     from pyisc.dhcpd.nodes import (
-        Subnet4, Pool4, Range4, Option, DhcpClass, Event, EventSet,
+        Subnet4, Subnet6, Pool4, Range4, Option, DhcpClass, Event, EventSet,
         Group, Host, SharedNetwork, SubClass, Zone, Key, Include)
 
 # Methods to be inherited by objects in order to reduce duplicate code.
@@ -24,20 +24,31 @@ if TYPE_CHECKING:
 
 
 class SubnetMixin:
-    """add, delete, get, modify, search in list of subnets.
-    Should handle both v4 and v6 despite what below type hint indicates."""
-    def add_subnet(self, subnet: 'Subnet4', sort: bool = True) -> None:
-        self.subnets.append(subnet)
+    def add_subnet(
+        self,
+        network: Union['Subnet4', 'Subnet6'],
+        sort: bool = True
+    ) -> None:
+        """Adds a subnet to objects subnets.
+        
+        Args:
+            network (Subnet4, Subnet6): The subnet object to be added.
+            sort (boolean): Sorts the list of subnets after an addition.
+        """
+        self.subnets.append(network)
         if sort:
             self.subnets.sort(key=lambda x: IPv4Network((x.network)))
 
-    def find_subnet(self, network: str) -> None:
+    def find_subnet(self, network: str) -> Union['Subnet4', 'Subnet6']:
+        """Return the first exact match from objcts subnets."""
         return next((x for x in self.subnets if x.network == network), None)
 
     def all_subnets(self) -> List:
+        """Return a list of all subnet with their index number"""
         return [[index, entity] for index, entity in enumerate(self.subnets)]
 
-    def delete_subnet(self, network) -> None:
+    def delete_subnet(self, network: str) -> None:
+        """Deletes the exact subnet from objects subnets."""
         found_subnet = self.find_subnet(network)
         if found_subnet:
             self.subnets.remove(found_subnet)
@@ -70,7 +81,7 @@ class PoolMixin:
     def find_pool(self, key):
         try:
             return self.all_pools()[key]
-        except:
+        except IndexError:
             return None
 
     def all_pools(self):

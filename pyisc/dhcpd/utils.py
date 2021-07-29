@@ -36,7 +36,7 @@ class TokenProcessor:
 
         Returns:
             tuple: Tuple containing value or object in first position
-                    and method in second position.
+                and method in second position.
 
         Examples:
             >>> token = Token(type='OPTION',
@@ -110,17 +110,33 @@ class TokenProcessor:
         _, statement = self.token.value[:-1].split(' ', 1)
         return (statement, 'spawn')
 
+    # def range4(self) -> Tuple:
+    #     """Returns tuple for the range statement for ipv4 configuration."""
+    #     if self.token.value.count(' ') == 1:
+    #         _, range_start = self.token.value[:-1].split()
+    #         range_end = flag = None
+    #     elif self.token.value.count(' ') == 2:
+    #         _, range_start, range_end = self.token.value[:-1].split()
+    #         flag = None
+    #     else:
+    #         _, flag, range_start, range_end = self.token.value[:-1].split()
+    #     subnet_range = Range4(start=range_start, end=range_end, flag=flag)
+    #     return (subnet_range, 'add_range')
+
     def range4(self) -> Tuple:
         """Returns tuple for the range statement for ipv4 configuration."""
-        if self.token.value.count(' ') == 1:
-            _, range_start = self.token.value[:-1].split()
-            range_end = flag = None
-        elif self.token.value.count(' ') == 2:
-            _, range_start, range_end = self.token.value[:-1].split()
-            flag = None
+        cleaned_token = self.token.value[:-1].strip()
+        range_list = [data.strip() for data in cleaned_token.split()]
+        if 'dynamic-bootp' in cleaned_token:
+            dynamic_bootp = True
+            range_list.remove('dynamic-bootp')
         else:
-            _, flag, range_start, range_end = self.token.value[:-1].split()
-        subnet_range = Range4(start=range_start, end=range_end, flag=flag)
+            dynamic_bootp = False
+        while len(range_list) < 3:
+            range_list += [None]
+        _, range_start, range_end = range_list
+        subnet_range = Range4(
+            start=range_start, end=range_end, dynamic_bootp=dynamic_bootp)
         return (subnet_range, 'add_range')
 
     def option(self) -> Tuple:
@@ -177,7 +193,8 @@ class TokenProcessor:
 
     def subclass(self) -> Tuple:
         """Returns tuple for the class declaration and parameter."""
-        _, name, match_value = self.token.value[:-1].split()
+        cleaned_token = self.token.value[:-1].strip()
+        _, name, match_value = cleaned_token.split(' ', 2)
         return (SubClass(name=name, match_value=match_value), 'add_subclass')
 
     def zone(self) -> Tuple:
