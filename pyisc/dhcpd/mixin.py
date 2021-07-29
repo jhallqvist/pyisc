@@ -13,30 +13,31 @@
 # limitations under the License.
 
 from ipaddress import IPv4Network
-from os import EX_PROTOCOL
 from typing import List, TYPE_CHECKING
 if TYPE_CHECKING:
     from pyisc.dhcpd.nodes import (
-        Subnet4, Pool4, Range4, Option, DhcpClass, 
+        Subnet4, Pool4, Range4, Option, DhcpClass, Event, EventSet,
         Group, Host, SharedNetwork, SubClass, Zone, Key, Include)
 
 # Methods to be inherited by objects in order to reduce duplicate code.
 # All add methods currently expects a object instance.
+
+
 class SubnetMixin:
     """add, delete, get, modify, search in list of subnets.
     Should handle both v4 and v6 despite what below type hint indicates."""
-    def add_subnet(self, subnet: 'Subnet4', sort: bool=True) -> None:
+    def add_subnet(self, subnet: 'Subnet4', sort: bool = True) -> None:
         self.subnets.append(subnet)
         if sort:
             self.subnets.sort(key=lambda x: IPv4Network((x.network)))
+
     def find_subnet(self, network: str) -> None:
-        for subnet in self.subnets:
-            if subnet.network == network:
-                return subnet
-            return None
+        return next((x for x in self.subnets if x.network == network), None)
+
     def all_subnets(self) -> List:
         return [[index, entity] for index, entity in enumerate(self.subnets)]
-    def delete_subnet(self, network)-> None:
+
+    def delete_subnet(self, network) -> None:
         found_subnet = self.find_subnet(network)
         if found_subnet:
             self.subnets.remove(found_subnet)
@@ -48,26 +49,33 @@ class SubnetMixin:
 class RangeMixin:
     def add_range(self, range: 'Range4'):
         self.ranges.append(range)
+
     def find_range(self, key):
         for index, dhcp_range in self.all_ranges():
             if index == key:
                 return [index, dhcp_range]
             return None
+
     def all_ranges(self):
         return [[index, entity] for index, entity in enumerate(self.ranges)]
+
     def delete_range():
         pass
+
 
 class PoolMixin:
     def add_pool(self, pool: 'Pool4'):
         self.pools.append(pool)
+
     def find_pool(self, key):
         try:
             return self.all_pools()[key]
         except:
             return None
+
     def all_pools(self):
         return [[index, entity] for index, entity in enumerate(self.pools)]
+
     def delete_pool(self, key):
         index, found_pool = self.find_pool(key)
         if found_pool:
@@ -76,78 +84,128 @@ class PoolMixin:
         else:
             return 'No pool found'
 
+
 class OptionMixin:
     def add_option(self, option: 'Option'):
         self.options.append(option)
+
     def find_option(self, option):
         pass
+
     def delete_option(self, option):
         pass
+
 
 class HostMixin:
     def add_host(self, host: 'Host'):
         self.hosts.append(host)
+
     def find_host(self, host):
         pass
+
     def delete_host(self, host):
         pass
+
 
 class GroupMixin:
     def add_group(self, group: 'Group'):
         self.groups.append(group)
+
     def find_group(self, group):
         pass
+
     def delete_group(self, group):
         pass
+
 
 class ClassMixin:
     def add_class(self, class_obj: 'DhcpClass'):
         self.classes.append(class_obj)
+
     def find_class(self, class_obj):
         pass
+
     def delete_class(self, class_obj):
         pass
+
 
 class SubClassMixin:
     def add_subclass(self, subclass: 'SubClass'):
         self.subclasses.append(subclass)
+
     def find_subclass(self, subclass):
         pass
+
     def delete_subclass(self, subclass):
         pass
+
 
 class SharedNetworkMixin:
     def add_shared_network(self, shared_network: 'SharedNetwork'):
         self.shared_networks.append(shared_network)
+
     def find_shared_network(self, shared_network):
         pass
+
     def delete_shared_network(self, shared_network):
         pass
+
 
 class ZoneMixin:
     def add_zone(self, zone: 'Zone'):
         self.zones.append(zone)
+
     def find_zone(self, zone):
         pass
+
     def delete_zone(self, zone):
         pass
+
 
 class KeyMixin:
     def add_key(self, key: 'Key'):
         self.keys.append(key)
+
     def find_key(self, key):
         pass
+
     def delete_key(self, key):
         pass
+
 
 class IncludeMixin:
     """Methods for working with the Include class as an attribute."""
     def add_include(self, include: 'Include'):
         self.includes.append(include)
+
     def find_include(self, include):
         pass
+
     def delete_include(self, include):
         pass
+
+
+class EventMixin:
+    def add_event(self, key: 'Event'):
+        self.events.append(key)
+
+    def find_event(self, key):
+        pass
+
+    def delete_event(self, key):
+        pass
+
+
+class EventSetMixin:
+    def add_event_set(self, key: 'EventSet'):
+        self.event_sets.append(key)
+
+    def find_event_set(self, key):
+        pass
+
+    def delete_event_set(self, key):
+        pass
+
 
 class Parameters:
     """Contains all inheritable ISC Parameters.
@@ -160,7 +218,7 @@ class Parameters:
     def __init__(
         self,
         # abandon_lease_time=None,
-        adaptive_lease_time_threshold: int=None,
+        adaptive_lease_time_threshold: int = None,
         # always_broadcast=None,
         always_reply_rfc1048=None,
         # authoritative=None,
@@ -238,12 +296,7 @@ class Parameters:
         vendor_option_space=None,
 
     ) -> None:
-        """Initialize attributes for the class.
-        
-        Args:
-            adaptive_lease_time_threshold (int): A percentage value 
-                    between 1 and 99.
-        """
+        """Initialize attributes for the class."""
         # self.abandon_lease_time = abandon_lease_time
         self.adaptive_lease_time_threshold = adaptive_lease_time_threshold
         # self.always_broadcast = always_broadcast

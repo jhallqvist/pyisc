@@ -1,4 +1,4 @@
-from pyisc.dhcpd.parsing import *
+from pyisc.dhcpd.parsing import DhcpdParser
 
 parser = DhcpdParser()
 

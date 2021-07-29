@@ -17,6 +17,7 @@ import re
 from pyisc.dhcpd.nodes import Global
 from pyisc.dhcpd.utils import TokenProcessor
 
+
 class Token(NamedTuple):
     """A class to implement tokens for text classification."""
 
@@ -25,12 +26,13 @@ class Token(NamedTuple):
     line: int
     column: int
 
+
 class DhcpdParser:
     """A parser for ISC DHCPD configs.
 
-    This class parses contains methods for making tokens out of text as
+    This class contains methods for making tokens out of text as
     well as building a object tree of the generated tokens.
-    Instantiate the class and use of of the methods with a string from 
+    Instantiate the class and use of of the methods with a string from
     a valid ISC DHCPD configuration file.
 
     """
@@ -50,45 +52,50 @@ class DhcpdParser:
             <generator object DhcpdParser.tokenize at ...>
             >>> for token in parser.tokenize(isc_string):
             ...     token
-            Token(type='OPTION', value='option domain-name "example.org";', line=1, column=0)
+            Token(type='OPTION', value='option domain-name "example.org";',
+            line=1, column=0)
 
         """
         token_specification = [
-            ('SHARED_NETWORK',      r'shared-network\s+[^\n]*?{'),          # SCOPE
-            ('SUBNET4',             r'subnet\s+[^\n]*?{'),                  # SCOPE
-            ('POOL',                r'pool\s+[^\n]*?{'),                    # SCOPE
-            ('GROUP',               r'group\s+[^\n]*?{'),                   # SCOPE
-            ('HOST',                r'host\s+[^\n]*?{'),                    # SCOPE
-            ('SUBCLASS',            r'subclass\s+[^\n]*?({|;)'),                # SCOPE
-            ('FAILOVER',            r'failover\s+[^\n]*?({|;)'),                # SCOPE
-            ('DHCP_CLASS',          r'class\s+[^\n]*?{'),                   # SCOPE
-            ('SERVER_DUID',         r'server-duid\s+[^\n]*?;'),             # PARAMETER - Not implemented
-            ('HARDWARE',            r'hardware\s+[^\n]*?;'),                # PARAMETER
-            ('KEY',                 r'key\s+[^\n]*?({|;)'),                     # SCOPE
-            ('ZONE',                r'zone\s+[^\n]*?{'),                    # SCOPE
-            ('PRIMARY',             r'primary\s+[^\n]*?;'),                 # SCOPE
-            ('EVENT',               r'on\s+[^\n]*?{'),                      # SCOPE - Not implemented
-            ('OPTION',              r'option\s+[^\n=]*?;'),                 # PARAMETER
-            ('RANGE4',              r'range\s+[^\n]*?;'),                   # PARAMETER
-            ('INCLUDE',             r'include\s+[^\n]*?;'),                 # PARAMETER
-            ('FAILOVER_ROLE',       r'(primary|secondary);'),               # PARAMETER
-            ('AUTHORITATIVE',       r'(?:not\s+)?authoritative;'),          # PARAMETER
+            ('SHARED_NETWORK',      r'shared-network\s+[^\n]*?{'),
+            ('SUBNET4',             r'subnet\s+[^\n]*?{'),
+            ('POOL',                r'pool\s+[^\n]*?{'),
+            ('GROUP',               r'group\s+[^\n]*?{'),
+            ('HOST',                r'host\s+[^\n]*?{'),
+            ('SUBCLASS',            r'subclass\s+[^\n]*?({|;)'),
+            ('FAILOVER',            r'failover\s+[^\n]*?({|;)'),
+            ('DHCP_CLASS',          r'class\s+[^\n]*?{'),
+            ('SERVER_DUID',         r'server-duid\s+[^\n]*?;'),     # Not implemented
+            ('HARDWARE',            r'hardware\s+[^\n]*?;'),
+            ('KEY',                 r'key\s+[^\n]*?({|;)'),
+            ('ZONE',                r'zone\s+[^\n]*?{'),
+            ('PRIMARY',             r'primary\s+[^\n]*?;'),
+            ('EVENT',               r'on\s+[^\n]*?{'),
+            ('EVENT_SET',           r'set\s+[^\n]*?=[^\n]*?;'),
+            ('EVENT_LOG',           r'log\([^\n]*?[^\n]*?;'),
+            ('EVENT_EXECUTE',       r'execute\([^\n]*?[^\n]*?;'),
+            ('OPTION',              r'option\s+[^\n=]*?;'),
+            ('RANGE4',              r'range\s+[^\n]*?;'),
+            ('INCLUDE',             r'include\s+[^\n]*?;'),
+            ('FAILOVER_ROLE',       r'(primary|secondary);'),
+            ('AUTHORITATIVE',       r'(?:not\s+)?authoritative;'),
             ('ALLOW_MEMBER',        r'allow\s+member[^\n]*?;'),
             ('DENY_MEMBER',         r'deny\s+member[^\n]*?;'),
             ('CLASS_STATEMENT',     r'match\s+(?:if\s+)?[^\n]*?;'),
             ('SPAWN_CLASS',         r'spawn\s+[^\n]*?;'),
-            ('GENERAL_PARAMETER',   r'[\w]+\s*?[^\n]*?;'),                  # GENERAL PARAMETERS
+            ('GENERAL_PARAMETER',   r'[\w]+\s*?[^\n]*?;'),
             ('SCOPE_END',           r'}'),
-            ('COMMENT_UNIX',        r'\#.*'),                               # COMMENT - Not implemented
+            ('COMMENT_UNIX',        r'\#.*'),       # COMMENT - Not implemented
             ('NEWLINE',             r'\n'),
             ('WHITESPACE',          r'[ \t]+'),
-            ('MISMATCH',            r'.'),                                  # Any other character
+            ('MISMATCH',            r'.'),
         ]
-        tok_regex = '|'.join('(?P<%s>%s)' % pair for pair in token_specification)
+        tok_regex = '|'.join(
+            '(?P<%s>%s)' % pair for pair in token_specification)
         line_num = 1
         line_start = 0
         for mo in re.finditer(tok_regex, content):
-            kind = mo.lastgroup     # maybe add .lower() here and remove in Processor switch method.
+            kind = mo.lastgroup
             value = re.sub(r'\s+', ' ', mo.group())
             column = mo.start() - line_start
             if kind == 'NEWLINE':
@@ -98,7 +105,7 @@ class DhcpdParser:
                 raise RuntimeError(f'{value!r} unexpected on line {line_num}')
             yield Token(kind, value, line_num, column)
 
-    def construct_tree(self, content:str) -> Global:
+    def construct_tree(self, content: str) -> Global:
         """
         Return an object tree of supplied string.
 
@@ -127,7 +134,8 @@ class DhcpdParser:
                 # maybe value, attribute instead of declaration, method?
                 declaration, method = processor.switch(token)
                 if not hasattr(node, method):
-                    raise AttributeError(f'{node} attribute {method} does not exist')
+                    raise AttributeError(
+                        f'{node} attribute {method} does not exist')
                 node_method = getattr(node, method)
                 if callable(node_method):
                     node_method(declaration)
