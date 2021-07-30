@@ -2,6 +2,7 @@
 
 ## DHCPD
 
+* [ ] Examples in to_isc method. Especially for Range objects and similar that changes output depending on what attributes are set.
 * [ ] Make match and spawn classes. The main philosophy behind this rebuild is after all - everything that is not a clear key/value parameter should be a seperate object. To tackle mutiple statements seperated by and/or maybe just save them in a list?
 * [ ] Complete Mixin Classes
 * [ ] Detach sorting function from the to_isc in Global class and allow it as a parameter for all to_isc methods. That way users can supply their own sorting if they wish. Sorting order should be: Parameters, Options, Includes, Keys, Zones, Failover, Subnets, Shared Networks, Classes, Subclasses, Hosts and Groups.

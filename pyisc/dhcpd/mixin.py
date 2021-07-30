@@ -30,7 +30,7 @@ class SubnetMixin:
         sort: bool = True
     ) -> None:
         """Adds a subnet to objects subnets.
-        
+
         Args:
             network (Subnet4, Subnet6): The subnet object to be added.
             sort (boolean): Sorts the list of subnets after an addition.
@@ -220,7 +220,7 @@ class EventSetMixin:
 
 class Parameters:
     """Contains all inheritable ISC Parameters.
-    
+
     Parameters not found in this class belong in certain scopes and hence are
     declared as an attribute directly in that class.
 

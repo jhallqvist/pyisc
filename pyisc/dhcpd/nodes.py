@@ -26,8 +26,8 @@ class Hardware:
     """Represents an hardware parameter."""
     def __init__(
         self,
-        type: Union[str, None],
-        address: Union[str, None]
+        type:       Union[str, None],
+        address:    Union[str, None]
     ) -> None:
         """Initialize attributes for the class.
 
@@ -55,6 +55,11 @@ class Hardware:
             indent (int): Supply an integer to use as indentation offset.
                 Default is 0.
 
+        Examples:
+            >>> hardware = Hardware(type='ethernet', address='1234:5678:9abc')
+            >>> print(hardware.to_isc())
+            hardware ethernet 1234:5678:9abc;
+
         Returns:
             str: A string representation of the object tree from this level.
 
@@ -70,6 +75,14 @@ class HostIdentifier:
         option_data:    str,
         number:         Union[int, None] = None
     ) -> None:
+        """Initialize attributes for the class.
+
+        Args:
+            option_name (str): The name of the option.
+            option_data (str): The value of the option.
+            number (int): Relay number.
+
+        """
         self.option_name = option_name
         self.option_data = option_data
         self.number = number
@@ -96,9 +109,24 @@ class HostIdentifier:
     def to_isc(self, indent: int = 0) -> str:
         """Returns valid ISC configuration as a string.
 
+        The output is dependant upon what attributes are set. If number is set
+        it is assumed that the host identifier is of the v6relopt type and the
+        produced configuration will reflect that.
+
         Args:
             indent (int): Supply an integer to use as indentation offset.
                 Default is 0.
+
+        Examples:
+            >>> host_id = HostIdentifier(option_name='domain-name',
+                                         option_data='"example.org"')
+            >>> print(host_id.to_isc())
+            host-identifier option domain-name "example.org";
+
+            >>> host_id = HostIdentifier(option_name='domain-name',
+                                         option_data='"example.org"', number=1)
+            >>> print(host_id.to_isc())
+            host-identifier v6relopt 1 domain-name "example.org";
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -198,6 +226,20 @@ class Option:
             indent (int): Supply an integer to use as indentation offset.
                 Default is 0.
 
+        Examples:
+            >>> option = Option(name='domain-name', value='"example.org"')
+            >>> print(option.to_isc())
+            option domain-name "example.org";
+
+            >>> option = Option(number=105, value='"test"')
+            >>> print(option.to_isc())
+            option 105 "test";
+
+            >>> option = Option(name='domain-name', number=98,
+                                value='"example.org"')
+            >>> print(option.to_isc())
+            option domain-name "example.org";
+
         Returns:
             str: A string representation of the object tree from this level.
 
@@ -227,11 +269,45 @@ class EventSet:
             indent (int): Supply an integer to use as indentation offset.
                 Default is 0.
 
+        Examples:
+            >>> event_set = EventSet(key='clip',
+                        value='binary-to-ascii(10, 8, ".", leased-address)')
+            >>> print(event_set.to_isc())
+            set clip = binary-to-ascii(10, 8, ".", leased-address);
+
         Returns:
             str: A string representation of the object tree from this level.
 
         """
         return f'{" " * indent}{self.__str__()};'
+
+
+class Prefix6:
+    """Represents an prefix parameter for IPv6 objects."""
+    def __init__(self) -> None:
+        pass
+
+    def __str__(self) -> str:
+        pass
+
+    def __repr__(self) -> str:
+        pass
+
+    def object_tree(self, indent=0):
+        return f'{" " * indent}{self.__repr__()}'
+
+    def to_isc(self, indent: int = 0) -> str:
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                Default is 0.
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
+        pass
 
 
 # Declarations
@@ -306,6 +382,18 @@ class Failover:
             indent (int): Supply an integer to use as indentation offset.
                 Default is 0.
 
+        Examples:
+            >>> failover = Failover(name='"failover-peer"')
+            >>> print(failover.to_isc())
+            failover peer "failover-peer" {
+            }
+
+            >>> failover.role = 'primary'
+            >>> print(failover.to_isc())
+            failover peer "failover-peer" {
+                primary;
+            }
+
         Returns:
             str: A string representation of the object tree from this level.
 
@@ -357,6 +445,11 @@ class Include:
             indent (int): Supply an integer to use as indentation offset.
                 Default is 0.
 
+        Examples:
+            >>> include = Include(filename='/etc/dhcpd-keys.conf')
+            >>> print(include.to_isc())
+            include /etc/dhcpd-keys.conf;
+
         Returns:
             str: A string representation of the object tree from this level.
 
@@ -386,15 +479,15 @@ class Range4:
         self.dynamic_bootp = dynamic_bootp
 
     def __str__(self) -> str:
-        list_comp = [x for x in (self.start, self.end) if x]
+        list_comp = [data for data in (self.start, self.end) if data]
         if self.dynamic_bootp:
             return f'range dynamic-bootp {" ".join(list_comp)}'
         else:
             return f'range {" ".join(list_comp)}'
 
     def __repr__(self) -> str:
-        string_repr = [f'{key}="{value}"' for key, value in self.__dict__.items() if value]
-        return f'Range4({", ".join(string_repr)})'
+        return (f'Range4(start={self.start}, end={self.end}, '
+                f'dynamic_bootp={self.dynamic_bootp})')
 
     def object_tree(self, indent=0):
         return f'{" " * indent}{self.__repr__()}'
@@ -405,6 +498,19 @@ class Range4:
         Args:
             indent (int): Supply an integer to use as indentation offset.
                 Default is 0.
+
+        Examples:
+            >>> dhcp_range = Range4(start='10.10.10.10')
+            >>> print(dhcp_range.to_isc())
+            range 10.10.10.10;
+
+            >>> dhcp_range.end = '10.10.10.250'
+            >>> print(dhcp_range.to_isc())
+            range 10.10.10.10 10.10.10.250;
+
+            >>> dhcp_range.dynamic_bootp = True
+            >>> print(dhcp_range.to_isc())
+            range dynamic-bootp 10.10.10.10 10.10.10.250;
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -442,6 +548,27 @@ class Event(EventSetMixin):
         Args:
             indent (int): Supply an integer to use as indentation offset.
                 Default is 0.
+
+        Examples:
+            >>> event = Event(event_type='commit')
+            >>> print(event.to_isc())
+            on commit {
+            }
+
+            >>> event.add_event_set(
+                EventSet(key='clip',
+                    value='binary-to-ascii(10, 8, ".", leased-address)'))
+            >>> print(event.to_isc())
+            on commit {
+                set clip = binary-to-ascii(10, 8, ".", leased-address);
+            }
+
+            >>> event.execute = '("/usr/local/sbin/dhcpevent", "commit", clip, clhw, host-decl-name)'
+            >>> print(event.to_isc())
+            on commit {
+                set clip = binary-to-ascii(10, 8, ".", leased-address);
+                execute ("/usr/local/sbin/dhcpevent", "commit", clip, clhw, host-decl-name);
+            }
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -485,11 +612,11 @@ class Range6:
         self.temporary = temporary
 
     def __str__(self) -> str:
+        list_comp = [data for data in (self.start, self.end) if data]
         if self.temporary:
-            list_comp = [x for x in (self.start, self.end, 'temporary') if x]
+            return f'range6 {" ".join(list_comp)} temporary'
         else:
-            list_comp = [x for x in (self.start, self.end) if x]
-        return f'range6 {" ".join(list_comp)}'
+            return f'range6 {" ".join(list_comp)}'
 
     def __repr__(self) -> str:
         return (f'Range6(start={self.start}, end={self.end}, '
@@ -504,6 +631,23 @@ class Range6:
         Args:
             indent (int): Supply an integer to use as indentation offset.
                 Default is 0.
+
+        Examples:
+            >>> dhcp_range = Range6(start='dead:beef::1')
+            >>> print(dhcp_range.to_isc())
+            range6 dead:beef::1;
+
+            >>> dhcp_range.end = 'dead:beef::128'
+            >>> print(dhcp_range.to_isc())
+            range6 dead:beef::1 dead:beef::128;
+
+            >>> dhcp_range.temporary = True
+            >>> print(dhcp_range.to_isc())
+            range6 dead:beef::1 dead:beef::128 temporary;
+
+            >>> dhcp_range = Range6(start='dead:beef:0:f1::/64')
+            >>> print(dhcp_range.to_isc())
+            range6 dead:beef:0:f1::/64;
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -604,6 +748,17 @@ class Key:
             indent (int): Supply an integer to use as indentation offset.
                 Default is 0.
 
+        >>> key = Key(name='DHCP_UPDATER')
+        >>> print(key.to_isc())
+        key DHCP_UPDATER {
+        }
+
+        >>> key.secret = 'Ofakekeyfakekeyfakekey=='
+        >>> print(key.to_isc())
+        key DHCP_UPDATER {
+            secret Ofakekeyfakekeyfakekey==;
+        }
+
         Returns:
             str: A string representation of the object tree from this level.
 
@@ -658,6 +813,25 @@ class Zone:
         Args:
             indent (int): Supply an integer to use as indentation offset.
                 Default is 0.
+
+        Examples:
+            >>> zone = Zone(name='EXAMPLE.ORG.')
+            >>> print(zone.to_isc())
+            zone EXAMPLE.ORG. {
+            }
+
+            >>> zone.primary = '127.0.0.1'
+            >>> print(zone.to_isc())
+            zone EXAMPLE.ORG. {
+                primary 127.0.0.1;
+            }
+
+            >>> zone.key = Key(name='DHCP_UPDATER')
+            >>> print(zone.to_isc())
+            zone EXAMPLE.ORG. {
+                primary 127.0.0.1;
+                key DHCP_UPDATER;
+            }
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -722,6 +896,25 @@ class DhcpClass:
             indent (int): Supply an integer to use as indentation offset.
                 Default is 0.
 
+        Examples:
+            >>> dhcp_class = DhcpClass(name='foo')
+        >>> print(dhcp_class.to_isc())
+        class foo {
+        }
+
+        >>> dhcp_class.lease_limit = 4
+        >>> print(dhcp_class.to_isc())
+        class foo {
+            lease limit 4;
+        }
+
+        >>> dhcp_class.match = 'if substring (option vendor-class-identifier, 0, 4) = "SUNW"'
+        >>> print(dhcp_class.to_isc())
+        class foo {
+            match if substring (option vendor-class-identifier, 0, 4) = "SUNW";
+            lease limit 4;
+        }
+
         Returns:
             str: A string representation of the object tree from this level.
 
@@ -783,6 +976,27 @@ class SubClass(Parameters, OptionMixin):
         Args:
             indent (int): Supply an integer to use as indentation offset.
                 Default is 0.
+
+        Examples:
+            >>> subclass = SubClass(name='"foo"',
+                                    match_value='1:08:00:2b:a1:11:31')
+            >>> print(subclass.to_isc())
+            subclass "foo" 1:08:00:2b:a1:11:31;
+
+            >>> subclass.lease_limit = 4
+            >>> print(subclass.to_isc())
+            subclass "foo" 1:08:00:2b:a1:11:31 {
+                lease limit 4;
+            }
+
+            >>> option = Option(name='domain-name-servers',
+                                value='ns1.example.org, ns2.example.org')
+            >>> subclass.add_option(option)
+            >>> print(subclass.to_isc())
+            subclass "foo" 1:08:00:2b:a1:11:31 {
+                lease limit 4;
+                option domain-name-servers ns1.example.org, ns2.example.org;
+            }
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -861,6 +1075,26 @@ class Host(Parameters):
             indent (int): Supply an integer to use as indentation offset.
                 Default is 0.
 
+        Examples:
+            >>> host = Host(name='pluto.example.org')
+            >>> print(host.to_isc())
+            host pluto.example.org {
+            }
+
+            >>> host.always_broadcast = True
+            >>> print(host.to_isc())
+            host pluto.example.org {
+                always-broadcast true;
+            }
+
+            >>> hardware = Hardware(type='ethernet', address='1234:5678:9abc')
+            >>> host.hardware = hardware
+            >>> print(host.to_isc())
+            host pluto.example.org {
+                always-broadcast true;
+                hardware ethernet 1234:5678:9abc;
+            }
+
         Returns:
             str: A string representation of the object tree from this level.
 
@@ -871,6 +1105,9 @@ class Host(Parameters):
             new_key = key.replace("_", "-")
             if hasattr(value, 'to_isc'):
                 attrs.append(f'{" " * child_indent}{value.to_isc()}')
+            elif isinstance(value, bool):
+                attrs.append(
+                    f'{" " * child_indent}{new_key} {str(value).lower()};')
             elif all((value, key != 'name')):
                 attrs.append(f'{" " * child_indent}{new_key} {value};')
         return_str = (f'{" " * indent}{self.__str__()}' ' {')
@@ -901,18 +1138,22 @@ class Pool4(RangeMixin):
         """Initialize attributes for the class.
 
         Args:
-            known_clients (str): pass
-            unknown_clients (str): pass
-            allow_members_of (list[str]): pass
-            deny_members_of (list[str]): pass
-            dynamic_bootp_clients (str): pass
-            authenticated_clients (str): pass
-            unauthenticated_clients (str): pass
-            all_clients (str): pass
-            allow_after (int): pass
-            deny_after (int): pass
-            failover (pyisc.dhcpd.nodes.Failover): pass
-            ranges (list[pyisc.dhcpd.nodes.Range4]): pass
+            known_clients (str): Allows or denies known clients.
+            unknown_clients (str): Allows or denies unknown clients.
+            allow_members_of (list[str]): List of allowed classes.
+            deny_members_of (list[str]): List of denied classes.
+            dynamic_bootp_clients (str): Allows or denies bootp clients.
+            authenticated_clients (str): Allows or denies authenticated
+                clients.
+            unauthenticated_clients (str): Allows or denies unauthenticated
+                clients.
+            all_clients (str): Allows or denies all clients.
+            allow_after (int): Allows clients after a given date.
+            deny_after (int): Denies clients after a given date.
+            failover (pyisc.dhcpd.nodes.Failover): The failover peer of the
+                pool.
+            ranges (list[pyisc.dhcpd.nodes.Range4]): List of IPv4 ranges
+                belonging to the pool.
 
         """
         self.known_clients = known_clients
@@ -964,6 +1205,59 @@ class Pool4(RangeMixin):
             indent (int): Supply an integer to use as indentation offset.
                 Default is 0.
 
+        Examples:
+            >>> pool = Pool4()
+            >>> print(pool.to_isc())
+            pool {
+            }
+
+            >>> pool.known_clients = 'allow'
+            >>> print(pool.to_isc())
+            pool {
+                allow known-clients;
+            }
+
+            >>> pool.unknown_clients = 'deny'
+            >>> print(pool.to_isc())
+            pool {
+                allow known-clients;
+                deny unknown-clients;
+            }
+
+            >>> pool.add_allowed_member('"foo"')
+            >>> print(pool.to_isc())
+            pool {
+                allow known-clients;
+                deny unknown-clients;
+                allow members of "foo";
+            }
+
+            >>> pool.add_allowed_member('"bar"')
+            >>> print(pool.to_isc())
+            pool {
+                allow known-clients;
+                deny unknown-clients;
+                allow members of "foo";
+                allow members of "bar";
+            }
+
+            >>> pool.delete_allowed_member('"foo"')
+            >>> print(pool.to_isc())
+            pool {
+                allow known-clients;
+                deny unknown-clients;
+                allow members of "bar";
+            }
+
+            >>> failover = Failover(name='"foo"')
+            >>> pool.failover = failover
+            >>> print(pool.to_isc())
+            pool {
+                allow known-clients;
+                allow members of "foo";
+                failover peer "foo";
+            }
+
         Returns:
             str: A string representation of the object tree from this level.
 
@@ -1009,12 +1303,13 @@ class Subnet4(Parameters, OptionMixin, RangeMixin, PoolMixin):
         """Initialize attributes for the class.
 
         Args:
-            network (str): pass
-            authoritative (boolean): pass
-            server_id_check (boolean): pass
-            options (list[pyisc.dhcpd.nodes.Option]): pass
-            ranges (list[pyisc.dhcpd.nodes.Range4]): pass
-            pools (list[pyisc.dhcpd.nodes.Pool4]): pass
+            network (str): The network in CIDR format.
+            authoritative (boolean): Authoritative state.
+            server_id_check (boolean): Tells the server to verify value of
+                dhcp-server-identifier option.
+            options (list[pyisc.dhcpd.nodes.Option]): List of options.
+            ranges (list[pyisc.dhcpd.nodes.Range4]): List of ranges.
+            pools (list[pyisc.dhcpd.nodes.Pool4]): List of pools.
 
         """
         self.network = IPv4Network(network).with_prefixlen
@@ -1042,6 +1337,43 @@ class Subnet4(Parameters, OptionMixin, RangeMixin, PoolMixin):
         Args:
             indent (int): Supply an integer to use as indentation offset.
                 Default is 0.
+
+        Examples:
+            >>> subnet = Subnet4('10.10.10.0/24')
+            >>> print(subnet.to_isc())
+            subnet 10.10.10.0 netmask 255.255.255.0 {
+            }
+
+            >>> subnet.authoritative = True
+            >>> print(subnet.to_isc())
+            subnet 10.10.10.0 netmask 255.255.255.0 {
+                authoritative;
+            }
+
+            >>> pool = Pool4()
+            >>> pool.known_clients = 'allow'
+            >>> pool.add_allowed_member('"foo"')
+            >>> subnet.add_pool(pool)
+            >>> print(subnet.to_isc())
+            subnet 10.10.10.0 netmask 255.255.255.0 {
+                authoritative;
+                pool {
+                    allow known-clients;
+                    allow members of "foo";
+                }
+            }
+
+            >>> option = Option(name='domain-name', value='"example.org"')
+            >>> subnet.add_option(option)
+            >>> print(subnet.to_isc())
+            subnet 10.10.10.0 netmask 255.255.255.0 {
+                authoritative;
+                option domain-name "example.org";
+                pool {
+                    allow known-clients;
+                    allow members of "foo";
+                }
+            }
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -1081,11 +1413,11 @@ class SharedNetwork(OptionMixin, SubnetMixin, PoolMixin):
         """Initialize attributes for the class.
 
         Args:
-            name (str): pass
-            authoritative (boolean): pass
-            options (list[pyisc.dhcpd.nodes.Option]): pass
-            ranges (list[pyisc.dhcpd.nodes.Range4]): pass
-            pools (list[pyisc.dhcpd.nodes.Pool4]): pass
+            name (str): Name of the Shared Network.
+            authoritative (boolean): Authoritative state.
+            options (list[pyisc.dhcpd.nodes.Option]): List of options.
+            ranges (list[pyisc.dhcpd.nodes.Range4]): List of ranges.
+            pools (list[pyisc.dhcpd.nodes.Pool4]): List of pools.
 
         """
         self.name = name
@@ -1106,6 +1438,44 @@ class SharedNetwork(OptionMixin, SubnetMixin, PoolMixin):
         Args:
             indent (int): Supply an integer to use as indentation offset.
                 Default is 0.
+
+        Examples:
+            >>> shared_network = SharedNetwork(name='"test"')
+            >>> print(shared_network.to_isc())
+            shared-network "test" {
+            }
+
+            >>> subnet = Subnet4('10.10.10.0/24')
+            >>> shared_network.add_subnet(subnet)
+            >>> print(shared_network.to_isc())
+            shared-network "test" {
+                subnet 10.10.10.0 netmask 255.255.255.0 {
+                }
+            }
+
+            >>> shared_network.authoritative = True
+            >>> print(shared_network.to_isc())
+            shared-network "test" {
+            authoritative;
+                subnet 10.10.10.0 netmask 255.255.255.0 {
+                }
+            }
+
+            >>> pool = Pool4()
+            >>> pool.add_allowed_member('"foo"')
+            >>> dhcp_range = Range4(start='10.10.10.10', end='10.10.10.250')
+            >>> pool.add_range(dhcp_range)
+            >>> shared_network.add_pool(pool)
+            >>> print(shared_network.to_isc())
+            shared-network "test" {
+            authoritative;
+                subnet 10.10.10.0 netmask 255.255.255.0 {
+                }
+                pool {
+                    allow members of "foo";
+                    range 10.10.10.10 10.10.10.250;
+                }
+            }
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -1145,10 +1515,11 @@ class Group(Parameters, SubnetMixin, SharedNetworkMixin, HostMixin,
         """Initialize attributes for the class.
 
         Args:
-            options (list[pyisc.dhcpd.nodes.Option]): pass
-            subnets (list[pyisc.dhcpd.nodes.Subnet4]): pass
-            shared_networks (list[pyisc.dhcpd.nodes.SharedNetwork]): pass
-            hosts (list[pyisc.dhcpd.nodes.Host]): pass
+            options (list[pyisc.dhcpd.nodes.Option]): List of options.
+            subnets (list[pyisc.dhcpd.nodes.Subnet4]): List of subnets.
+            shared_networks (list[pyisc.dhcpd.nodes.SharedNetwork]): List of
+                shared networks.
+            hosts (list[pyisc.dhcpd.nodes.Host]): List of hosts.
 
         """
         self.options = [] if not options else options
@@ -1169,6 +1540,44 @@ class Group(Parameters, SubnetMixin, SharedNetworkMixin, HostMixin,
         Args:
             indent (int): Supply an integer to use as indentation offset.
                 Default is 0.
+
+        Examples:
+            >>> group = Group()
+            >>> print(group.to_isc())
+            group {
+            }
+
+            >>> option = Option(name='domain-name', value='"example.org"')
+            >>> group.add_option(option)
+            >>> print(group.to_isc())
+            group {
+                option domain-name "example.org";
+            }
+
+            >>> subnet = Subnet4('10.10.10.0/24')
+            >>> group.add_subnet(subnet)
+            >>> print(group.to_isc())
+            group {
+                option domain-name "example.org";
+                subnet 10.10.10.0 netmask 255.255.255.0 {
+                }
+            }
+
+            >>> pool = Pool4()
+            >>> pool.unknown_clients = 'deny'
+            >>> dhcp_range = Range4(start='10.10.10.10', end='10.10.10.250')
+            >>> pool.add_range(dhcp_range)
+            >>> subnet.add_pool(pool)
+            >>> print(group.to_isc())
+            group {
+                option domain-name "example.org";
+                subnet 10.10.10.0 netmask 255.255.255.0 {
+                    pool {
+                        deny unknown-clients;
+                        range 10.10.10.10 10.10.10.250;
+                    }
+                }
+            }
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -1326,6 +1735,8 @@ class Global(Parameters, OptionMixin, SubnetMixin, SharedNetworkMixin,
             elif isinstance(value, list):
                 for item in value:
                     attrs.append(item.to_isc())
+            elif isinstance(value, bool):
+                attrs.append(f'{new_key} {str(value).lower()};')
             elif value:
                 attrs.append(f'{new_key} {value};')
         attrs_str = "\n".join(attrs)
