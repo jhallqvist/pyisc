@@ -59,6 +59,7 @@ class DhcpdParser:
         token_specification = [
             ('SHARED_NETWORK',      r'shared-network\s+[^\n]*?{'),
             ('SUBNET4',             r'subnet\s+[^\n]*?{'),
+            ('SUBNET6',             r'subnet6\s+[^\n]*?{'),
             ('POOL',                r'pool\s+[^\n]*?{'),
             ('GROUP',               r'group\s+[^\n]*?{'),
             ('HOST',                r'host\s+[^\n]*?{'),
@@ -76,13 +77,20 @@ class DhcpdParser:
             ('EVENT_EXECUTE',       r'execute\([^\n]*?[^\n]*?;'),
             ('OPTION',              r'option\s+[^\n=]*?;'),
             ('RANGE4',              r'range\s+[^\n]*?;'),
+            ('RANGE6',              r'range6\s+[^\n]*?;'),
+            ('PREFIX6',             r'prefix6\s+[^\n]*?;'),         # Not implemented
             ('INCLUDE',             r'include\s+[^\n]*?;'),
             ('FAILOVER_ROLE',       r'(primary|secondary);'),
             ('AUTHORITATIVE',       r'(?:not\s+)?authoritative;'),
             ('ALLOW_MEMBER',        r'allow\s+member[^\n]*?;'),
             ('DENY_MEMBER',         r'deny\s+member[^\n]*?;'),
+            ('IGNORE_GENERAL',      r'ignore[^\n]*?;'),
+            ('ALLOW_GENERAL',       r'allow[^\n]*?;'),
+            ('DENY_GENERAL',        r'deny[^\n]*?;'),
             ('CLASS_STATEMENT',     r'match\s+(?:if\s+)?[^\n]*?;'),
             ('SPAWN_CLASS',         r'spawn\s+[^\n]*?;'),
+            ('CUSTOM_OPTION',       r'option\s+[^\n]*?code\s+\d+\s+=[^\n]*?;'),
+            ('OPTION_EXPRESSION',   r'option\s+[^\n]*?=[^\n]*?;'),  # Not implemented
             ('GENERAL_PARAMETER',   r'[\w]+\s*?[^\n]*?;'),
             ('SCOPE_END',           r'}'),
             ('COMMENT_UNIX',        r'\#.*'),       # COMMENT - Not implemented
@@ -126,7 +134,7 @@ class DhcpdParser:
         node_stack = []
         processor = TokenProcessor()
         for token in self.tokenize(content):
-            if token.type in ('NEWLINE', 'WHITESPACE', 'COMMENT_UNIX'):
+            if token.type in ('NEWLINE', 'WHITESPACE', 'COMMENT_UNIX', 'OPTION_EXPRESSION'):
                 continue
             elif token.type == 'SCOPE_END':
                 node = node_stack.pop()

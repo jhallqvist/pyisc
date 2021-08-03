@@ -36,8 +36,8 @@ class SubnetMixin:
             sort (boolean): Sorts the list of subnets after an addition.
         """
         self.subnets.append(network)
-        if sort:
-            self.subnets.sort(key=lambda x: IPv4Network((x.network)))
+        # if sort:
+        #     self.subnets.sort(key=lambda x: IPv4Network((x.network)))
 
     def find_subnet(self, network: str) -> Union['Subnet4', 'Subnet6']:
         """Return the first exact match from objcts subnets."""
@@ -218,6 +218,31 @@ class EventSetMixin:
         pass
 
 
+class Permissions:
+    """Contains all inheritable non-pool permission statements.
+
+    Allowed values are: 'allow', 'deny' and in some cases 'ignore'.
+    For a description of the various attributes refer to the ISC KB for DHCP.
+    """
+    def __init__(
+        self,
+        bootp:          Union[str, None] = None,
+        booting:        Union[str, None] = None,
+        duplicates:     Union[str, None] = None,
+        declines:       Union[str, None] = None,
+        client_updates: Union[str, None] = None,
+        leasequery:     Union[str, None] = None,
+    ) -> None:
+        """Initialize attributes for the class."""
+        self.bootp = bootp
+        self.booting = booting
+        self.duplicates = duplicates
+        self.declines = declines
+        self.client_updates = client_updates
+        self.leasequery = leasequery
+        super().__init__()
+
+
 class Parameters:
     """Contains all inheritable ISC Parameters.
 
@@ -385,3 +410,4 @@ class Parameters:
         self.use_host_decl_names = use_host_decl_names
         self.use_lease_addr_for_default_route = use_lease_addr_for_default_route
         self.vendor_option_space = vendor_option_space
+        super().__init__()

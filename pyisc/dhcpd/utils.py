@@ -13,9 +13,10 @@
 # limitations under the License.
 
 from typing import Tuple
-from pyisc.dhcpd.nodes import (DhcpClass, Event, EventSet, Group, Hardware,
+from pyisc.dhcpd.nodes import (CustomOption, DhcpClass, Event, EventSet, Group, Hardware,
                                Host, Include, Key, Failover, Option, Pool4,
-                               Range4, SubClass, Subnet4, SharedNetwork, Zone)
+                               Range4, Range6, SubClass, Subnet4, Subnet6,
+                               SharedNetwork, Zone)
 
 
 class TokenProcessor:
@@ -51,8 +52,10 @@ class TokenProcessor:
 
         """
         self.token = token
-        default = (None, 'Unknown operation')
-        return getattr(self, str(token.type).lower(), lambda: default)()
+        return getattr(self, str(token.type).lower(), self.not_found)()
+
+    def not_found(self):
+        raise AttributeError(f'Token {self.token.type} does not have a method.')
 
     def authoritative(self) -> Tuple:
         """Returns tuple for the authoritative command."""
@@ -100,6 +103,24 @@ class TokenProcessor:
         _, value = self.token.value[:-1].rsplit(' ', 1)
         return (value, 'add_denied_member')
 
+    def allow_general(self) -> Tuple:
+        """Returns tuple for the allow statement."""
+        _, key = self.token.value[:-1].split()
+        key = key.replace('-', '_')
+        return ('allow', key)
+
+    def deny_general(self) -> Tuple:
+        """Returns tuple for the deny statement."""
+        _, key = self.token.value[:-1].split()
+        key = key.replace('-', '_')
+        return ('deny', key)
+    
+    def ignore_general(self) -> Tuple:
+        """Returns tuple for the ignore statement."""
+        _, key = self.token.value[:-1].split()
+        key = key.replace('-', '_')
+        return ('ignore', key)
+
     def class_statement(self) -> Tuple:
         """Returns tuple for the match statement of the class declaration."""
         _, statement = self.token.value[:-1].split(' ', 1)
@@ -109,19 +130,6 @@ class TokenProcessor:
         """Returns tuple for the spawn statement of the class declaration."""
         _, statement = self.token.value[:-1].split(' ', 1)
         return (statement, 'spawn')
-
-    # def range4(self) -> Tuple:
-    #     """Returns tuple for the range statement for ipv4 configuration."""
-    #     if self.token.value.count(' ') == 1:
-    #         _, range_start = self.token.value[:-1].split()
-    #         range_end = flag = None
-    #     elif self.token.value.count(' ') == 2:
-    #         _, range_start, range_end = self.token.value[:-1].split()
-    #         flag = None
-    #     else:
-    #         _, flag, range_start, range_end = self.token.value[:-1].split()
-    #     subnet_range = Range4(start=range_start, end=range_end, flag=flag)
-    #     return (subnet_range, 'add_range')
 
     def range4(self) -> Tuple:
         """Returns tuple for the range statement for ipv4 configuration."""
@@ -139,15 +147,41 @@ class TokenProcessor:
             start=range_start, end=range_end, dynamic_bootp=dynamic_bootp)
         return (subnet_range, 'add_range')
 
+    def range6(self) -> Tuple:
+        """Returns tuple for the range statement for ipv6 configuration."""
+        cleaned_token = self.token.value[:-1].strip()
+        range_list = [data.strip() for data in cleaned_token.split()]
+        if 'temporary' in cleaned_token:
+            temporary = True
+            range_list.remove('temporary')
+        else:
+            temporary = False
+        while len(range_list) < 3:
+            range_list += [None]
+        _, range_start, range_end = range_list
+        subnet_range = Range6(
+            start=range_start, end=range_end, temporary=temporary)
+        return (subnet_range, 'add_range')
+
     def option(self) -> Tuple:
         """Returns tuple for the option command."""
-        _, option, value = self.token.value[:-1].split(' ', 2)
+        if self.token.value.count(' ') == 1:
+            _, option = self.token.value[:-1].split()
+            value = True
+        else:
+            _, option, value = self.token.value[:-1].split(' ', 2)
         if option.isdigit():
             node_option = Option(number=option, value=value)
         else:
             option = option.replace('-', '_')
             node_option = Option(name=option, value=value)
         return (node_option, 'add_option')
+
+    def custom_option(self) -> Tuple:
+        """Returns tuple for the custom option command."""
+        _, option_name, _, code, _, value = self.token.value[:-1].split(' ', 5)
+        return (CustomOption(name=option_name, code=code, value=value),
+                'add_custom_option')
 
     def key(self) -> Tuple:
         """Returns tuple for the key declaration."""
@@ -167,6 +201,11 @@ class TokenProcessor:
         """Returns tuple for the ipv4 subnet declaration."""
         _, subnet, _, netmask = self.token.value[:-1].split()
         return (Subnet4(network=f'{subnet}/{netmask}'), 'add_subnet')
+
+    def subnet6(self) -> Tuple:
+        """Returns tuple for the ipv4 subnet declaration."""
+        _, subnet_cidr = self.token.value[:-1].split()
+        return (Subnet6(network=f'{subnet_cidr}'), 'add_subnet')
 
     def shared_network(self) -> Tuple:
         """Returns tuple for the shared network declaration."""
