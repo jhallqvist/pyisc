@@ -298,7 +298,7 @@ class CustomOption:
         return f'option {self.name} code {self.code} = {self.value}'
 
     def __repr__(self) -> str:
-        return f'CustomOption(name = {self.name}, code={self.code}, value={self.value})'
+        return f'CustomOption(name={self.name}, code={self.code}, value={self.value})'
 
     def to_isc(self, indent: int = 0) -> str:
         """Returns valid ISC configuration as a string.
@@ -309,6 +309,36 @@ class CustomOption:
 
         Examples:
             >>> pass
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
+        return f'{" " * indent}{self.__str__()};'
+
+
+class OptionExpression:
+    """Represents option with an expression as its value."""
+    def __init__(
+        self,
+        name:   str,
+        value:  str
+    ) -> None:
+        self.name = name
+        self.value = value
+
+    def __str__(self) -> str:
+        return f'option {self.name} = {self.value}'
+
+    def __repr__(self) -> str:
+        return f'OptionExpression(name={self.name}, value={self.value})'
+
+    def to_isc(self, indent: int = 0) -> str:
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                Default is 0.
 
         Returns:
             str: A string representation of the object tree from this level.
@@ -1464,6 +1494,16 @@ class Subnet4(Parameters, Permissions, OptionMixin, RangeMixin, PoolMixin):
         self.pools = [] if not pools else pools
         super().__init__()
 
+    # def __lt__(self, other: object) -> bool:
+    #     return IPv4Network(self.network) < IPv4Network(other.network)
+
+    # def __eq__(self, other: object) -> bool:
+    #     if other is None:
+    #         return False
+    #     return (
+    #         IPv4Network(self.network) == IPv4Network(other.network)
+    #     )
+
     def __str__(self) -> str:
         ip_network = IPv4Network(self.network)
         subnet, netmask = ip_network.with_netmask.split('/')
@@ -1554,7 +1594,8 @@ class Subnet6(Parameters, Permissions, OptionMixin, RangeMixin, PoolMixin):
         server_id_check:    Union[bool, None] = None,
         options:            Union[List[Option], None] = None,
         ranges:             Union[List[Range6], None] = None,
-        pools:              Union[List[Pool6], None] = None
+        pools:              Union[List[Pool6], None] = None,
+        prefix6:            Union[Prefix6, None] = None
     ) -> None:
         """Initialize attributes for the class.
 
@@ -1574,7 +1615,18 @@ class Subnet6(Parameters, Permissions, OptionMixin, RangeMixin, PoolMixin):
         self.options = [] if not options else options
         self.ranges = [] if not ranges else ranges
         self.pools = [] if not pools else pools
+        self.prefix6 = prefix6
         super().__init__()
+
+    # def __lt__(self, other: object) -> bool:
+    #     return IPv6Network(self.network) < IPv6Network(other.network)
+
+    # def __eq__(self, other: object) -> bool:
+    #     if other is None:
+    #         return False
+    #     return (
+    #         IPv6Network(self.network) == IPv6Network(other.network)
+    #     )
 
     def __str__(self) -> str:
         return f'subnet6 {self.network}'
@@ -1605,6 +1657,8 @@ class Subnet6(Parameters, Permissions, OptionMixin, RangeMixin, PoolMixin):
             if isinstance(value, list):
                 for item in value:
                     attrs.append(item.to_isc(indent=child_indent))
+            elif hasattr(value, 'to_isc'):
+                attrs.append(f'{" " * child_indent}{value.to_isc()}')
             elif all((isinstance(value, bool), key == 'authoritative')):
                 if value:
                     attrs.append(f'{" " * child_indent}{key};')
@@ -1862,7 +1916,8 @@ class Global(Parameters, Permissions, OptionMixin, SubnetMixin,
         subclasses:                     Union[List[SubClass], None] = None,
         includes:                       Union[List[Include], None] = None,
         events:                         Union[List[Event], None] = None,
-        custom_options:                 Union[List[CustomOption], None] = None
+        custom_options:                 Union[List[CustomOption], None] = None,
+        option_expressions:             Union[List[OptionExpression], None] = None
     ) -> None:
         """Initialize attributes for the class.
 
@@ -1910,6 +1965,7 @@ class Global(Parameters, Permissions, OptionMixin, SubnetMixin,
         self.includes = [] if not includes else includes
         self.events = [] if not events else events
         self.custom_options = [] if not custom_options else custom_options
+        self.option_expressions = [] if not option_expressions else option_expressions
         super().__init__()
 
     def __str__(self) -> str:
@@ -1925,6 +1981,15 @@ class Global(Parameters, Permissions, OptionMixin, SubnetMixin,
         pass
 
     def delete_custom_option(self, option):
+        pass
+
+    def add_option_expression(self, option: OptionExpression):
+        self.option_expressions.append(option)
+
+    def find_option_expression(self, option):
+        pass
+
+    def delete_option_expression(self, option):
         pass
 
     def to_isc(self):

@@ -13,9 +13,10 @@
 # limitations under the License.
 
 from typing import Tuple
-from pyisc.dhcpd.nodes import (CustomOption, DhcpClass, Event, EventSet, Group, Hardware,
-                               Host, Include, Key, Failover, Option, Pool4,
-                               Range4, Range6, SubClass, Subnet4, Subnet6,
+from pyisc.dhcpd.nodes import (CustomOption, DhcpClass, Event, EventSet, Group,
+                               Hardware, Host, Include, Key, Failover, Option,
+                               OptionExpression, Pool4, Prefix6, Range4,
+                               Range6, SubClass, Subnet4, Subnet6,
                                SharedNetwork, Zone)
 
 
@@ -55,7 +56,8 @@ class TokenProcessor:
         return getattr(self, str(token.type).lower(), self.not_found)()
 
     def not_found(self):
-        raise AttributeError(f'Token {self.token.type} does not have a method.')
+        raise AttributeError(
+            f'Token {self.token.type} does not have a associated method.')
 
     def authoritative(self) -> Tuple:
         """Returns tuple for the authoritative command."""
@@ -114,7 +116,7 @@ class TokenProcessor:
         _, key = self.token.value[:-1].split()
         key = key.replace('-', '_')
         return ('deny', key)
-    
+
     def ignore_general(self) -> Tuple:
         """Returns tuple for the ignore statement."""
         _, key = self.token.value[:-1].split()
@@ -182,6 +184,18 @@ class TokenProcessor:
         _, option_name, _, code, _, value = self.token.value[:-1].split(' ', 5)
         return (CustomOption(name=option_name, code=code, value=value),
                 'add_custom_option')
+
+    def prefix6(self) -> Tuple:
+        _, start, end, bits = self.token.value[:-1].split()
+        return (Prefix6(start=start, end=end, bits=bits), 'prefix6')
+
+    def option_expression(self) -> Tuple:
+        _, option_name, _, value = self.token.value[:-1].split(' ', 3)
+        return (OptionExpression(name=option_name, value=value),
+                'add_option_expression')
+
+    def server_duid(self) -> Tuple:
+        pass
 
     def key(self) -> Tuple:
         """Returns tuple for the key declaration."""

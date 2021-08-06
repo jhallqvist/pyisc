@@ -78,7 +78,7 @@ class DhcpdParser:
             ('OPTION',              r'option\s+[^\n=]*?;'),
             ('RANGE4',              r'range\s+[^\n]*?;'),
             ('RANGE6',              r'range6\s+[^\n]*?;'),
-            ('PREFIX6',             r'prefix6\s+[^\n]*?;'),         # Not implemented
+            ('PREFIX6',             r'prefix6\s+[^\n]*?;'),
             ('INCLUDE',             r'include\s+[^\n]*?;'),
             ('FAILOVER_ROLE',       r'(primary|secondary);'),
             ('AUTHORITATIVE',       r'(?:not\s+)?authoritative;'),
@@ -90,10 +90,10 @@ class DhcpdParser:
             ('CLASS_STATEMENT',     r'match\s+(?:if\s+)?[^\n]*?;'),
             ('SPAWN_CLASS',         r'spawn\s+[^\n]*?;'),
             ('CUSTOM_OPTION',       r'option\s+[^\n]*?code\s+\d+\s+=[^\n]*?;'),
-            ('OPTION_EXPRESSION',   r'option\s+[^\n]*?=[^\n]*?;'),  # Not implemented
+            ('OPTION_EXPRESSION',   r'option\s+[^\n]*?=[^\n]*?;'),
             ('GENERAL_PARAMETER',   r'[\w]+\s*?[^\n]*?;'),
             ('SCOPE_END',           r'}'),
-            ('COMMENT_UNIX',        r'\#.*'),       # COMMENT - Not implemented
+            ('COMMENT_UNIX',        r'\#.*'),
             ('NEWLINE',             r'\n'),
             ('WHITESPACE',          r'[ \t]+'),
             ('MISMATCH',            r'.'),
@@ -134,7 +134,7 @@ class DhcpdParser:
         node_stack = []
         processor = TokenProcessor()
         for token in self.tokenize(content):
-            if token.type in ('NEWLINE', 'WHITESPACE', 'COMMENT_UNIX', 'OPTION_EXPRESSION'):
+            if token.type in ('NEWLINE', 'WHITESPACE', 'COMMENT_UNIX'):
                 continue
             elif token.type == 'SCOPE_END':
                 node = node_stack.pop()
