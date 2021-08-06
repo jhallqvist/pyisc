@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ipaddress import IPv4Network
+from ipaddress import ip_network, IPv6Network
 from typing import List, Union, TYPE_CHECKING
 if TYPE_CHECKING:
     from pyisc.dhcpd.nodes import (
@@ -36,15 +36,18 @@ class SubnetMixin:
             sort (boolean): Sorts the list of subnets after an addition.
         """
         self.subnets.append(network)
-        # if sort:
-        #     self.subnets.sort(key=lambda x: IPv4Network((x.network)))
+        if sort:
+            self.subnets.sort(
+                key=lambda x: (
+                    isinstance(ip_network(x.network), IPv6Network),
+                    ip_network(x.network)))
 
     def find_subnet(self, network: str) -> Union['Subnet4', 'Subnet6']:
-        """Return the first exact match from objcts subnets."""
+        """Return the first exact match from objects subnets."""
         return next((x for x in self.subnets if x.network == network), None)
 
     def all_subnets(self) -> List:
-        """Return a list of all subnet with their index number"""
+        """Return a list of all subnets with their index number"""
         return [[index, entity] for index, entity in enumerate(self.subnets)]
 
     def delete_subnet(self, network: str) -> None:
@@ -408,6 +411,7 @@ class Parameters:
         self.update_static_leases = update_static_leases
         # self.use_eui_64 = use_eui_64
         self.use_host_decl_names = use_host_decl_names
-        self.use_lease_addr_for_default_route = use_lease_addr_for_default_route
+        self.use_lease_addr_for_default_route = \
+            use_lease_addr_for_default_route
         self.vendor_option_space = vendor_option_space
         super().__init__()
