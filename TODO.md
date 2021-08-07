@@ -2,7 +2,6 @@
 
 ## DHCPD
 
-* [ ] Examples in to_isc method. Especially for Range objects and similar that changes output depending on what attributes are set.
 * [ ] Remaining, non-pool specific permissions (Allow/Deny) need to be implemented.
 * [ ] Make match and spawn classes. The main philosophy behind this rebuild is after all - everything that is not a clear key/value parameter should be a seperate object. To tackle mutiple statements seperated by and/or maybe just save them in a list?
 * [ ] Complete Mixin Classes
@@ -12,6 +11,7 @@
 * [ ] The Include node should contain a parsed tree of the included file and the ablity to write back to that specific file.
 * [ ] Create new tests and remove the old ones.
 * [ ] Alternate idea is that instead of the Global object there is a DhcpdConf object that is initiated with the file given to it. That could be a simple way to keep track of the files involved.
+* [x] Examples in to_isc method. Especially for Range objects and similar that changes output depending on what attributes are set.
 * [x] Make a cleaner method of the build_tree method. Currently there is one big if/else statement and this could possbibly hurt readability. Also perhaps rename method to construct_object_tree or something similar for clarity.
 * [x] Possibility to reduce repeated code in parsing. For all declarations - create a switcher class where the functions add the correct object and also use getattr with a dict mapping to determine the method that must be used to add the object.
 * [x] Rename the Class class. It conflicts with the class statement in Python which was proven in the implemantation of the TokenProcessor class in the method for the Class object.
