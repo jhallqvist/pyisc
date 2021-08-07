@@ -1,7 +1,6 @@
 # PyISC
 
-A python library with the purpose of parsing and manipulating ISC configuration files. Currently only focused on the dhcpd.conf file but might be expanded in the future.
-This module draws inspiration from the reconfigure library found [here](https://github.com/Eugeny/reconfigure).
+A python library with the purpose of parsing and manipulating ISC configuration files. Currently only focused on the dhcpd.conf file but will be expanded in the future.
 
 ## Scope of project
 
@@ -11,7 +10,7 @@ It is not in scope to provide validation of provided data when supplying new dat
 
 ## Installation
 
-Currently a git clone is necessary. If project goes well a package on PyPi might be possible.
+Currently a git clone is necessary as the package on PyPi is not yet updated.
 
 ## Usage
 
@@ -19,11 +18,34 @@ Currently a git clone is necessary. If project goes well a package on PyPi might
 >>> from pyisc import dhcpd
 
 >>> test = '''shared-network 224-29 {
+    subnet 10.0.29.0 netmask 255.255.255.0 {
+        option routers rtr-29.example.org;
+    }
     subnet 10.17.224.0 netmask 255.255.255.0 {
         option routers rtr-224.example.org;
     }
+    pool {
+        allow members of "foo";
+        range 10.17.224.10 10.17.224.250;
+    }
+    pool {
+        deny members of "foo";
+        range 10.0.29.10 10.0.29.230;
+    }
+}'''
+
+>>> tree = dhcpd.loads(test)
+
+>>> dhcpd.dumps(tree) == test
+True
+
+>>> print(dhcpd.dumps(tree))
+shared-network 224-29 {
     subnet 10.0.29.0 netmask 255.255.255.0 {
         option routers rtr-29.example.org;
+    }
+    subnet 10.17.224.0 netmask 255.255.255.0 {
+        option routers rtr-224.example.org;
     }
     pool {
         allow members of "foo";
@@ -34,25 +56,26 @@ Currently a git clone is necessary. If project goes well a package on PyPi might
         range 10.0.29.10 10.0.29.230;
     }
 }
-'''
 
->>> tree = dhcpd.loads(test)
+>>> new_subnet = dhcpd.nodes.Subnet4(network='192.168.0.0/24')
 
->>> print(f'\nDumped string matches original string: {dhcpd.dumps(tree) == test}\n')
+>>> tree.shared_networks[0].subnets
+[Subnet4(network="10.0.29.0/24"), Subnet4(network="10.17.224.0/24")]
 
->>> print(dhcpd.dumps(tree))
+>>> tree.shared_networks[0].add_subnet(new_subnet)
 
->>> new_node = dhcpd.Node(type='subnet', value='172.16.0.0', parameters='netmask 255.255.255.0')
-
->>> tree.children[0].children.append(new_node)
+>>> tree.shared_networks[0].subnets
+[Subnet4(network="10.0.29.0/24"), Subnet4(network="10.17.224.0/24"), Subnet4(network="192.168.0.0/24")]
 
 >>> print(dhcpd.dumps(tree))
 shared-network 224-29 {
+    subnet 10.0.29.0 netmask 255.255.255.0 {
+        option routers rtr-29.example.org;
+    }
     subnet 10.17.224.0 netmask 255.255.255.0 {
         option routers rtr-224.example.org;
     }
-    subnet 10.0.29.0 netmask 255.255.255.0 {
-        option routers rtr-29.example.org;
+    subnet 192.168.0.0 netmask 255.255.255.0 {
     }
     pool {
         allow members of "foo";
@@ -61,8 +84,6 @@ shared-network 224-29 {
     pool {
         deny members of "foo";
         range 10.0.29.10 10.0.29.230;
-    }
-    subnet 172.16.0.0 netmask 255.255.255.0 {
     }
 }
 ```
