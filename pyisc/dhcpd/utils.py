@@ -16,8 +16,8 @@ from typing import Tuple
 from pyisc.dhcpd.nodes import (CustomOption, DhcpClass, Event, EventSet, Group,
                                Hardware, Host, Include, Key, Failover, Option,
                                OptionExpression, Pool4, Prefix6, Range4,
-                               Range6, SubClass, Subnet4, Subnet6,
-                               SharedNetwork, Zone)
+                               Range6, ServerDuidEN, ServerDuidLL, SubClass,
+                               Subnet4, Subnet6, SharedNetwork, Zone)
 
 
 class TokenProcessor:
@@ -182,7 +182,7 @@ class TokenProcessor:
     def custom_option(self) -> Tuple:
         """Returns tuple for the custom option command."""
         _, option_name, _, code, _, value = self.token.value[:-1].split(' ', 5)
-        return (CustomOption(name=option_name, code=code, value=value),
+        return (CustomOption(name=option_name, code=code, definition=value),
                 'add_custom_option')
 
     def prefix6(self) -> Tuple:
@@ -194,8 +194,20 @@ class TokenProcessor:
         return (OptionExpression(name=option_name, value=value),
                 'add_option_expression')
 
-    def server_duid(self) -> Tuple:
-        pass
+    def server_duid_ll(self) -> Tuple:
+        cleaned_token = self.token.value[:-1].strip()
+        if 'LLT' in cleaned_token:
+            *_, hardware_type, timestamp, hardware_address = cleaned_token.split()
+        else:
+            *_, hardware_type, hardware_address, timestamp = cleaned_token.split() + [None]
+        return (ServerDuidLL(hardware_type=hardware_type,
+                             hardware_address=hardware_address,
+                             timestamp=timestamp), 'server_duid')
+
+    def server_duid_en(self) -> Tuple:
+        *_, enterprise_number, enterprise_id = self.token.value[:-1].split(' ', 3)
+        return (ServerDuidEN(enterprise_number=enterprise_number,
+                             enterprise_id=enterprise_id), 'server_duid')
 
     def key(self) -> Tuple:
         """Returns tuple for the key declaration."""

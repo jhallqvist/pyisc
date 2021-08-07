@@ -66,7 +66,8 @@ class DhcpdParser:
             ('SUBCLASS',            r'subclass\s+[^\n]*?({|;)'),
             ('FAILOVER',            r'failover\s+[^\n]*?({|;)'),
             ('DHCP_CLASS',          r'class\s+[^\n]*?{'),
-            ('SERVER_DUID',         r'server-duid\s+[^\n]*?;'),     # Not implemented
+            ('SERVER_DUID_LL',      r'server-duid\s+LL[^\n]*?;'),
+            ('SERVER_DUID_EN',      r'server-duid\s+[^\n]*?;'),
             ('HARDWARE',            r'hardware\s+[^\n]*?;'),
             ('KEY',                 r'key\s+[^\n]*?({|;)'),
             ('ZONE',                r'zone\s+[^\n]*?{'),

@@ -21,23 +21,66 @@ from pyisc.dhcpd.mixin import (EventMixin, EventSetMixin, KeyMixin, Parameters,
                                IncludeMixin)
 
 # TODO:
-# Range classes currently have start and end - should they be renamed to better
-# reseamble the ISC docs?
-# Range6 might be confusing that start can also be a prefix. Possible solutions
-# are - Clear documention, a new class, or rename the attribute to reflect the
-# dual purpose.
-# ServerDuid might be wise to split it up into two classes - one for EN and one
-# for LL/LLT.
-# Add prefix6 attribute where needed.
 # Add the match_if attribute to DhcpClass and make changes to current parsing
 # to match the new attribute. Also add Token psec and parsing for regular match
 # (without the if).
+
 # Try to reduce the number of variants of the to_isc method. Ideally there
 # should be two versions - one for parameter like object that only take the
 # __str__() and add the ';' and one for declaration objects.
 
+# Move Parameters and Permissions to a seperate file - they do not belong in
+# mixin
+
 
 # Parameter classes
+class CustomOption:
+    """Represents an custom dhcp option definition."""
+    def __init__(
+        self,
+        name:       str,
+        code:       int,
+        definition: str
+    ) -> None:
+        """Initialize attributes for the class.
+
+        Args:
+            name (str): The name of the dhcp option.
+            code (int): The number of the dhcp option.
+            definition (str): The definition of the option.
+
+        """
+        self.name = name
+        self.code = code
+        self.definition = definition
+
+    def __str__(self) -> str:
+        return f'option {self.name} code {self.code} = {self.definition}'
+
+    def __repr__(self) -> str:
+        return (f'CustomOption(name={self.name}, code={self.code}, '
+                f'definition={self.definition})')
+
+    def to_isc(self, indent: int = 0) -> str:
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                Default is 0.
+
+        Examples:
+            >>> new_option = CustomOption(name='client-arch-type', code=93,
+                                          definition='unsigned integer 16')
+            >>> print(new_option.to_isc())
+            option client-arch-type code 93 = unsigned integer 16;
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
+        return f'{" " * indent}{self.__str__()};'
+
+
 class EventSet:
     """Represents an set expression for event objects."""
     def __init__(self, key: str, value: str) -> None:
@@ -77,8 +120,8 @@ class Hardware:
     """Represents an hardware parameter."""
     def __init__(
         self,
-        type:       Union[str, None],
-        address:    Union[str, None]
+        type:       str,
+        address:    str
     ) -> None:
         """Initialize attributes for the class.
 
@@ -131,7 +174,8 @@ class HostIdentifier:
         Args:
             option_name (str): The name of the option.
             option_data (str): The value of the option.
-            number (int): Relay number.
+            number (int): Relay number. If used this will automatically change
+                the outputted isc configuration string to a v6relopt.
 
         """
         self.option_name = option_name
@@ -190,7 +234,7 @@ class Option:
     """Represents an dhcp option."""
     def __init__(
         self,
-        value:  Union[str, None],
+        value:  str,
         name:   Union[str, None] = None,
         number: Union[int, None] = None
     ) -> None:
@@ -272,51 +316,6 @@ class Option:
         return f'{" " * indent}{self.__str__()};'
 
 
-class CustomOption:
-    """Represents an custom dhcp option."""
-    def __init__(
-        self,
-        name:   Union[str, None],
-        code:   Union[int, None],
-        value:  Union[str, None]
-    ) -> None:
-        """Initialize attributes for the class.
-
-        Possible description.
-
-        Args:
-            name (str): The name of the dhcp option.
-            code (int): The number of the dhcp option.
-            value (str): The value of the option.
-
-        """
-        self.name = name
-        self.code = code
-        self.value = value
-
-    def __str__(self) -> str:
-        return f'option {self.name} code {self.code} = {self.value}'
-
-    def __repr__(self) -> str:
-        return f'CustomOption(name={self.name}, code={self.code}, value={self.value})'
-
-    def to_isc(self, indent: int = 0) -> str:
-        """Returns valid ISC configuration as a string.
-
-        Args:
-            indent (int): Supply an integer to use as indentation offset.
-                Default is 0.
-
-        Examples:
-            >>> pass
-
-        Returns:
-            str: A string representation of the object tree from this level.
-
-        """
-        return f'{" " * indent}{self.__str__()};'
-
-
 class OptionExpression:
     """Represents option with an expression as its value."""
     def __init__(
@@ -347,16 +346,59 @@ class OptionExpression:
         return f'{" " * indent}{self.__str__()};'
 
 
-class ServerDuid:
-    """Represents an server DUID parameter."""
-    def __init__(self) -> None:
-        pass
+class ServerDuidLL:
+    def __init__(
+        self,
+        hardware_type:      str,
+        hardware_address:   str,
+        timestamp:          Union[int, None] = None
+    ) -> None:
+        self.hardware_type = hardware_type
+        self.hardware_address = hardware_address
+        self.timestamp = timestamp
 
     def __str__(self) -> str:
-        pass
+        if self.timestamp:
+            return (f'server-duid LLT {self.hardware_type} {self.timestamp} '
+                    f'{self.hardware_address}')
+        else:
+            return (f'server-duid LL {self.hardware_type} '
+                    f'{self.hardware_address}')
 
     def __repr__(self) -> str:
-        pass
+        return (f'ServerDuidLL(hardware_type={self.hardware_type}, '
+                f'hardware_address={self.hardware_address}, '
+                f'timestamp={self.timestamp})')
+
+    def to_isc(self, indent: int = 0) -> str:
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                Default is 0.
+
+        Examples:
+            >>> pass
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
+        return f'{" " * indent}{self.__str__()};'
+
+
+class ServerDuidEN:
+    """Represents an server DUID enterprise parameter."""
+    def __init__(self, enterprise_number: int, enterprise_id: str) -> None:
+        self.enterprise_number = enterprise_number
+        self.enterprise_id = enterprise_id
+
+    def __str__(self) -> str:
+        return f'server-duid EN {self.enterprise_number} {self.enterprise_id}'
+
+    def __repr__(self) -> str:
+        return (f'ServerDuidEN(enterprise_number={self.enterprise_number}, '
+                f'enterprise_id={self.enterprise_id})')
 
     def object_tree(self, indent=0):
         return f'{" " * indent}{self.__repr__()}'
@@ -368,11 +410,17 @@ class ServerDuid:
             indent (int): Supply an integer to use as indentation offset.
                 Default is 0.
 
+        Examples:
+            >>> server_duid = ServerDuidEN(enterprise_number=9,
+                              enterprise_id='"a string of some significance"')
+            >>> print(server_duid.to_isc())
+            server-duid EN 9 "a string of some significance";
+
         Returns:
             str: A string representation of the object tree from this level.
 
         """
-        pass
+        return f'{" " * indent}{self.__str__()};'
 
 
 # Declarations
@@ -892,8 +940,8 @@ class Range4:
         """Initialize attributes for the class.
 
         Args:
-            start (str): The first IP address in the range.
-            end (str): The last IP address in the range.
+            start (str): The first or lowest IP address in the range.
+            end (str): The last or highest IP address in the range.
             dynamic_bootp (boolean): If set allows BOOTP clients to get
                 dynamically assigned addresses.
 
@@ -954,8 +1002,10 @@ class Range6:
         """Initialize attributes for the class.
 
         Args:
-            start (str): The first IP address in the range or the subnet.
-            end (str): The last IP address in the range.
+            start (str): The first or lowest IP address in the range or the
+                subnet. This could also be set as a prefix in cidr notation. 
+                And if so the end attribute should be omitted.
+            end (str): The last or highest IP address in the range.
             temporary (boolean): If set makes the prefix available for
                 temporary (RFC 4941) addresses.
 
@@ -1361,7 +1411,9 @@ class Pool6:
             elif all((value, key == 'ranges')):
                 for dhcp_range in self.ranges:
                     attrs.append(f'{" " * child_indent}{dhcp_range.to_isc()}')
-            elif all((value, key == 'prefix6')):
+            # elif all((value, key == 'prefix6')):
+            #     attrs.append(f'{" " * child_indent}{value.to_isc()}')
+            elif hasattr(value, 'to_isc'):
                 attrs.append(f'{" " * child_indent}{value.to_isc()}')
             elif all((value, key == 'failover')):
                 attrs.append(f'{" " * child_indent}{value};')
@@ -1901,7 +1953,7 @@ class Global(Parameters, Permissions, OptionMixin, SubnetMixin,
         release_on_roam:                Union[bool, None] = None,
         remote_port:                    Union[int, None] = None,
         server_id_check:                Union[bool, None] = None,
-        server_duid:                    Union[ServerDuid, None] = None,
+        server_duid:                    Union[ServerDuidEN, ServerDuidLL, None] = None,
         update_conflict_detection:      Union[bool, None] = None,
         use_eui_64:                     Union[bool, None] = None,
         options:                        Union[List[Option], None] = None,
@@ -1965,7 +2017,8 @@ class Global(Parameters, Permissions, OptionMixin, SubnetMixin,
         self.includes = [] if not includes else includes
         self.events = [] if not events else events
         self.custom_options = [] if not custom_options else custom_options
-        self.option_expressions = [] if not option_expressions else option_expressions
+        self.option_expressions = [] if not option_expressions else \
+            option_expressions
         super().__init__()
 
     def __str__(self) -> str:
@@ -2008,16 +2061,17 @@ class Global(Parameters, Permissions, OptionMixin, SubnetMixin,
             'options': 1,
             'includes': 2,
             'custom_options': 3,
-            'keys': 4,
-            'zones': 5,
-            'failover': 6,
-            'subnets': 7,
-            'shared_networks': 8,
-            'classes': 9,
-            'subclasses': 10,
-            'hosts': 11,
-            'groups': 12,
-            'events': 13
+            'option_expressions': 4,
+            'keys': 5,
+            'zones': 6,
+            'failover': 7,
+            'subnets': 8,
+            'shared_networks': 9,
+            'classes': 10,
+            'subclasses': 11,
+            'hosts': 12,
+            'groups': 13,
+            'events': 14
             }
         sorted_dict = sorted(
             self.__dict__.items(), key=lambda x: sort_order.get(x[0], 0))
