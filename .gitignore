@@ -6,6 +6,7 @@
 **/old*
 **/gen2_venv
 temp*
+html
 
 ### Editor files
 .vscode
