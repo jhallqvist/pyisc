@@ -8,6 +8,8 @@ The aim of this project it to provide a working ORM for ISC configuration files 
 
 It is not in scope to provide validation of provided data when supplying new data to a parsed configuration file.
 
+This projects assumes the files given for parsing is correct syntactically as in the corresponding ISC service would not find any errors when parsing them.
+
 ## Installation
 
 Currently a git clone is necessary as the package on PyPi is not yet updated.

@@ -24,7 +24,7 @@ Example:
     >>> parser = dhcpd.DhcpdParser()
     >>> with open('etc/dhcpd.conf', 'r') as infile:
     ...     isc_config = infile.read()
-    >>> object_tree = parser.construct_tree(conf)
+    >>> object_tree = parser.construct_tree(isc_config)
     >>> print(object_tree.to_isc())
     authoritative;
     log-facility local7;
