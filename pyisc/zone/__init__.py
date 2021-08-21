@@ -38,7 +38,6 @@ __version__ = '0.6.0'
 __author__ = 'Jonas Hallqvist'
 
 from pyisc.zone.parsing import ZoneParser
-from pyisc.zone.nodes import *
 
 
 def loads(content):

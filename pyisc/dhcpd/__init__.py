@@ -95,7 +95,6 @@ __version__ = '0.6.0'
 __author__ = 'Jonas Hallqvist'
 
 from pyisc.dhcpd.parsing import DhcpdParser
-from pyisc.dhcpd.nodes import *
 
 
 def loads(content):
