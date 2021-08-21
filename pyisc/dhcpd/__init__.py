@@ -21,10 +21,9 @@ dhcpd daemon.
 
 Example:
     >>> from pyisc import dhcpd
-    >>> parser = dhcpd.DhcpdParser()
     >>> with open('etc/dhcpd.conf', 'r') as infile:
     ...     isc_config = infile.read()
-    >>> object_tree = parser.construct_tree(isc_config)
+    >>> object_tree = dhcpd.loads(isc_config)
     >>> print(object_tree.to_isc())
     authoritative;
     log-facility local7;

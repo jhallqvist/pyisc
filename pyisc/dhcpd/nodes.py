@@ -1831,7 +1831,7 @@ class SharedNetwork(Parameters, Permissions, OptionMixin, SubnetMixin,
 
 class Group(Parameters, SubnetMixin, SharedNetworkMixin, HostMixin,
             OptionMixin):
-    """Represents an group declaration."""
+    """Represents a group declaration."""
     def __init__(
         self,
         options:            Union[List[Option], None] = None,
