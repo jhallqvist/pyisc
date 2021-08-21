@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from typing import Tuple, List
-from pyisc.dhcpd.parsing import Token
 from pyisc.zone.nodes import A, AAAA, CNAME, MX, NS, SOA
 
 
@@ -38,7 +37,15 @@ class TokenProcessor:
                 and method in second position.
 
         Examples:
-            >>> pass
+            >>> token = Token(type='A',
+            ...               value='example.com. IN A 192.0.2.1',
+            ...               line=11, column=47)
+            >>> processor = TokenProcessor()
+            >>> declaration, method = processor.switch(token)
+            >>> declaration
+            A(label=example.com., record_class=IN, ttl=None, address=192.0.2.1)
+            >>> method
+            'add_record'
 
         """
         self.token = token
@@ -118,7 +125,7 @@ class TokenProcessor:
 
 
 def partition_string(content: str) -> List:
-    """Takes a string from a zone file and splits it into correct rows."""
+    """Returns a list of zone file rows from supplied string."""
     result_array = []
     token_str = ''
     line_no = 1
@@ -157,7 +164,12 @@ def partition_string(content: str) -> List:
 
 
 def rr_split(rr_string: str) -> List:
-    """Splits a resource record string up to the rdata portion of the string."""
+    """Returns a list from a supplied resource record string.
+
+    Since RData length can vary this function splits all components up to the
+    RData of the string.
+
+    """
     rr_types = ('NSEC3PARAM', 'OPENPGPKEY', 'IPSECKEY', 'CDNSKEY', 'DNSKEY',
                 'SMIMEA', 'ZONEMD', 'AFSDB', 'CNAME', 'CSYNC', 'DHCID',
                 'DNAME', 'EUI48', 'EUI64', 'HINFO', 'HTTPS', 'NAPTR', 'NSEC3',
@@ -192,8 +204,14 @@ def has_name(rr_list: List) -> bool:
 
 
 def standardize_rr(rr_list: List) -> List:
-    """Returns a formatted list of the resource record that matches the
-    standarized format of Label, Class, TTL, Type, RData."""
+    """Returns a padded list of the supplied resource record list.
+
+    The returned list will represent the five-tuple designated correct by
+    RFC1035. This means ['label', 'ttl, 'class', 'type', 'rdata']. 
+    Missing entries in the supplied list will be padded with None or, in the
+    case of class, with 'IN'.
+
+    """
     while len(rr_list) < 5:
         if not has_ttl(rr_list):
             rr_list.insert(-2, None)

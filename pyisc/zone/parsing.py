@@ -32,7 +32,7 @@ class ZoneParser:
 
     This class contains methods for making tokens out of text as
     well as building a object tree of the generated tokens.
-    Instantiate the class and use of of the methods with a string from
+    Instantiate the class and use one of the methods with a string from
     a valid ISC Zone file.
 
     """
@@ -48,7 +48,13 @@ class ZoneParser:
             generator: A generator containing the tokens.
 
         Examples:
-            >>> pass
+            >>> from pyisc.zone.parsing import ZoneParser
+            >>> parser = ZoneParser()
+            >>> isc_string = 'example.com.   IN NS         ns1.example.'
+            >>> for token in parser.tokenize(isc_string):
+            ...     token
+            Token(type='NS', value='example.com. IN NS ns1.example.',
+            ...   line=1, column=42)
 
         """
         content_list = partition_string(content)
@@ -79,7 +85,11 @@ class ZoneParser:
             Zone: An object tree with the root of Zone.
 
         Examples:
-            >>> pass
+            >>> from pyisc.zone.parsing import ZoneParser
+            >>> parser = ZoneParser()
+            >>> with open('example.com.txt','r') as infile:
+            ...     zone_file = infile.read()
+            >>> object_tree = parser.construct_tree(zone_file)
 
         """
         node = Zone()

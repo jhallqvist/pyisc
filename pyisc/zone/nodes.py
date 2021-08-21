@@ -17,12 +17,16 @@ from typing import List, Union
 
 
 class ResourceRecord:
+    """A base for all the various record types.
+
+    This class is not meant to be instantiated but only to serve as a
+    foundation for the other record types in order to reduce repetitive code.
+    """
     def __init__(
         self,
         label:          Union[str, None] = None,
         record_class:   Union[str, None] = None,
         ttl:            Union[int, None] = None,
-        # record_data:    str
     ) -> None:
         self.label = label
         self.record_class = record_class
@@ -67,6 +71,7 @@ class ResourceRecord:
 
 
 class A(ResourceRecord):
+    """Represents the A record type"""
     def __init__(
         self,
         address:        IPv4Address,
@@ -85,6 +90,7 @@ class A(ResourceRecord):
 
 
 class AAAA(ResourceRecord):
+    """Represents the AAAA record type"""
     def __init__(
         self,
         address:        IPv6Address,
@@ -103,6 +109,7 @@ class AAAA(ResourceRecord):
 
 
 class AFSDB(ResourceRecord):
+    """Represents the AFSDB record type"""
     def __init__(
         self,
         subtype:        str,
@@ -123,6 +130,7 @@ class AFSDB(ResourceRecord):
 
 
 class APL(ResourceRecord):
+    """Represents the APL record type"""
     def __init__(
         self,
         address_family: str,
@@ -173,6 +181,7 @@ class CERT(ResourceRecord):
 
 
 class CNAME(ResourceRecord):
+    """Represents the CNAME record type"""
     def __init__(
         self,
         cname:          str,
@@ -223,6 +232,7 @@ class EUI64(ResourceRecord):
 
 
 class HINFO(ResourceRecord):
+    """Represents the HINFO record type"""
     def __init__(
         self,
         cpu:            str,
@@ -263,6 +273,7 @@ class LOC(ResourceRecord):
 
 
 class MX(ResourceRecord):
+    """Represents the MX record type"""
     def __init__(
         self,
         preference:     int,
@@ -289,6 +300,7 @@ class NAPTR(ResourceRecord):
 
 
 class NS(ResourceRecord):
+    """Represents the NS record type"""
     def __init__(
         self,
         nsdname:        str,
@@ -323,6 +335,7 @@ class OPENPGPKEY(ResourceRecord):
 
 
 class PTR(ResourceRecord):
+    """Represents the PTR record type"""
     def __init__(
         self,
         ptrdname:       str,
@@ -345,6 +358,7 @@ class RRSIG(ResourceRecord):
 
 
 class RP(ResourceRecord):
+    """Represents the RP record type"""
     def __init__(
         self,
         mbox_dname:     str,
@@ -375,6 +389,7 @@ class SMIMEA(ResourceRecord):
 
 
 class SOA(ResourceRecord):
+    """Represents the SOA record type"""
     def __init__(
         self,
         mname:          str,
@@ -446,6 +461,7 @@ class TSIG(ResourceRecord):
 
 
 class TXT(ResourceRecord):
+    """Represents the TXT record type"""
     def __init__(
         self,
         txtdata:        str,
@@ -493,6 +509,7 @@ class OPT(ResourceRecord):
 
 
 class WKS(ResourceRecord):
+    """Represents the WKS record type"""
     def __init__(
         self,
         address:        IPv4Address,
@@ -517,6 +534,10 @@ class WKS(ResourceRecord):
 
 
 class Zone:
+    """Represents the Zone.
+
+    This is the root of all the zone configuration and its records.
+    """
     def __init__(
         self,
         origin:     Union[str, None] = None,
@@ -524,6 +545,15 @@ class Zone:
         soa:        Union[SOA, None] = None,
         records:    Union[List, None] = None
     ) -> None:
+        """Initialize attributes for the class.
+
+        Args:
+            origin (str): The Origin of the zone.
+            ttl (int)): The Time To Live for the zone.
+            soa (pyisc.zone.nodes.SOA): The Start of Authority for the zone.
+            records (list): List of all records in the zone.
+
+        """
         self.origin = origin
         self.ttl = ttl
         self.soa = soa
