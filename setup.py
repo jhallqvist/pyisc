@@ -27,7 +27,7 @@ setup(
     version=find_version("pyisc", "__init__.py"),
     author="Jonas Hallqvist",
     author_email="jonas.hallqvist@outlook.com",
-    description="A module for manipulation of ISC configuration files.",
+    description="A module for manipulation of various ISC files.",
     license="Apache 2.0",
     url="https://github.com/jhallqvist/pyisc",
     packages=find_packages(exclude=("test*",)),

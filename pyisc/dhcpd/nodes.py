@@ -1003,7 +1003,7 @@ class Range6:
 
         Args:
             start (str): The first or lowest IP address in the range or the
-                subnet. This could also be set as a prefix in cidr notation. 
+                subnet. This could also be set as a prefix in cidr notation.
                 And if so the end attribute should be omitted.
             end (str): The last or highest IP address in the range.
             temporary (boolean): If set makes the prefix available for

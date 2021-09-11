@@ -207,7 +207,7 @@ def standardize_rr(rr_list: List) -> List:
     """Returns a padded list of the supplied resource record list.
 
     The returned list will represent the five-tuple designated correct by
-    RFC1035. This means ['label', 'ttl, 'class', 'type', 'rdata']. 
+    RFC1035. This means ['label', 'ttl, 'class', 'type', 'rdata'].
     Missing entries in the supplied list will be padded with None or, in the
     case of class, with 'IN'.
 

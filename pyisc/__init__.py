@@ -12,17 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""PyISC enables the manipulation of ISC configuration files.
+"""PyISC enables the manipulation of ISC files.
 
 The library is divided into submodules where each submodule is
 responsible for the parsing and editing of that specific type of file.
 So for ISC DHCPds configuration file the submodule dhcpd is used and
-for Bind9s named.conf file the bind subpackage is used.
+for Bind9s named.conf file the named submodule is used.
 
 """
 
-__all__ = ['dhcpd']
-__version__ = '0.3.1'
+__all__ = ['dhcpd', 'zone']
+__version__ = '0.5.0'
 __author__ = 'Jonas Hallqvist'
 
-from pyisc import dhcpd
+from pyisc import dhcpd, zone

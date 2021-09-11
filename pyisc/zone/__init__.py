@@ -15,7 +15,7 @@
 """Manipulates ISC Zone files.
 
 Enables the conversion of a ISC zone file to a tree like structure
-of objects suitable for alteration and the conversation of that
+of objects suitable for alteration and the conversion of that
 structure to a string that can easily be written to a file.
 
 Example:
