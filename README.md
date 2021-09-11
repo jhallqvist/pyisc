@@ -1,10 +1,10 @@
 # PyISC
 
-A python library with the purpose of parsing and manipulating ISC configuration files. Currently only focused on the dhcpd.conf file but will be expanded in the future.
+A python library with the purpose of parsing and manipulating ISC files. Currently supports DHCPd configuration files and Zone files.
 
 ## Scope of project
 
-The aim of this project it to provide a working ORM for ISC configuration files so that one may use existing, as well as new, files and transform them to a easy to use python data structure.
+The aim of this project it to provide a working ORM for ISC files so that one may use existing, as well as new, files and transform them to a easy to use python data structure.
 
 It is not in scope to provide validation of provided data when supplying new data to a parsed configuration file.
 
