@@ -15,3 +15,15 @@
 * [x] Make a cleaner method of the build_tree method. Currently there is one big if/else statement and this could possbibly hurt readability. Also perhaps rename method to construct_object_tree or something similar for clarity.
 * [x] Possibility to reduce repeated code in parsing. For all declarations - create a switcher class where the functions add the correct object and also use getattr with a dict mapping to determine the method that must be used to add the object.
 * [x] Rename the Class class. It conflicts with the class statement in Python which was proven in the implemantation of the TokenProcessor class in the method for the Class object.
+
+## NAMED
+
+* [ ] Modify to_isc for the older classes to look more like the one in BaseZoneList class (key_replace, discard if in the beginning, etc). This might be something to implement in the DHCPD module as well.
+* Change all type hints that uses Union to Optional instead. Looks cleaner and allows Union to be used inside Optional for the rare cases where an attribute can be more than two values (ie. actual value or None).
+* Maybe change the return_str in to_isc metho to a list instead. This way one could make a cleaner return:
+
+```python
+new_line = '\n'
+attrs = []
+return_list = [f'{" " * indent}{self.__str__()}', ' {', f'{new_line if attrs else ""}','}']
+```
