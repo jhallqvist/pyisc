@@ -18,7 +18,7 @@ from typing import List, Optional, Tuple, Union
 # TODO - Maybe redo a few thing - create a to_isc that can be inherited that
 # for instance joins the values that are lists within brackets.
 
-# Non regular parameters.
+# Ancestor classes.
 class BaseAML:
     """Represents an Address match statment.
 
@@ -34,11 +34,11 @@ class BaseAML:
                 The expected values for the entries in this list is:
                 ip addresses, ip prefixes key IDs, another ACL or any or the
                 predefined options (any, none, localhost, localnets).
-                A leading exclamation mark in an element is also allowed to 
+                A leading exclamation mark in an element is also allowed to
                 negate the element.
 
         """
-        self.elements = [] if not elements else elements
+        self.elements = elements or []
 
     def __str__(self, parameter=None) -> str:
         prefix = f'{parameter if parameter else self.__class__.__name__}'
@@ -64,9 +64,8 @@ class BaseAML:
 
         """
         attrs = []
-        # print("    " + ";\n    ".join(test.elements) + ";")
         excluded_attrs = ('name', 'elements')
-        addr_str = ('{ ' f'{"; ".join(self.elements)};' ' }')
+        addr_str = ('{ ' f'{"; ".join(self.elements)}' f'{";"if len(self.elements) > 0 else ""}' ' }')
         for key, value in self.__dict__.items():
             key = key.replace('_', '-')
             if any((key in excluded_attrs, value is None)):
@@ -86,93 +85,309 @@ class BaseAML:
         return (f'{return_str}{attrs_str}{section_end}')
 
 
-# class AllowNotify(BaseAML):
-#     def __str__(self) -> str:
-#         return super().__str__(parameter='allow-notify')
-
-
-# class AllowQuery(BaseAML):
-#     def __str__(self) -> str:
-#         return super().__str__(parameter='allow-query')
-
-
-# class AllowQueryCache(BaseAML):
-#     def __str__(self) -> str:
-#         return super().__str__(parameter='allow-query-cache')
-
-
-# class AllowQueryCacheOn(BaseAML):
-#     def __str__(self) -> str:
-#         return super().__str__(parameter='allow-query-cache-on')
-
-
-# class AllowRecursion(BaseAML):
-#     def __str__(self) -> str:
-#         return super().__str__(parameter='allow-recursion')
-
-
-# class AllowRecursionOn(BaseAML):
-#     def __str__(self) -> str:
-#         return super().__str__(parameter='allow-recursion-on')
-
-
-# class AllowTransfer(BaseAML):
-#     def __str__(self) -> str:
-#         return super().__str__(parameter='allow-transfer')
-
-
-# class AllowUpdate(BaseAML):
-#     def __str__(self) -> str:
-#         return super().__str__(parameter='allow-update')
-
-
-# class AllowUpdateForwarding(BaseAML):
-#     def __str__(self) -> str:
-#         return super().__str__(parameter='allow-update-forwarding')
-
-
-# class Blackhole(BaseAML):
-#     def __str__(self) -> str:
-#         return super().__str__(parameter='blackhole')
-
-
-class DenyAnswerAddress(BaseAML):
+class BaseExceptFrom(BaseAML):
     def __init__(
         self,
         elements:       List[str] = None,
         except_from:    List[str] = None
     ) -> None:
-        self.except_from = [] if not except_from else except_from
+        self.except_from = except_from or []
         super().__init__(elements=elements)
-
-    def __str__(self) -> str:
-        return super().__str__(parameter='deny-answer-addresses')
 
     def to_isc(self, indent: int = 0, element_pos: int = 0) -> str:
         return super().to_isc(indent=indent, element_pos=element_pos)
 
 
-class DenyAnswerAlias(DenyAnswerAddress):
-    pass
-
-# class Clients(BaseAML):
-#     def __str__(self) -> str:
-#         return super().__str__(parameter='clients')
+class BaseAMLName(BaseAML):
+    def __init__(self, name: str, elements: List[str] = None) -> None:
+        self.name = name
+        super().__init__(elements=elements)
 
 
-# class Exclude(BaseAML):
-#     def __str__(self) -> str:
-#         return super().__str__(parameter='exclude')
+class BaseSource:
+    """Ancestor to alt-transfer-source, alt-transfer-source-v6, notify-source
+    and notify-source-v6, parental-source, parental-source-v6, transfer-source
+    and transfer-source-v6 parameters."""
+    def __init__(
+        self,
+        address:    str,
+        port:       Union[int, None] = None,
+        dscp:       Union[int, None] = None
+    ) -> None:
+        self.address = address
+        self.port = port
+        self.dscp = dscp
+
+    def __str__(self, parameter=None) -> str:
+        prefix = f'{str(parameter) + " " if parameter is not None else ""}'
+        return f'{prefix}{self.address}'
+
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}(address={self.address})'
+
+    def to_isc(self, indent: int = 0) -> str:
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                Default is 0.
+
+        Examples:
+            >>> pass
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
+        attrs = []
+        excluded_attrs = ('address')
+        return_str = (f'{" " * indent}{self.__str__()}')
+        for key, value in self.__dict__.items():
+            key = key.replace('_', '-')
+            if any((key in excluded_attrs, value is None)):
+                continue
+            else:
+                attrs.append(f'{key} {value}')
+        if len(attrs) > 0:
+            return_str += ' '
+        attrs_str = " ".join(attrs)
+        section_end = ';'
+        return (f'{return_str}{attrs_str}{section_end}')
 
 
-# class Mapped(BaseAML):
-#     def __str__(self) -> str:
-#         return super().__str__(parameter='mapped')
+class RemoteServer:
+    "Represents a single element in the remote server list element."
+    def __init__(
+        self,
+        server: str,
+        port:   Optional[int] = None,
+        key:    Optional[str] = None,
+        tls:    Optional[str] = None
+    ) -> None:
+        self.server = server
+        self.port = port
+        self.key = key
+        self.tls = tls
+
+    def __str__(self) -> str:
+        return f'{self.server}'
+
+    def __repr__(self) -> str:
+        return f'RemoteServer(server={self.server})'
+
+    def to_isc(self, indent: int = 0) -> str:
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                Default is 0.
+
+        Examples:
+            >>> pass
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
+        attrs = []
+        excluded_attrs = ('server')
+        return_str = (f'{" " * indent}{self.__str__()}')
+        for key, value in self.__dict__.items():
+            key = key.replace('_', '-')
+            if any((key in excluded_attrs, value is None)):
+                continue
+            else:
+                attrs.append(f'{key} {value}')
+        if len(attrs) > 0:
+            return_str += ' '
+        attrs_str = " ".join(attrs)
+        section_end = ';'
+        return (f'{return_str}{attrs_str}{section_end}')
 
 
-# class KeepResponseOrder(BaseAML):
-#     def __str__(self) -> str:
-#         return super().__str__(parameter='keep-response-order')
+class BaseZoneList:
+    """Ancestor to parental-agents, primaries, also-notify, masters,
+    default-masters and default-primaries statements."""
+    def __init__(
+        self,
+        port:           Union[int, None] = None,
+        dscp:           Union[int, None] = None,
+        servers:        Optional[List[RemoteServer]] = None,
+    ) -> None:
+        self.port = port
+        self.dscp = dscp
+        self.servers = servers or []
+
+    def __str__(self, parameter=None) -> str:
+        optional_attrs = ''
+        if self.port:
+            optional_attrs += f' port {self.port}'
+        if self.dscp:
+            optional_attrs += f' dscp {self.dscp}'
+        prefix = f'{parameter if parameter else self.__class__.__name__}'
+        stmt_name = f'{" " + self.name if hasattr(self, "name") else ""}'
+        return f'{prefix}{stmt_name}{optional_attrs}'
+
+    def __repr__(self) -> str:
+        optional_attrs = ''
+        if self.port:
+            optional_attrs += f', port={self.port}'
+        if self.dscp:
+            optional_attrs += f', dscp={self.dscp}'
+        stmt_name = f'{"name=" + self.name if hasattr(self, "name") else ""}'
+        return f'{self.__class__.__name__}({stmt_name}{optional_attrs})'
+
+    def to_isc(self, indent: int = 0, section_end: str = '};') -> str:
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                Default is 0.
+
+        >>> pass
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
+        attrs = []
+        excluded_attrs = ('name', 'port', 'dscp')
+        child_indent = indent + 4 if indent > 0 else 4
+        return_str = (f'{" " * indent}{self.__str__()}' ' {')
+        for key, value in self.__dict__.items():
+            key = key.replace('_', '-')
+            if any((key in excluded_attrs, value is None)):
+                continue
+            # elif hasattr(value, 'to_isc'):
+            #     attrs.append(f'{value.to_isc(indent=child_indent)}')
+            elif all((key == 'servers', isinstance(value, list))):
+                str_list = [item.to_isc(indent=child_indent) for item in value]
+                attrs.append('\n'.join(str_list))
+            # elif all((key == 'servers', isinstance(value, str))):
+            #     attrs.append(f'{" " * child_indent}{value}')
+            # elif all((key == 'servers', isinstance(value, tuple))):
+            #     addr, port = value
+            #     attrs.append(f'{" " * child_indent}{addr} port {port}')
+            # elif isinstance(value, bool):
+            #     attrs.append(f'{" " * child_indent}{key} {str(value).lower()}')
+            else:
+                attrs.append(f'{" " * child_indent}{key} {value}')
+        if len(attrs) > 0:
+            return_str += '\n'
+        attrs_str = "\n".join(attrs)
+        return (f'{return_str}{attrs_str}' '\n' f'{" " * indent}{section_end}')
+
+
+class BaseOptionalSecond:
+    """Ancestor to the prefetch, sig-validity-interval, fetches-per-server and
+    fetches-per-zone parameters."""
+    def __init__(
+        self,
+        mandatory_int: int
+        # optional_int: Optional[int] = None
+    ) -> None:
+        self.mandatory_int = mandatory_int
+        # self.optional_int = optional_int
+
+    def __str__(self, parameter=None) -> str:
+        prefix = f'{parameter if parameter else self.__class__.__name__}'
+        return f'{prefix} {self.mandatory_int}'
+
+    def __repr__(self) -> str:
+        str_attrs = f'mandatory_int={self.mandatory_int}'
+        # if self.optional_int:
+        #     str_attrs += f', optional_int={self.optional_int}'
+        return f'{self.__class__.__name__}({str_attrs})'
+
+    def to_isc(self, indent: int = 0) -> str:
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                Default is 0.
+
+        >>> pass
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
+        attrs = []
+        excluded_attrs = ('mandatory-int')
+        return_str = (f'{" " * indent}{self.__str__()}')
+        for key, value in self.__dict__.items():
+            key = key.replace('_', '-')
+            if any((key in excluded_attrs, value is None)):
+                continue
+            else:
+                attrs.append(f' {value}')
+        attrs_str = " ".join(attrs)
+        section_end = ';'
+        return (f'{return_str}{attrs_str}{section_end}')
+
+
+class BaseQuery:
+    """TEMP."""
+    def __init__(
+        self,
+        address: Optional[str] = None,
+        port: Optional[str] = None
+    ) -> None:
+        self.address = address
+        self.port = port
+
+    def __str__(self, parameter=None) -> str:
+        optional_attrs = ''
+        if self.address:
+            optional_attrs += f' address {self.address}'
+        if self.port:
+            optional_attrs += f' port {self.port}'
+        prefix = f'{parameter if parameter else self.__class__.__name__}'
+        return f'{prefix}{optional_attrs}'
+
+    def __repr__(self) -> str:
+        optional_attrs = ''
+        if self.address:
+            optional_attrs += f', address={self.address}'
+        if self.port:
+            optional_attrs += f', port={self.port}'
+        return f'{self.__class__.__name__}({optional_attrs})'
+
+    def to_isc(self, indent: int = 0) -> str:
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                Default is 0.
+
+        >>> pass
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
+        return f'{self.__str__()};'
+
+
+# Non regular parameters
+class DenyAnswerAddress(BaseExceptFrom):
+    def __str__(self) -> str:
+        return super().__str__(parameter='deny-answer-addresses')
+
+
+class DenyAnswerAlias(BaseExceptFrom):
+    def __str__(self) -> str:
+        return super().__str__(parameter='deny-answer-aliases')
+
+
+class DisableAlgorithm(BaseAMLName):
+    def __str__(self) -> str:
+        return super().__str__(parameter='disable-algorithms')
+
+
+class DisableDsDigest(BaseAMLName):
+    def __str__(self) -> str:
+        return super().__str__(parameter='disable-ds-digests')
 
 
 class ListenOn(BaseAML):
@@ -199,16 +414,6 @@ class ListenOnV6(ListenOn):
         return super().__str__(parameter='listen-on-v6')
 
 
-# class NoCaseCompress(BaseAML):
-#     def __str__(self) -> str:
-#         return super().__str__(parameter='no-case-compress')
-
-
-# class ExemptClients(BaseAML):
-#     def __str__(self) -> str:
-#         return super().__str__(parameter='exempt-clients')
-
-
 class ResponsePadding(BaseAML):
     def __init__(
         self,
@@ -223,56 +428,6 @@ class ResponsePadding(BaseAML):
 
     def to_isc(self, indent: int = 0, element_pos: int = 0) -> str:
         return super().to_isc(indent=indent, element_pos=element_pos)
-
-
-class BaseSource:
-    """Ancestor to alt-transfer-source, alt-transfer-source-v6, notify-source
-    and notify-source-v6, parental-source, parental-source-v6, transfer-source
-    and transfer-source-v6 statements."""
-    def __init__(
-        self,
-        address:    str,
-        port:       Union[int, None] = None,
-        dscp:       Union[int, None] = None
-    ) -> None:
-        self.address = address
-        self.port = port
-        self.dscp = dscp
-
-    def __str__(self, parameter=None) -> str:
-        prefix = f'{parameter if parameter else self.__class__.__name__}'
-        return f'{prefix}'
-
-    def __repr__(self) -> str:
-        return f'{self.__class__.__name__}(address={self.address})'
-
-    def to_isc(self, indent: int = 0) -> str:
-        """Returns valid ISC configuration as a string.
-
-        Args:
-            indent (int): Supply an integer to use as indentation offset.
-                Default is 0.
-
-        Examples:
-            >>> pass
-
-        Returns:
-            str: A string representation of the object tree from this level.
-
-        """
-        attrs = []
-        return_str = (f'{" " * indent}{self.__str__()} ')
-        for key, value in self.__dict__.items():
-            key = key.replace('_', '-')
-            if not value:
-                continue
-            elif key == 'address':
-                attrs.append(f'{value}')
-            else:
-                attrs.append(f'{key} {value}')
-        attrs_str = " ".join(attrs)
-        section_end = ';'
-        return (f'{return_str}{attrs_str}{section_end}')
 
 
 class AltTransferSource(BaseSource):
@@ -323,67 +478,333 @@ class TransferSourceV6(BaseSource):
         return super().__str__(parameter='transfer-source-v6')
 
 
-# class SortList(BaseAML):
-#     def __str__(self) -> str:
-#         return super().__str__(parameter='sortlist')
+class DualStackMember(BaseSource):
+    """Represents the alt-transfer-source parameter."""
+    pass
+
+
+class FetchesPerServer(BaseOptionalSecond):
+    def __init__(
+        self,
+        mandatory_int: int,
+        optional_str: Optional[str] = None
+    ) -> None:
+        super().__init__(mandatory_int)
+        self.optional_str = optional_str
+
+    def __str__(self) -> str:
+        return super().__str__(parameter='fetches-per-server')
+
+
+class FetchesPerZone(BaseOptionalSecond):
+    def __init__(
+        self,
+        mandatory_int: int,
+        optional_str: Optional[str] = None
+    ) -> None:
+        super().__init__(mandatory_int)
+        self.optional_str = optional_str
+
+    def __str__(self) -> str:
+        return super().__str__(parameter='fetches-per-zone')
+
+
+class Prefetch(BaseOptionalSecond):
+    def __init__(
+        self,
+        mandatory_int: int,
+        optional_int: Optional[int] = None
+    ) -> None:
+        super().__init__(mandatory_int)
+        self.optional_int = optional_int
+
+    def __str__(self) -> str:
+        return super().__str__(parameter='prefetch')
+
+
+class SigValidityInterval(BaseOptionalSecond):
+    def __init__(
+        self,
+        mandatory_int: int,
+        optional_int: Optional[int] = None
+    ) -> None:
+        super().__init__(mandatory_int)
+        self.optional_int = optional_int
+
+    def __str__(self) -> str:
+        return super().__str__(parameter='sig-validity-interval')
+
+
+class Clients(BaseAML):
+    def __str__(self) -> str:
+        return super().__str__(parameter='clients')
+
+
+class Exclude(BaseAML):
+    def __str__(self) -> str:
+        return super().__str__(parameter='exclude')
+
+
+class Mapped(BaseAML):
+    def __str__(self) -> str:
+        return super().__str__(parameter='mapped')
+
+
+class Dns64:
+    """TEMP."""
+    def __init__(
+        self,
+        netprefix:      str,
+        break_dnssec:   Optional[bool] = None,
+        clients:        Optional[Clients] = None,
+        exclude:        Optional[Exclude] = None,
+        mapped:         Optional[Mapped] = None,
+        recursive_only: Optional[bool] = None,
+        suffix:         Optional[str] = None
+    ) -> None:
+        self.netprefix = netprefix
+        self.break_dnssec = break_dnssec
+        self.clients = clients
+        self.exclude = exclude
+        self.mapped = mapped
+        self.recursive_only = recursive_only
+        self.suffix = suffix
+
+    def __str__(self) -> str:
+        return f'dns64 {self.netprefix}'
+
+    def __repr__(self) -> str:
+        return f'Dns64(netprefix={self.netprefix})'
+
+    def to_isc(self, indent: int = 0) -> str:
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                Default is 0.
+
+        >>> pass
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
+        attrs = []
+        excluded_attrs = ('netprefix')
+        child_indent = indent + 4 if indent > 0 else 4
+        return_str = (f'{" " * indent}{self.__str__()}' ' {')
+        for key, value in self.__dict__.items():
+            key = key.replace('_', '-')
+            if any((key in excluded_attrs, value is None)):
+                continue
+            elif hasattr(value, 'to_isc'):
+                attrs.append(f'{value.to_isc(indent=child_indent)}')
+            elif isinstance(value, bool):
+                attrs.append(f'{" " * child_indent}{key} {str(value).lower()};')
+            else:
+                attrs.append(f'{" " * child_indent}{key} {value};')
+        if len(attrs) > 0:
+            return_str += '\n'
+        attrs_str = "\n".join(attrs)
+        section_end = '};'
+        return (f'{return_str}{attrs_str}' '\n' f'{" " * indent}{section_end}')
+
+
+class DnsTapMember:
+    """TEMP."""
+    def __init__(
+        self,
+        mandatory_str:  str,
+        optional_str:   Optional[str] = None
+    ) -> None:
+        self.mandatory_str = mandatory_str
+        self.optional_str = optional_str
+
+    def __str__(self) -> str:
+        return_str = f'{self.mandatory_str}'
+        if self.optional_str:
+            return_str += f' {self.optional_str}'
+        return f'{return_str}'
+
+    def __repr__(self) -> str:
+        str_attrs = f'mandatory_str={self.mandatory_str}'
+        if self.optional_str:
+            str_attrs += f', optional_str={self.optional_str}'
+        return f'{self.__class__.__name__}({str_attrs})'
+
+    def to_isc(self, indent: int = 0) -> str:
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                Default is 0.
+
+        >>> pass
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
+        return_str = (f'{" " * indent}{self.__str__()}')
+        section_end = ';'
+        return (f'{return_str}{section_end}')
+
+
+class DnsTapOutput:
+    """TEMP."""
+    def __init__(
+        self,
+        destination:    str,
+        path:           str,
+        size:           Optional[Union[str, int]] = None,
+        versions:       Optional[Union[str, int]] = None,
+        suffix:         Optional[str] = None
+    ) -> None:
+        self.destination = destination
+        self.path = path
+        self.size = size
+        self.versions = versions
+        self.suffix = suffix
+
+    def __str__(self) -> str:
+        return f'dnstap-output {self.destination} {self.path}'
+
+    def __repr__(self) -> str:
+        return f'DnsTapOutput(destination={self.destination}, path={self.path})'
+
+    def to_isc(self, indent: int = 0) -> str:
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                Default is 0.
+
+        >>> pass
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
+        attrs = []
+        excluded_attrs = ('destination', 'path')
+        return_str = (f'{" " * indent}{self.__str__()}')
+        for key, value in self.__dict__.items():
+            key = key.replace('_', '-')
+            if any((key in excluded_attrs, value is None)):
+                continue
+            else:
+                attrs.append(f'{key} {value}')
+        if len(attrs) > 0:
+            return_str += ' '
+        attrs_str = " ".join(attrs)
+        section_end = ';'
+        return (f'{return_str}{attrs_str}{section_end}')
+
+
+class DualStackServers:
+    """TEMP."""
+    def __init__(
+        self,
+        port:       Optional[int] = None,
+        servers:    Optional[List[DualStackMember]] = None
+    ) -> None:
+        self.port = port
+        self.servers = servers or []
+
+    def __str__(self) -> str:
+        return 'dual-stack-servers'
+
+    def __repr__(self) -> str:
+        return 'DualStackServers()'
+
+    def to_isc(self, indent: int = 0) -> str:
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                Default is 0.
+
+        >>> pass
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
+        attrs = []
+        excluded_attrs = ('destination', 'path')
+        return_str = (f'{" " * indent}{self.__str__()}')
+        for key, value in self.__dict__.items():
+            key = key.replace('_', '-')
+            if any((key in excluded_attrs, value is None)):
+                continue
+            elif all((isinstance(value, list), not value)):
+                continue
+            elif isinstance(value, list):
+                string_list = [str(item.to_isc()) for item in value]
+                value_list = ('{ ' f'{" ".join(string_list)}' ' }')
+                attrs.append((f'{key} ' f'{value_list}'))
+            else:
+                attrs.append(f'{key} {value}')
+        if len(attrs) > 0:
+            return_str += ' '
+        attrs_str = " ".join(attrs)
+        section_end = ';'
+        return (f'{return_str}{attrs_str}{section_end}')
+
+
+class FetchQuotaParams:
+    """TEMP."""
+    def __init__(
+        self,
+        average_ratio:  int,
+        low:            float,
+        high:           float,
+        discount_rate:  float
+    ) -> None:
+        self.average_ratio = average_ratio
+        self.low = low
+        self.high = high
+        self.discount_rate = discount_rate
+
+    def __str__(self) -> str:
+        return (f'fetch-quota-params {self.average_ratio} {self.low} '
+                f'{self.high} {self.discount_rate}')
+
+    def __repr__(self) -> str:
+        return (f'FetchQuotaParams(average_ratio={self.average_ratio}, '
+                f'low={self.low}, high={self.high}, '
+                f'discount_rate={self.discount_rate})')
+
+    def to_isc(self, indent: int = 0) -> str:
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                Default is 0.
+
+        >>> pass
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
+        return f'{self.__str__()};'
+
+
+class QuerySource(BaseQuery):
+    def __str__(self) -> str:
+        return super().__str__(parameter='query-source')
+
+
+class QuerySourceV6(BaseQuery):
+    def __str__(self) -> str:
+        return super().__str__(parameter='query-source-v6')
 
 
 # Statements
-class Acl(BaseAML):
-    def __init__(self, name: str, elements: List[str] = None) -> None:
-        self.name = name
-        super().__init__(elements=elements)
-
+class Acl(BaseAMLName):
     def __str__(self) -> str:
         return super().__str__(parameter='acl')
-# class Acl:
-#     """Represents an ACL statment."""
-#     def __init__(self, name: str, acl_elements: List[str] = None) -> None:
-#         """Initialize attributes for the class.
-
-#         Args:
-#             name (str): The name of the ACL.
-#             acl_elements (List[str]): A list of addresses to match.
-#                 The expected values for the entries in this list is:
-#                 ip addresses, ip prefixes key IDs, another ACL or any or the
-#                 predefined options (any, none, localhost, localnets).
-#                 A leading exclamation mark in an element is also allowed to 
-#                 negate the element.
-
-#         """
-#         self.name = name
-#         self.acl_elements = [] if not acl_elements else acl_elements
-
-#     def __str__(self) -> str:
-#         return f'acl {self.name}'
-
-#     def __repr__(self) -> str:
-#         return f'Acl(name={self.name})'
-
-#     def to_isc(self, indent: int = 0) -> str:
-#         """Returns valid ISC configuration as a string.
-
-#         Args:
-#             indent (int): Supply an integer to use as indentation offset.
-#                 Default is 0.
-
-#         Examples:
-#             >>> pass
-
-#         Returns:
-#             str: A string representation of the object tree from this level.
-
-#         """
-#         child_indent = indent * 2 if indent > 0 else 4
-#         addr_list = []
-#         for addr in self.acl_elements:
-#             addr_list.append(f'{" " * child_indent}{addr};')
-#         return_str = (f'{" " * indent}{self.__str__()}' ' {')
-#         if len(addr_list) > 0:
-#             return_str += '\n'
-#         addr_str = "\n".join(addr_list)
-#         section_end = '};'
-#         return (f'{return_str}{addr_str}' '\n' f'{" " * indent}{section_end}')
 
 
 class ControlsInet:
@@ -399,7 +820,7 @@ class ControlsInet:
         self.ip_addr = ip_addr
         self.allow = allow
         self.ip_port = ip_port
-        self.keys = [] if not keys else keys
+        self.keys = keys or []
         self.read_only = read_only
 
     def __str__(self) -> str:
@@ -422,7 +843,7 @@ class ControlsInet:
             str: A string representation of the object tree from this level.
 
         """
-        child_indent = indent * 2 if indent > 0 else 4
+        child_indent = indent + 4 if indent > 0 else 4
         if self.allow:
             allow_str = (' allow { ' f'{"; ".join(self.allow)}' '; }')
         else:
@@ -462,7 +883,7 @@ class ControlsUnix:
         self.permission = permission
         self.owner = owner
         self.group = group
-        self.keys = [] if not keys else keys
+        self.keys = keys or []
         self.read_only = read_only
 
     def __str__(self) -> str:
@@ -486,7 +907,7 @@ class ControlsUnix:
             str: A string representation of the object tree from this level.
 
         """
-        child_indent = indent * 2 if indent > 0 else 4
+        child_indent = indent + 4 if indent > 0 else 4
         if self.keys:
             keys_str = (' keys { ' f'{"; ".join(self.keys)}' '; }')
         else:
@@ -598,7 +1019,7 @@ class Key:
 
         """
         attrs = []
-        child_indent = indent * 2 if indent > 0 else 4
+        child_indent = indent + 4 if indent > 0 else 4
         for key, value in self.__dict__.items():
             if all((value, key != 'name')):
                 attrs.append(f'{" " * child_indent}{key} {value};')
@@ -699,7 +1120,7 @@ class LogChannel:
 
         """
         attrs = []
-        child_indent = indent * 2 if indent > 0 else 4
+        child_indent = indent + 4 if indent > 0 else 4
         for key, value in self.__dict__.items():
             if key in ('null', 'stderr'):
                 attrs.append(f'{" " * child_indent}{key};')
@@ -721,7 +1142,7 @@ class LogCategory:
     """Represents the logging category statement."""
     def __init__(self, name: str, channels: List[LogChannel]) -> None:
         self.name = name
-        self.channels = [] if not channels else channels
+        self.channels = channels or []
 
     def __str__(self) -> str:
         return f'category {self.name}'
@@ -758,8 +1179,8 @@ class Logging:
         categories: List[LogCategory],
         channels:   List[LogChannel]
     ) -> None:
-        self.categories = [] if not categories else categories
-        self.channels = [] if not channels else channels
+        self.categories = categories or []
+        self.channels = channels or []
 
     def __str__(self) -> str:
         return 'logging'
@@ -781,85 +1202,12 @@ class Logging:
 
         """
         attrs = []
-        child_indent = indent * 2 if indent > 0 else 4
+        child_indent = indent + 4 if indent > 0 else 4
         return_str = (f'{" " * indent}{self.__str__()}' ' {')
         for category in self.categories:
             attrs.append(f'{category.to_isc(indent=child_indent)}')
         for channel in self.channels:
             attrs.append(f'{channel.to_isc(indent=child_indent)}')
-        if len(attrs) > 0:
-            return_str += '\n'
-        attrs_str = "\n".join(attrs)
-        section_end = '};'
-        return (f'{return_str}{attrs_str}' '\n' f'{" " * indent}{section_end}')
-
-
-class BaseZoneList:
-    """Ancestor to parental-agents, primaries, also-notify and masters
-    statements."""
-    def __init__(
-        self,
-        port:           Union[int, None] = None,
-        dscp:           Union[int, None] = None,
-        servers:        Union[List[str], Tuple[str, int]] = None,
-        key:            Union[str, None] = None,
-        tls:            Union[str, None] = None
-    ) -> None:
-        self.port = port
-        self.dscp = dscp
-        self.servers = servers
-        self.key = key
-        self.tls = tls
-
-    def __str__(self, parameter=None) -> str:
-        optional_attrs = ''
-        if self.port:
-            optional_attrs += f' port {self.port}'
-        if self.dscp:
-            optional_attrs += f' dscp {self.dscp}'
-        prefix = f'{parameter if parameter else self.__class__.__name__}'
-        stmt_name = f'{" " + self.name if hasattr(self, "name") else ""}'
-        return f'{prefix}{stmt_name}{optional_attrs}'
-
-    def __repr__(self) -> str:
-        optional_attrs = ''
-        if self.port:
-            optional_attrs += f', port={self.port}'
-        if self.dscp:
-            optional_attrs += f', dscp={self.dscp}'
-        stmt_name = f'{"name=" + self.name if hasattr(self, "name") else ""}'
-        return f'{self.__class__.__name__}({stmt_name}{optional_attrs})'
-
-    def to_isc(self, indent: int = 0) -> str:
-        """Returns valid ISC configuration as a string.
-
-        Args:
-            indent (int): Supply an integer to use as indentation offset.
-                Default is 0.
-
-        >>> pass
-
-        Returns:
-            str: A string representation of the object tree from this level.
-
-        """
-        attrs = []
-        excluded_attrs = ('name', 'port', 'dscp')
-        child_indent = indent * 2 if indent > 0 else 4
-        return_str = (f'{" " * indent}{self.__str__()}' ' {')
-        for key, value in self.__dict__.items():
-            key = key.replace('_', '-')
-            if any((key in excluded_attrs, value is None)):
-                continue
-            elif all((key == 'servers', isinstance(value, list))):
-                attrs.append(f'{" " * child_indent}{", ".join(value)};')
-            elif all((key == 'servers', isinstance(value, str))):
-                attrs.append(f'{" " * child_indent}{value};')
-            elif all((key == 'servers', isinstance(value, tuple))):
-                addr, port = value
-                attrs.append(f'{" " * child_indent}{addr} port {port};')
-            else:
-                attrs.append(f'{" " * child_indent}{key} {value};')
         if len(attrs) > 0:
             return_str += '\n'
         attrs_str = "\n".join(attrs)
@@ -977,35 +1325,206 @@ class Masters(BaseZoneList):
         return super().to_isc(indent=indent)
 
 
+class DefaultMasters(BaseZoneList):
+    """Represents the default-masters statement."""
+
+    def __str__(self) -> str:
+        return super().__str__(parameter='default-masters')
+
+    def to_isc(self, indent: int = 0) -> str:
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                Default is 0.
+
+        >>> pass
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
+        return super().to_isc(indent=indent, section_end='}')
+
+
+class DefaultPrimaries(BaseZoneList):
+    """Represents the default-primaries statement."""
+
+    def __str__(self) -> str:
+        return super().__str__(parameter='default-primaries')
+
+    def to_isc(self, indent: int = 0) -> str:
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                Default is 0.
+
+        >>> pass
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
+        return super().to_isc(indent=indent, section_end='}')
+
+
+class Forwarders(BaseZoneList):
+    """Represents the also-notify statement."""
+
+    def __str__(self) -> str:
+        return super().__str__(parameter='forwarders')
+
+    def to_isc(self, indent: int = 0) -> str:
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                Default is 0.
+
+        >>> pass
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
+        return super().to_isc(indent=indent)
+
+
+class CatalogZone:
+    """Represents a zone in the catalog-zones statement options."""
+    def __init__(
+        self,
+        name:                   str,
+        default_masters:        Optional[DefaultMasters] = None,
+        default_primaries:      Optional[DefaultPrimaries] = None,
+        zone_directory:         Optional[str] = None,
+        in_memory:              Optional[bool] = None,
+        min_update_interval:    Optional[int] = None
+    ) -> None:
+        self.name = name
+        self.default_masters = default_masters
+        self.default_primaries = default_primaries
+        self.zone_directory = zone_directory
+        self.in_memory = in_memory
+        self.min_update_interval = min_update_interval
+
+    def __str__(self) -> str:
+        return f'zone {self.name}'
+
+    def __repr__(self) -> str:
+        return f'CatalogZones(name={self.name})'
+
+    def to_isc(self, indent: int = 0) -> str:
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                Default is 0.
+
+        >>> pass
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
+        attrs = []
+        excluded_attrs = ('name')
+        child_indent = indent + 4 if indent > 0 else 4
+        return_str = (f'{" " * indent}{self.__str__()}')
+        for key, value in self.__dict__.items():
+            key = key.replace('_', '-')
+            if any((key in excluded_attrs, value is None)):
+                continue
+            elif hasattr(value, 'to_isc'):
+                attrs.append(f'{value.to_isc(indent=child_indent)}')
+            elif isinstance(value, bool):
+                attrs.append(f'{" " * child_indent}{key} {str(value).lower()}')
+            else:
+                attrs.append(f'{" " * child_indent}{key} {value}')
+        if len(attrs) > 0:
+            return_str += '\n'
+        attrs_str = "\n".join(attrs)
+        section_end = ';'
+        return f'{return_str}{attrs_str}{section_end}'
+
+
+class CatalogZones:
+    """Represents the catalog-zones statement in options."""
+    def __init__(
+        self,
+        zones:  Optional[List[CatalogZone]] = None,
+    ) -> None:
+        self.zones = zones or []
+
+    def __str__(self) -> str:
+        return 'catalog-zones'
+
+    def __repr__(self) -> str:
+        return 'CatalogZones()'
+
+    def to_isc(self, indent: int = 0) -> str:
+        """Returns valid ISC configuration as a string.
+
+        Args:
+            indent (int): Supply an integer to use as indentation offset.
+                Default is 0.
+
+        >>> pass
+
+        Returns:
+            str: A string representation of the object tree from this level.
+
+        """
+        attrs = []
+        excluded_attrs = ()
+        child_indent = indent + 4 if indent > 0 else 4
+        return_str = (f'{" " * indent}{self.__str__()}' ' {')
+        for key, value in self.__dict__.items():
+            key = key.replace('_', '-')
+            if any((key in excluded_attrs, value is None)):
+                continue
+            elif isinstance(value, list):
+                str_list = [item.to_isc(indent=child_indent) for item in value]
+                attrs.append('\n'.join(str_list))
+            else:
+                attrs.append(f'{" " * child_indent}{key} {value}')
+        if len(attrs) > 0:
+            return_str += '\n'
+        attrs_str = "\n".join(attrs)
+        section_end = '};'
+        return (f'{return_str}{attrs_str}' '\n' f'{" " * indent}{section_end}')
+
+
 class Options:
     def __init__(
         self,
-        allow_new_zones:            Union[bool, None] = None,
-        allow_notify:               Union[List, None] = None,
-        allow_query:                Union[List, None] = None,
-        allow_query_cache:          Union[List, None] = None,
-        allow_query_cache_on:       Union[List, None] = None,
-        allow_query_on:             Union[List, None] = None,
-        allow_recursion:            Union[List, None] = None,
-        allow_recursion_on:         Union[List, None] = None,
-        allow_transfer:             Union[List, None] = None,
-        allow_update:               Union[List, None] = None,
-        allow_update_forwarding:    Union[List, None] = None,
-        also_notify:                Union[AlsoNotify, None] = None,
-        alt_transfer_source:        Union[AltTransferSource, None] = None,
-        alt_transfer_source_v6:     Union[AltTransferSourceV6, None] = None,
-        answer_cookie:              Union[bool, None] = None,
-        attach_cache:               Union[str, None] = None,
-        auth_nxdomain:              Union[bool, None] = None,
-        auto_dnssec:                Union[str, None] = None,
-        automatic_interface_scan:   Union[bool, None] = None,
-        avoid_v4_udp_ports:         Union[List, None] = None,
-        avoid_v6_udp_ports:         Union[List, None] = None,
-        bindkeys_file:              Union[str, None] = None,
-        blackhole:                  Union[List, None] = None,
-        cache_file:                 Union[str, None] = None,
+        allow_new_zones:                    Optional[bool] = None,
+        allow_notify:                       Optional[List[str]] = None,
+        allow_query:                        Optional[List[str]] = None,
+        allow_query_cache:                  Optional[List[str]] = None,
+        allow_query_cache_on:               Optional[List[str]] = None,
+        allow_query_on:                     Optional[List[str]] = None,
+        allow_recursion:                    Optional[List[str]] = None,
+        allow_recursion_on:                 Optional[List[str]] = None,
+        allow_transfer:                     Optional[List[str]] = None,
+        allow_update:                       Optional[List[str]] = None,
+        allow_update_forwarding:            Optional[List[str]] = None,
+        also_notify:                        Optional[AlsoNotify] = None,
+        alt_transfer_source:                Optional[AltTransferSource] = None,
+        alt_transfer_source_v6:             Optional[AltTransferSourceV6] = None,
+        answer_cookie:                      Optional[bool] = None,
+        attach_cache:                       Optional[str] = None,
+        auth_nxdomain:                      Optional[bool] = None,
+        auto_dnssec:                        Optional[str] = None,
+        automatic_interface_scan:           Optional[bool] = None,
+        avoid_v4_udp_ports:                 Optional[List[str]] = None,
+        avoid_v6_udp_ports:                 Optional[List[str]] = None,
+        bindkeys_file:                      Optional[str] = None,
+        blackhole:                          Optional[List[str]] = None,
+        cache_file:                         Optional[str] = None,
         # Finish below
-        catalog_zones:                      Optional[object] = None, # Not done
+        catalog_zones:                      Optional[CatalogZones] = None,
         check_dup_records:                  Optional[str] = None,
         check_integrity:                    Optional[bool] = None,
         check_mx:                           Optional[str] = None,
@@ -1024,211 +1543,211 @@ class Options:
         deny_answer_aliases:                Optional[DenyAnswerAlias] = None,
         dialup:                             Optional[Union[str, bool]] = None,
         directory:                          Optional[str] = None,
-        disable_algorithms:                 Optional[object] = None,
-        disable_ds_digests:                 Optional[object] = None,
-        disable_empty_zone:                 Optional[object] = None,
-        dns64:                              Optional[object] = None,
-        dns64_contact:                      Optional[object] = None,
-        dns64_server:                       Optional[object] = None,
-        dnskey_sig_validity:                Optional[object] = None,
-        dnsrps_enable:                      Optional[object] = None,
-        dnsrps_options:                     Optional[object] = None,
-        dnssec_accept_expired:              Optional[object] = None,
-        dnssec_dnskey_kskonly:              Optional[object] = None,
-        dnssec_loadkeys_interval:           Optional[object] = None,
-        dnssec_must_be_secure:              Optional[object] = None,
-        dnssec_policy:                      Optional[object] = None,
-        dnssec_secure_to_insecure:          Optional[object] = None,
-        dnssec_update_mode:                 Optional[object] = None,
-        dnssec_validation:                  Optional[object] = None,
-        dnstap:                             Optional[object] = None,
-        dnstap_identity:                    Optional[object] = None,
-        dnstap_output:                      Optional[object] = None,
-        dnstap_version:                     Optional[object] = None,
-        dscp:                               Optional[object] = None,
-        dual_stack_servers:                 Optional[object] = None,
-        dump_file:                          Optional[object] = None,
-        edns_udp_size:                      Optional[object] = None,
-        empty_contact:                      Optional[object] = None,
-        empty_server:                       Optional[object] = None,
-        empty_zones_enable:                 Optional[object] = None,
-        fetch_quota_params:                 Optional[object] = None,
-        fetches_per_server:                 Optional[object] = None,
-        fetches_per_zone:                   Optional[object] = None,
-        files:                              Optional[object] = None,
-        flush_zones_on_shutdown:            Optional[object] = None,
-        forward:                            Optional[object] = None,
-        forwarders:                         Optional[object] = None,
-        fstrm_set_buffer_hint:              Optional[object] = None,
-        fstrm_set_flush_timeout:            Optional[object] = None,
-        fstrm_set_input_queue_size:         Optional[object] = None,
-        fstrm_set_output_notify_threshold:  Optional[object] = None,
-        fstrm_set_output_queue_model:       Optional[object] = None,
-        fstrm_set_output_queue_size:        Optional[object] = None,
-        fstrm_set_reopen_interval:          Optional[object] = None,
-        geoip_directory:                    Optional[object] = None,
-        glue_cache:                         Optional[object] = None,
-        heartbeat_interval:                 Optional[object] = None,
-        hostname:                           Optional[object] = None,
-        http_listener_clients:              Optional[object] = None,
-        http_port:                          Optional[object] = None,
-        http_streams_per_connection:        Optional[object] = None,
-        https_port:                         Optional[object] = None,
-        interface_interval:                 Optional[object] = None,
-        ipv4only_contact:                   Optional[object] = None,
-        ipv4only_enable:                    Optional[object] = None,
-        ipv4only_server:                    Optional[object] = None,
-        ixfr_from_differences:              Optional[object] = None,
-        keep_response_order:                Optional[object] = None,
-        key_directory:                      Optional[object] = None,
-        lame_ttl:                           Optional[object] = None,
-        listen_on:                          Optional[object] = None,
-        listen_on_v6:                       Optional[object] = None,
-        lmdb_mapsize:                       Optional[object] = None,
-        lock_file:                          Optional[object] = None,
-        managed_keys_directory:             Optional[object] = None,
-        masterfile_format:                  Optional[object] = None,
-        masterfile_style:                   Optional[object] = None,
-        match_mapped_addresses:             Optional[object] = None,
-        max_cache_size:                     Optional[object] = None,
-        max_cache_ttl:                      Optional[object] = None,
-        max_clients_per_query:              Optional[object] = None,
-        max_ixfr_ratio:                     Optional[object] = None,
-        max_journal_size:                   Optional[object] = None,
-        max_ncache_ttl:                     Optional[object] = None,
-        max_records:                        Optional[object] = None,
-        max_recursion_depth:                Optional[object] = None,
-        max_recursion_queries:              Optional[object] = None,
-        max_refresh_time:                   Optional[object] = None,
-        max_retry_time:                     Optional[object] = None,
-        max_rsa_exponent_size:              Optional[object] = None,
-        max_stale_ttl:                      Optional[object] = None,
-        max_transfer_idle_in:               Optional[object] = None,
-        max_transfer_idle_out:              Optional[object] = None,
-        max_transfer_time_in:               Optional[object] = None,
-        max_transfer_time_out:              Optional[object] = None,
-        max_udp_size:                       Optional[object] = None,
-        max_zone_ttl:                       Optional[object] = None,
-        memstatistics:                      Optional[object] = None,
-        memstatistics_file:                 Optional[object] = None,
-        message_compression:                Optional[object] = None,
-        min_cache_ttl:                      Optional[object] = None,
-        min_ncache_ttl:                     Optional[object] = None,
-        min_refresh_time:                   Optional[object] = None,
-        min_retry_time:                     Optional[object] = None,
-        minimal_any:                        Optional[object] = None,
-        minimal_responses:                  Optional[object] = None,
-        multi_master:                       Optional[object] = None,
-        new_zones_directory:                Optional[object] = None,
-        no_case_compress:                   Optional[object] = None,
-        nocookie_udp_size:                  Optional[object] = None,
-        notify:                             Optional[object] = None,
-        notify_delay:                       Optional[object] = None,
-        notify_rate:                        Optional[object] = None,
-        notify_source:                      Optional[object] = None,
-        notify_source_v6:                   Optional[object] = None,
-        notify_to_soa:                      Optional[object] = None,
-        nta_lifetime:                       Optional[object] = None,
-        nta_recheck:                        Optional[object] = None,
-        nxdomain_redirect:                  Optional[object] = None,
-        parental_source:                    Optional[object] = None,
-        parental_source_v6:                 Optional[object] = None,
-        pid_file:                           Optional[object] = None,
-        port:                               Optional[object] = None,
-        preferred_glue:                     Optional[object] = None,
-        prefetch:                           Optional[object] = None,
-        provide_ixfr:                       Optional[object] = None,
-        qname_minimization:                 Optional[object] = None,
-        query_source:                       Optional[object] = None,
-        query_source_v6:                    Optional[object] = None,
-        querylog:                           Optional[object] = None,
-        random_device:                      Optional[object] = None,
-        rate_limit:                         Optional[object] = None,
-        recursing_file:                     Optional[object] = None,
-        recursion:                          Optional[object] = None,
-        recursive_clients:                  Optional[object] = None,
-        request_expire:                     Optional[object] = None,
-        request_ixfr:                       Optional[object] = None,
-        request_nsid:                       Optional[object] = None,
-        require_server_cookie:              Optional[object] = None,
-        reserved_sockets:                   Optional[object] = None,
-        resolver_nonbackoff_tries:          Optional[object] = None,
-        resolver_query_timeout:             Optional[object] = None,
-        resolver_retry_interval:            Optional[object] = None,
-        response_padding:                   Optional[object] = None,
-        response_policy:                    Optional[object] = None,
-        root_delegation_only:               Optional[object] = None,
-        root_key_sentinel:                  Optional[object] = None,
-        rrset_order:                        Optional[object] = None,
-        secroots_file:                      Optional[object] = None,
-        send_cookie:                        Optional[object] = None,
-        serial_query_rate:                  Optional[object] = None,
-        serial_update_method:               Optional[object] = None,
-        server_id:                          Optional[object] = None,
-        servfail_ttl:                       Optional[object] = None,
-        session_keyalg:                     Optional[object] = None,
-        session_keyfile:                    Optional[object] = None,
-        session_keyname:                    Optional[object] = None,
-        sig_signing_nodes:                  Optional[object] = None,
-        sig_signing_signatures:             Optional[object] = None,
-        sig_signing_type:                   Optional[object] = None,
-        sig_validity_interval:              Optional[object] = None,
-        sortlist:                           Optional[object] = None,
-        stacksize:                          Optional[object] = None,
-        stale_answer_client_timeout:        Optional[object] = None,
-        stale_answer_enable:                Optional[object] = None,
-        stale_answer_ttl:                   Optional[object] = None,
-        stale_cache_enable:                 Optional[object] = None,
-        stale_refresh_time:                 Optional[object] = None,
-        startup_notify_rate:                Optional[object] = None,
-        statistics_file:                    Optional[object] = None,
-        synth_from_dnssec:                  Optional[object] = None,
-        tcp_advertised_timeout:             Optional[object] = None,
-        tcp_clients:                        Optional[object] = None,
-        tcp_idle_timeout:                   Optional[object] = None,
-        tcp_initial_timeout:                Optional[object] = None,
-        tcp_keepalive_timeout:              Optional[object] = None,
-        tcp_listen_queue:                   Optional[object] = None,
-        tcp_receive_buffer:                 Optional[object] = None,
-        tcp_send_buffer:                    Optional[object] = None,
-        tkey_dhkey:                         Optional[object] = None,
-        tkey_domain:                        Optional[object] = None,
-        tkey_gssapi_credential:             Optional[object] = None,
-        tkey_gssapi_keytab:                 Optional[object] = None,
-        tls_port:                           Optional[object] = None,
-        transfer_format:                    Optional[object] = None,
-        transfer_message_size:              Optional[object] = None,
-        transfer_source:                    Optional[object] = None,
-        transfer_source_v6:                 Optional[object] = None,
-        transfers_in:                       Optional[object] = None,
-        transfers_out:                      Optional[object] = None,
-        transfers_per_ns:                   Optional[object] = None,
-        trust_anchor_telemetry:             Optional[object] = None,
-        try_tcp_refresh:                    Optional[object] = None,
-        udp_receive_buffer:                 Optional[object] = None,
-        udp_send_buffer:                    Optional[object] = None,
-        update_check_ksk:                   Optional[object] = None,
-        use_alt_transfer_source:            Optional[object] = None,
-        use_v4_udp_ports:                   Optional[object] = None,
-        use_v6_udp_ports:                   Optional[object] = None,
-        v6_bias:                            Optional[object] = None,
-        validate_except:                    Optional[object] = None,
-        version:                            Optional[object] = None,
-        zero_no_soa_ttl:                    Optional[object] = None,
-        zero_no_soa_ttl_cache:              Optional[object] = None,
-        zone_statistics:                    Optional[object] = None,
+        disable_algorithms:                 Optional[DisableAlgorithm] = None,
+        disable_ds_digests:                 Optional[DisableDsDigest] = None,
+        disable_empty_zone:                 Optional[str] = None,
+        dns64:                              Optional[Dns64] = None,
+        dns64_contact:                      Optional[str] = None,
+        dns64_server:                       Optional[str] = None,
+        dnskey_sig_validity:                Optional[int] = None,
+        dnsrps_enable:                      Optional[bool] = None,
+        dnsrps_options:                     Optional[str] = None,
+        dnssec_accept_expired:              Optional[bool] = None,
+        dnssec_dnskey_kskonly:              Optional[bool] = None,
+        dnssec_loadkeys_interval:           Optional[int] = None,
+        dnssec_must_be_secure:              Optional[bool] = None,
+        dnssec_policy:                      Optional[str] = None,
+        dnssec_secure_to_insecure:          Optional[bool] = None,
+        dnssec_update_mode:                 Optional[str] = None,
+        dnssec_validation:                  Optional[str] = None,
+        dnstap:                             Optional[List[DnsTapMember]] = None,
+        dnstap_identity:                    Optional[str] = None,
+        dnstap_output:                      Optional[DnsTapOutput] = None,
+        dnstap_version:                     Optional[str] = None,
+        dscp:                               Optional[int] = None,
+        dual_stack_servers:                 Optional[DualStackServers] = None,
+        dump_file:                          Optional[str] = None,
+        edns_udp_size:                      Optional[int] = None,
+        empty_contact:                      Optional[str] = None,
+        empty_server:                       Optional[str] = None,
+        empty_zones_enable:                 Optional[bool] = None,
+        fetch_quota_params:                 Optional[FetchQuotaParams] = None,
+        fetches_per_server:                 Optional[FetchesPerServer] = None,
+        fetches_per_zone:                   Optional[FetchesPerZone] = None,
+        files:                              Optional[str] = None,
+        flush_zones_on_shutdown:            Optional[bool] = None,
+        forward:                            Optional[str] = None,
+        forwarders:                         Optional[Forwarders] = None,
+        fstrm_set_buffer_hint:              Optional[int] = None,
+        fstrm_set_flush_timeout:            Optional[int] = None,
+        fstrm_set_input_queue_size:         Optional[int] = None,
+        fstrm_set_output_notify_threshold:  Optional[int] = None,
+        fstrm_set_output_queue_model:       Optional[str] = None,
+        fstrm_set_output_queue_size:        Optional[int] = None,
+        fstrm_set_reopen_interval:          Optional[int] = None,
+        geoip_directory:                    Optional[str] = None,
+        glue_cache:                         Optional[bool] = None,
+        heartbeat_interval:                 Optional[int] = None,
+        hostname:                           Optional[str] = None,
+        http_listener_clients:              Optional[int] = None,
+        http_port:                          Optional[int] = None,
+        http_streams_per_connection:        Optional[int] = None,
+        https_port:                         Optional[int] = None,
+        interface_interval:                 Optional[int] = None,
+        ipv4only_contact:                   Optional[str] = None,
+        ipv4only_enable:                    Optional[bool] = None,
+        ipv4only_server:                    Optional[str] = None,
+        ixfr_from_differences:              Optional[Union[str, bool]] = None,
+        keep_response_order:                Optional[List[str]] = None,
+        key_directory:                      Optional[str] = None,
+        lame_ttl:                           Optional[int] = None,
+        listen_on:                          Optional[ListenOn] = None,
+        listen_on_v6:                       Optional[ListenOnV6] = None,
+        lmdb_mapsize:                       Optional[int] = None,
+        lock_file:                          Optional[str] = None,
+        managed_keys_directory:             Optional[str] = None,
+        masterfile_format:                  Optional[str] = None,
+        masterfile_style:                   Optional[str] = None,
+        match_mapped_addresses:             Optional[bool] = None,
+        max_cache_size:                     Optional[Union[str, int]] = None,
+        max_cache_ttl:                      Optional[int] = None,
+        max_clients_per_query:              Optional[int] = None,
+        max_ixfr_ratio:                     Optional[Union[str, int]] = None,
+        max_journal_size:                   Optional[Union[str, int]] = None,
+        max_ncache_ttl:                     Optional[int] = None,
+        max_records:                        Optional[int] = None,
+        max_recursion_depth:                Optional[int] = None,
+        max_recursion_queries:              Optional[int] = None,
+        max_refresh_time:                   Optional[int] = None,
+        max_retry_time:                     Optional[int] = None,
+        max_rsa_exponent_size:              Optional[int] = None,
+        max_stale_ttl:                      Optional[int] = None,
+        max_transfer_idle_in:               Optional[int] = None,
+        max_transfer_idle_out:              Optional[int] = None,
+        max_transfer_time_in:               Optional[int] = None,
+        max_transfer_time_out:              Optional[int] = None,
+        max_udp_size:                       Optional[int] = None,
+        max_zone_ttl:                       Optional[Union[str, int]] = None,
+        memstatistics:                      Optional[bool] = None,
+        memstatistics_file:                 Optional[str] = None,
+        message_compression:                Optional[bool] = None,
+        min_cache_ttl:                      Optional[int] = None,
+        min_ncache_ttl:                     Optional[int] = None,
+        min_refresh_time:                   Optional[int] = None,
+        min_retry_time:                     Optional[int] = None,
+        minimal_any:                        Optional[bool] = None,
+        minimal_responses:                  Optional[Union[str, bool]] = None,
+        multi_master:                       Optional[bool] = None,
+        new_zones_directory:                Optional[str] = None,
+        no_case_compress:                   Optional[List[str]] = None,
+        nocookie_udp_size:                  Optional[int] = None,
+        notify:                             Optional[Union[str, bool]] = None,
+        notify_delay:                       Optional[int] = None,
+        notify_rate:                        Optional[int] = None,
+        notify_source:                      Optional[NotifySource] = None,
+        notify_source_v6:                   Optional[NotifySourceV6] = None,
+        notify_to_soa:                      Optional[bool] = None,
+        nta_lifetime:                       Optional[int] = None,
+        nta_recheck:                        Optional[int] = None,
+        nxdomain_redirect:                  Optional[str] = None,
+        parental_source:                    Optional[ParentalSource] = None,
+        parental_source_v6:                 Optional[ParentalSourceV6] = None,
+        pid_file:                           Optional[str] = None,
+        port:                               Optional[int] = None,
+        preferred_glue:                     Optional[str] = None,
+        prefetch:                           Optional[Prefetch] = None,
+        provide_ixfr:                       Optional[bool] = None,
+        qname_minimization:                 Optional[str] = None,
+        query_source:                       Optional[QuerySource] = None,
+        query_source_v6:                    Optional[QuerySourceV6] = None,
+        querylog:                           Optional[bool] = None,
+        random_device:                      Optional[str] = None,
+        rate_limit:                         Optional[object] = None,  # Not done
+        recursing_file:                     Optional[str] = None,
+        recursion:                          Optional[bool] = None,
+        recursive_clients:                  Optional[int] = None,
+        request_expire:                     Optional[bool] = None,
+        request_ixfr:                       Optional[bool] = None,
+        request_nsid:                       Optional[bool] = None,
+        require_server_cookie:              Optional[bool] = None,
+        reserved_sockets:                   Optional[int] = None,
+        resolver_nonbackoff_tries:          Optional[int] = None,
+        resolver_query_timeout:             Optional[int] = None,
+        resolver_retry_interval:            Optional[int] = None,
+        response_padding:                   Optional[ResponsePadding] = None,
+        response_policy:                    Optional[object] = None,  # Not done
+        root_delegation_only:               Optional[object] = None,  # Not done
+        root_key_sentinel:                  Optional[bool] = None,
+        rrset_order:                        Optional[object] = None,  # Not done
+        secroots_file:                      Optional[str] = None,
+        send_cookie:                        Optional[bool] = None,
+        serial_query_rate:                  Optional[int] = None,
+        serial_update_method:               Optional[str] = None,
+        server_id:                          Optional[str] = None,
+        servfail_ttl:                       Optional[int] = None,
+        session_keyalg:                     Optional[str] = None,
+        session_keyfile:                    Optional[str] = None,
+        session_keyname:                    Optional[str] = None,
+        sig_signing_nodes:                  Optional[int] = None,
+        sig_signing_signatures:             Optional[int] = None,
+        sig_signing_type:                   Optional[int] = None,
+        sig_validity_interval:              Optional[SigValidityInterval] = None,
+        sortlist:                           Optional[List[str]] = None,
+        stacksize:                          Optional[Union[str, int]] = None,
+        stale_answer_client_timeout:        Optional[Union[str, int]] = None,
+        stale_answer_enable:                Optional[bool] = None,
+        stale_answer_ttl:                   Optional[int] = None,
+        stale_cache_enable:                 Optional[bool] = None,
+        stale_refresh_time:                 Optional[int] = None,
+        startup_notify_rate:                Optional[int] = None,
+        statistics_file:                    Optional[str] = None,
+        synth_from_dnssec:                  Optional[bool] = None,
+        tcp_advertised_timeout:             Optional[int] = None,
+        tcp_clients:                        Optional[int] = None,
+        tcp_idle_timeout:                   Optional[int] = None,
+        tcp_initial_timeout:                Optional[int] = None,
+        tcp_keepalive_timeout:              Optional[int] = None,
+        tcp_listen_queue:                   Optional[int] = None,
+        tcp_receive_buffer:                 Optional[int] = None,
+        tcp_send_buffer:                    Optional[int] = None,
+        tkey_dhkey:                         Optional[object] = None,  # Not done
+        tkey_domain:                        Optional[str] = None,
+        tkey_gssapi_credential:             Optional[str] = None,
+        tkey_gssapi_keytab:                 Optional[str] = None,
+        tls_port:                           Optional[int] = None,
+        transfer_format:                    Optional[str] = None,
+        transfer_message_size:              Optional[int] = None,
+        transfer_source:                    Optional[TransferSource] = None,
+        transfer_source_v6:                 Optional[TransferSourceV6] = None,
+        transfers_in:                       Optional[int] = None,
+        transfers_out:                      Optional[int] = None,
+        transfers_per_ns:                   Optional[int] = None,
+        trust_anchor_telemetry:             Optional[bool] = None,
+        try_tcp_refresh:                    Optional[bool] = None,
+        udp_receive_buffer:                 Optional[int] = None,
+        udp_send_buffer:                    Optional[int] = None,
+        update_check_ksk:                   Optional[bool] = None,
+        use_alt_transfer_source:            Optional[bool] = None,
+        use_v4_udp_ports:                   Optional[List[str]] = None,
+        use_v6_udp_ports:                   Optional[List[str]] = None,
+        v6_bias:                            Optional[int] = None,
+        validate_except:                    Optional[List[str]] = None,
+        version:                            Optional[str] = None,
+        zero_no_soa_ttl:                    Optional[bool] = None,
+        zero_no_soa_ttl_cache:              Optional[bool] = None,
+        zone_statistics:                    Optional[Union[str, bool]] = None,
     ) -> None:
         self.allow_new_zones = allow_new_zones
-        self.allow_notify = allow_notify
-        self.allow_query = allow_query
-        self.allow_query_cache = allow_query_cache
-        self.allow_query_cache_on = allow_query_cache_on
-        self.allow_query_on = allow_query_on
-        self.allow_recursion = allow_recursion
-        self.allow_recursion_on = allow_recursion_on
-        self.allow_transfer = allow_transfer
-        self.allow_update = allow_update
-        self.allow_update_forwarding = allow_update_forwarding
+        self.allow_notify = allow_notify or []
+        self.allow_query = allow_query or []
+        self.allow_query_cache = allow_query_cache or []
+        self.allow_query_cache_on = allow_query_cache_on or []
+        self.allow_query_on = allow_query_on or []
+        self.allow_recursion = allow_recursion or []
+        self.allow_recursion_on = allow_recursion_on or []
+        self.allow_transfer = allow_transfer or []
+        self.allow_update = allow_update or []
+        self.allow_update_forwarding = allow_update_forwarding or []
         self.also_notify = also_notify
         self.alt_transfer_source = alt_transfer_source
         self.alt_transfer_source_v6 = alt_transfer_source_v6
@@ -1237,10 +1756,10 @@ class Options:
         self.auth_nxdomain = auth_nxdomain
         self.auto_dnssec = auto_dnssec
         self.automatic_interface_scan = automatic_interface_scan
-        self.avoid_v4_udp_ports = avoid_v4_udp_ports
-        self.avoid_v6_udp_ports = avoid_v6_udp_ports
+        self.avoid_v4_udp_ports = avoid_v4_udp_ports or []
+        self.avoid_v6_udp_ports = avoid_v6_udp_ports or []
         self.bindkeys_file = bindkeys_file
-        self.blackhole = blackhole
+        self.blackhole = blackhole  or []
         self.cache_file = cache_file
         self.catalog_zones = catalog_zones
         self.check_dup_records = check_dup_records
@@ -1278,7 +1797,7 @@ class Options:
         self.dnssec_secure_to_insecure = dnssec_secure_to_insecure
         self.dnssec_update_mode = dnssec_update_mode
         self.dnssec_validation = dnssec_validation
-        self.dnstap = dnstap
+        self.dnstap = dnstap or []
         self.dnstap_identity = dnstap_identity
         self.dnstap_output = dnstap_output
         self.dnstap_version = dnstap_version
@@ -1475,7 +1994,7 @@ class Options:
 
         """
         attrs = []
-        child_indent = indent * 2 if indent > 0 else 4
+        child_indent = indent + 4 if indent > 0 else 4
         excluded_attrs = ''
         return_str = (f'{" " * indent}{self.__str__()}' ' {')
         for key, value in self.__dict__.items():
@@ -1484,9 +2003,14 @@ class Options:
                 continue
             elif isinstance(value, bool):
                 attrs.append(f'{" " * child_indent}{key} {str(value).lower()};')
+            elif all((isinstance(value, list),
+                      all([hasattr(item, 'to_isc') for item in value]))):
+                string_list = [str(item.to_isc()) for item in value]
+                value_list = ('{ ' f'{" ".join(string_list)}' ' }')
+                attrs.append((f'{" " * child_indent}{key} ' f'{value_list};'))
             elif isinstance(value, list):
                 string_list = [str(item) for item in value]
-                value_list = ('{ ' f'{"; ".join(string_list)};' ' }')
+                value_list = ('{ ' f'{"; ".join(string_list)}' ' }')
                 attrs.append((f'{" " * child_indent}{key} ' f'{value_list};'))
             elif hasattr(value, 'to_isc'):
                 attrs.append(f'{value.to_isc(indent=child_indent)}')
